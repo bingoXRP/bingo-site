@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BingoXRPL - $BINGO memecoin on XRP Ledger. Inspired by 'Bingo was his name-o' – fun, fast, and farm-fresh crypto!">
+  <title>BingoXRPL | $BINGO Memecoin on XRP Ledger</title>
+  <link rel="icon" href="images/logo.png" type="image/png">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #0A0F2A; /* Navy bg */
+      color: #FFFFFF;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background-color: #00B8D9; /* Teal */
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      max-width: 100px;
+      height: auto;
+      animation: wag 2s infinite ease-in-out;
+    }
+
+    @keyframes wag {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+
+    h1 {
+      color: #FF0000; /* Red */
+      margin: 0;
+      font-size: 2em;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav li {
+      margin-left: 20px;
+    }
+
+    nav a {
+      color: #00FF00; /* Green */
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #FFFFFF;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 100px 0;
+      background-color: #1A1F3A; /* Darker navy */
+      position: relative;
+    }
+
+    .hero h2 {
+      font-size: 3em;
+      color: #00B8D9;
+    }
+
+    .typewriter {
+      font-size: 1.5em;
+      overflow: hidden;
+      border-right: .15em solid #FF0000;
+      white-space: nowrap;
+      margin: 0 auto;
+      letter-spacing: .15em;
+      animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: #FF0000; }
+    }
+
+    .cta-button {
+      background-color: #FF0000;
+      color: #FFFFFF;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .cta-button:hover {
+      background-color: #00FF00;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+    }
+
+    .section {
+      padding: 60px 0;
+      text-align: center;
+    }
+
+    .section h2 {
+      color: #00B8D9;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .feature {
+      background-color: #1A1F3A;
+      padding: 20px;
+      border-radius: 10px;
+      transition: transform 0.3s;
+    }
+
+    .feature:hover {
+      transform: scale(1.05);
+    }
+
+    .feature h3 {
+      color: #FF0000;
+    }
+
+    ol, ul {
+      list-style-position: inside;
+      text-align: left;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .community-links li {
+      display: inline-block;
+      margin: 0 15px;
+    }
+
+    .community-links a {
+      color: #00FF00;
+      text-decoration: none;
+    }
+
+    footer {
+      background-color: #00B8D9;
+      padding: 20px 0;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+      }
+      nav ul {
+        flex-direction: column;
+        margin-top: 10px;
+      }
+      nav li {
+        margin: 10px 0;
+      }
+      .hero {
+        padding: 60px 0;
+      }
+      .hero h2 {
+        font-size: 2em;
+      }
+      .typewriter {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <img src="images/logo.png" alt="Bingo the dog memecoin logo" class="logo" id="logo">
+      <h1>$BINGO</h1>
+      <nav>
+        <ul>
+          <li><a href="#about" class="smooth-scroll">About</a></li>
+          <li><a href="#tokenomics" class="smooth-scroll">Tokenomics</a></li>
+          <li><a href="#buy" class="smooth-scroll">How to Buy</a></li>
+          <li><a href="#community" class="smooth-scroll">Community</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section id="hero" class="hero">
+    <div class="container">
+      <h2>Welcome to BingoXRPL!</h2>
+      <p class="typewriter">There was a farmer had a dog, and Bingo was his name-o... Now it's a memecoin on XRP Ledger!</p>
+      <button id="buy-button" class="cta-button">Buy $BINGO Now!</button>
+      <canvas id="confetti-canvas"></canvas>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <div class="container">
+      <h2>About $BINGO</h2>
+      <p>BingoXRPL is the ultimate memecoin riff on the classic "Old MacDonald" song. Built on the lightning-fast XRP Ledger, $BINGO brings fun, community, and crypto vibes to the farm. With a cheerful dog sporting a red bandana and XRPL flair, we're here to wag tails and stack gains. B-I-N-G-O!</p>
+    </div>
+  </section>
+
+  <section id="tokenomics" class="section">
+    <div class="container">
+      <h2>Tokenomics</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <h3>Total Supply</h3>
+          <p>1,000,000,000 $BINGO – Plenty for the whole farm!</p>
+        </div>
+        <div class="feature">
+          <h3>Liquidity</h3>
+          <p>Locked and loaded on XRP Ledger for secure trading.</p>
+        </div>
+        <div class="feature">
+          <h3>Community Rewards</h3>
+          <p>Air drops, memes, and events – Sing along and earn!</p>
+        </div>
+        <div class="feature">
+          <h3>No Taxes</h3>
+          <p>Zero fees on transactions – Pure fun, no fuss.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="buy" class="section">
+    <div class="container">
+      <h2>How to Buy $BINGO</h2>
+      <ol>
+        <li>Set up an XRP Ledger wallet (e.g., Xumm or Trust Wallet).</li>
+        <li>Fund your wallet with XRP.</li>
+        <li>Visit a DEX like XRPL DEX or Sologenic.</li>
+        <li>Search for $BINGO and swap your XRP – Easy as clapping hands!</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="community" class="section">
+    <div class="container">
+      <h2>Join the Community</h2>
+      <p>Connect with fellow Bingo fans:</p>
+      <ul class="community-links">
+        <li><a href="https://twitter.com" target="_blank">Twitter/X</a></li>
+        <li><a href="https://discord.com" target="_blank">Discord</a></li>
+        <li><a href="https://telegram.org" target="_blank">Telegram</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scrolling for nav links
+    document.querySelectorAll('.smooth-scroll').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const target = document.getElementById(targetId);
+        target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Confetti burst on buy button click
+    const buyButton = document.getElementById('buy-button');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const ctx = confettiCanvas.getContext('2d');
+
+    buyButton.addEventListener('click', () => {
+      confettiCanvas.style.display = 'block';
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+
+      const confettiCount = 200;
+      const confetti = [];
+
+      for (let i = 0; i < confettiCount; i++) {
+        confetti.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 4 + 1,
+          d: Math.random() * confettiCount,
+          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+          tilt: Math.random() * 10 - 10,
+          tiltAngle: Math.random() * Math.PI
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        confetti.forEach((p, i) => {
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          ctx.stroke();
+          p.tiltAngle += 0.1;
+          p.tilt = Math.sin(p.tiltAngle) * 15;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+          if (p.y > confettiCanvas.height) confetti.splice(i, 1);
+        });
+        if (confetti.length > 0) requestAnimationFrame(draw);
+        else confettiCanvas.style.display = 'none';
+      }
+
+      draw();
+      // Redirect or action here, e.g., window.location.href = 'https://your-dex-link.com';
+    });
+
+    // Logo bounce on load
+    window.addEventListener('load', () => {
+      const logo = document.getElementById('logo');
+      logo.style.animation = 'wag 2s infinite ease-in-out';
+    });
+  </script>
+</body>
+</html>
