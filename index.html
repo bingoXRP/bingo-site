@@ -370,7 +370,7 @@
       <h2>Welcome to BingoXRPL!</h2>
       <img src="logo.png" alt="Bingo the dog memecoin logo" class="logo" id="logo">
       <p class="typewriter">There was a farmer had a dog, and Bingo was his name-o... memecoin on XRP Ledger!</p>
-      <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" target="_blank" class="cta-button">Trade $BINGO Now!</a>
+      <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" target="_blank" id="buy-button" class="cta-button">Trade $BINGO Now!</a>
       <canvas id="confetti-canvas"></canvas>
     </div>
   </section>
@@ -504,12 +504,13 @@
       navMenu.classList.toggle('active');
     });
 
-    // Confetti explosion on trade button click
+    // Confetti and link on trade button click
     const tradeButton = document.getElementById('buy-button');
     const confettiCanvas = document.getElementById('confetti-canvas');
     const ctx = confettiCanvas.getContext('2d');
 
-    tradeButton.addEventListener('click', () => {
+    tradeButton.addEventListener('click', (e) => {
+      e.preventDefault(); // Prevent default anchor behavior to handle manually
       window.open(tradeButton.href, '_blank'); // Open xMagnetic link in new tab
       confettiCanvas.style.display = 'block';
       confettiCanvas.width = window.innerWidth;
