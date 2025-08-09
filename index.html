@@ -27,40 +27,35 @@
 
     header {
       background-color: #00B8D9;
-      padding: 20px 0;
+      padding: 15px 0;
       position: sticky;
       top: 0;
       z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
-    .logo {
-      max-width: 300px; /* Maximized size, constrained by responsive design */
-      height: auto;
+    .hamburger {
+      display: none;
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      color: #00FF00;
+      cursor: pointer;
+      padding: 10px;
     }
 
-    h1 {
-      color: #FF0000;
-      margin: 0;
-      font-size: 2.5em;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-    }
-
-    nav ul {
+    .nav-menu {
       list-style: none;
       display: flex;
       margin: 0;
       padding: 0;
     }
 
-    nav li {
+    .nav-menu li {
       margin-left: 25px;
     }
 
-    nav a {
+    .nav-menu a {
       color: #00FF00;
       text-decoration: none;
       font-weight: bold;
@@ -68,9 +63,14 @@
       transition: color 0.3s, transform 0.3s;
     }
 
-    nav a:hover {
+    .nav-menu a:hover {
       color: #FFFFFF;
       transform: scale(1.15);
+    }
+
+    .logo {
+      max-width: 300px;
+      height: auto;
     }
 
     .hero {
@@ -136,6 +136,8 @@
       transition: background-color 0.3s, transform 0.3s;
       box-shadow: 0 6px 12px rgba(255, 0, 0, 0.6);
       margin-top: 20px;
+      text-decoration: none;
+      display: inline-block;
     }
 
     .cta-button:hover {
@@ -238,18 +240,37 @@
         flex-direction: column;
         padding: 10px 0;
       }
+      .hamburger {
+        display: block;
+      }
+      .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        background-color: #00B8D9;
+        padding: 10px 0;
+      }
+      .nav-menu.active {
+        display: flex;
+      }
+      .nav-menu li {
+        margin: 10px 0;
+        text-align: center;
+        width: 100%;
+      }
       .logo {
-        max-width: 200px; /* Adjusted for mobile, still large but fits */
+        max-width: 200px;
       }
       h1 {
         font-size: 1.8em;
-      }
-      nav ul {
-        flex-direction: column;
-        margin-top: 10px;
-      }
-      nav li {
+        text-align: center;
         margin: 10px 0;
+      }
+      nav {
+        width: 100%;
       }
       .hero {
         padding: 80px 0;
@@ -280,7 +301,7 @@
         padding: 15px 0;
       }
       .logo {
-        max-width: 250px; /* Adjusted for tablet, fits nicely */
+        max-width: 250px;
       }
       h1 {
         font-size: 2.2em;
@@ -310,9 +331,14 @@
 
     @media (min-width: 769px) {
       .logo {
-        max-width: 300px; /* Max size for desktop, constrained by container */
+        max-width: 300px;
       }
-      /* Default styles apply */
+      .hamburger {
+        display: none;
+      }
+      .nav-menu {
+        display: flex;
+      }
     }
   </style>
 </head>
@@ -325,8 +351,9 @@
   <header>
     <div class="container">
       <h1>$BINGO</h1>
+      <button class="hamburger">&#9776;</button>
       <nav>
-        <ul>
+        <ul class="nav-menu">
           <li><a href="#about" class="smooth-scroll">About</a></li>
           <li><a href="#tokenomics" class="smooth-scroll">Tokenomics</a></li>
           <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
@@ -343,7 +370,7 @@
       <h2>Welcome to BingoXRPL!</h2>
       <img src="logo.png" alt="Bingo the dog memecoin logo" class="logo" id="logo">
       <p class="typewriter">There was a farmer had a dog, and Bingo was his name-o... memecoin on XRP Ledger!</p>
-      <button id="buy-button" class="cta-button">Trade $BINGO Now!</button>
+      <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" target="_blank" class="cta-button">Trade $BINGO Now!</a>
       <canvas id="confetti-canvas"></canvas>
     </div>
   </section>
@@ -469,12 +496,21 @@
       });
     });
 
+    // Toggle hamburger menu on mobile
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+    });
+
     // Confetti explosion on trade button click
-    const buyButton = document.getElementById('buy-button');
+    const tradeButton = document.getElementById('buy-button');
     const confettiCanvas = document.getElementById('confetti-canvas');
     const ctx = confettiCanvas.getContext('2d');
 
-    buyButton.addEventListener('click', () => {
+    tradeButton.addEventListener('click', () => {
+      window.open(tradeButton.href, '_blank'); // Open xMagnetic link in new tab
       confettiCanvas.style.display = 'block';
       confettiCanvas.width = window.innerWidth;
       confettiCanvas.height = window.innerHeight;
@@ -514,8 +550,6 @@
 
       draw();
     });
-
-    // No logo animation (already removed from CSS)
   </script>
 </body>
 </html>
