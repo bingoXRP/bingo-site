@@ -35,6 +35,12 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
     .hamburger {
       display: none;
       font-size: 1.5em;
@@ -50,23 +56,21 @@
       display: flex;
       margin: 0;
       padding: 0;
+      gap: 15px; /* Improved spacing for single-line */
     }
 
-    .nav-menu li {
-      margin-left: 25px;
-    }
-
-    .nav-menu a {
+    .nav-menu li a {
       color: #00FF00;
       text-decoration: none;
       font-weight: bold;
-      font-size: 1.1em;
+      font-size: 1em; /* Slightly smaller for fit */
       transition: color 0.3s, transform 0.3s;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Better contrast */
     }
 
-    .nav-menu a:hover {
+    .nav-menu li a:hover {
       color: #FFFFFF;
-      transform: scale(1.15);
+      transform: scale(1.05);
     }
 
     .logo {
@@ -76,7 +80,7 @@
 
     .hero {
       text-align: center;
-      padding: 150px 0;
+      padding: 100px 0 150px; /* Adjusted spacing for better flow */
       background: linear-gradient(135deg, #1A1F3A, #0A0F2A);
       position: relative;
       overflow: hidden;
@@ -101,20 +105,21 @@
     }
 
     .hero h2 {
-      font-size: 4em;
+      font-size: 3.5em;
       color: #00B8D9;
       text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
-      margin-bottom: 20px;
+      margin-bottom: 15px; /* Reduced margin for spacing */
     }
 
     .typewriter {
-      font-size: 1.8em;
+      font-size: 1.6em; /* Slightly smaller for mobile fit */
       overflow: hidden;
       border-right: 0.15em solid #FF0000;
       white-space: nowrap;
       margin: 0 auto;
       letter-spacing: 0.15em;
       animation: typing 4s steps(50, end), blink-caret 0.75s step-end infinite;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6); /* Improved contrast */
     }
 
     @keyframes typing {
@@ -131,15 +136,16 @@
       background-color: #FF0000;
       color: #FFFFFF;
       border: none;
-      padding: 20px 40px;
-      font-size: 1.5em;
+      padding: 15px 30px; /* Adjusted padding for better fit */
+      font-size: 1.4em; /* Slightly smaller for mobile */
       cursor: pointer;
       border-radius: 50px;
       transition: background-color 0.3s, transform 0.3s;
       box-shadow: 0 6px 12px rgba(255, 0, 0, 0.6);
-      margin-top: 20px;
+      margin-top: 15px;
       text-decoration: none;
       display: inline-block;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Better contrast */
     }
 
     .cta-button:hover {
@@ -158,27 +164,27 @@
     }
 
     .section {
-      padding: 80px 0;
+      padding: 60px 0; /* Reduced padding for tighter spacing */
       text-align: center;
       position: relative;
     }
 
     .section h2 {
       color: #00B8D9;
-      font-size: 3em;
-      margin-bottom: 30px;
+      font-size: 2.8em; /* Slightly smaller for balance */
+      margin-bottom: 20px; /* Reduced margin */
       text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
     }
 
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
+      gap: 20px; /* Reduced gap for tighter fit */
     }
 
     .feature {
       background-color: #1A1F3A;
-      padding: 30px;
+      padding: 25px; /* Adjusted padding */
       border-radius: 15px;
       transition: transform 0.3s, box-shadow 0.3s;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -191,7 +197,8 @@
 
     .feature h3 {
       color: #FF0000;
-      font-size: 1.8em;
+      font-size: 1.6em; /* Slightly smaller */
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
     }
 
     ol, ul {
@@ -212,6 +219,7 @@
       text-decoration: none;
       font-size: 1.2em;
       transition: color 0.3s;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
     }
 
     .community-links a:hover {
@@ -230,6 +238,7 @@
       margin: 0 15px;
       text-decoration: none;
       transition: color 0.3s;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
     }
 
     footer a:hover {
@@ -260,64 +269,72 @@
         display: flex;
       }
       .nav-menu li {
-        margin: 10px 0;
+        margin: 8px 0; /* Reduced spacing */
         text-align: center;
         width: 100%;
       }
       .nav-menu li a {
-        padding: 10px;
+        padding: 8px; /* Reduced padding */
         display: block;
+        font-size: 0.9em; /* Smaller font for mobile */
       }
       .logo {
         max-width: 200px;
       }
       h1 {
-        font-size: 1.8em;
+        font-size: 1.6em; /* Smaller for fit */
         text-align: center;
-        margin: 10px 0;
+        margin: 8px 0; /* Reduced margin */
       }
       nav {
         width: 100%;
       }
       .hero {
-        padding: 80px 0;
+        padding: 60px 0; /* Reduced for mobile */
       }
       .hero h2 {
-        font-size: 2.5em;
+        font-size: 2.2em; /* Smaller for mobile */
       }
       .typewriter {
-        font-size: 1.2em;
+        font-size: 1.1em; /* Smaller for mobile */
       }
       .cta-button {
-        padding: 15px 30px;
+        padding: 12px 24px; /* Reduced padding */
         font-size: 1.2em;
       }
       .section {
-        padding: 40px 0;
+        padding: 30px 0; /* Reduced padding */
       }
       .section h2 {
-        font-size: 2em;
+        font-size: 1.8em; /* Smaller for mobile */
+        margin-bottom: 15px; /* Reduced margin */
       }
       .features-grid {
-        grid-template-columns: 1fr;
+        gap: 15px; /* Reduced gap */
+      }
+      .feature {
+        padding: 20px; /* Reduced padding */
+      }
+      .feature h3 {
+        font-size: 1.4em; /* Smaller for mobile */
       }
     }
 
     @media (min-width: 481px) and (max-width: 768px) {
       header {
-        padding: 15px 0;
+        padding: 12px 0;
       }
       .logo {
         max-width: 250px;
       }
       h1 {
-        font-size: 2.2em;
+        font-size: 2em;
       }
       nav li {
         margin-left: 15px;
       }
       .hero {
-        padding: 100px 0;
+        padding: 80px 0;
       }
       .hero h2 {
         font-size: 3em;
@@ -326,7 +343,7 @@
         font-size: 1.5em;
       }
       .section {
-        padding: 60px 0;
+        padding: 50px 0;
       }
       .section h2 {
         font-size: 2.5em;
@@ -356,7 +373,7 @@
     </p>
   </noscript>
   <header>
-    <div class="container">
+    <div class="container header-inner">
       <h1>$BINGO</h1>
       <button class="hamburger">&#9776;</button>
       <nav>
@@ -367,7 +384,7 @@
           <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
           <li><a href="#community" class="smooth-scroll">Community</a></li>
           <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
-          <li><a href="/bingo-roller.html" target="_blank">Bingo Roller</a></li> <!-- New link added here -->
+          <li><a href="bingo-roller.html" target="_blank">Bingo Roller</a></li> <!-- Added link here -->
         </ul>
       </nav>
     </div>
