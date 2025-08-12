@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="$BINGO Roller - Fun bingo game for live streams on BingoXRPL!">
+  <title>$BINGO Roller - BingoXRPL Live Tool</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background: #0A0F2A;
+    }
+
+    .parallax {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 184, 217, 0.1),
+        rgba(0, 184, 217, 0.1) 10px,
+        rgba(255, 0, 0, 0.1) 10px,
+        rgba(255, 0, 0, 0.1) 20px
+      );
+      background-size: 200px 200px;
+      z-index: -1;
+      animation: parallaxMove 10s infinite linear;
+    }
+
+    @keyframes parallaxMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 200px 200px; }
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      background-color: #00B8D9;
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      color: #00FF00;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+      justify-content: center;
+    }
+
+    .nav-menu li {
+      margin: 0 20px;
+    }
+
+    .nav-menu a {
+      color: #00FF00;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1em;
+      transition: color 0.3s, transform 0.3s;
+    }
+
+    .nav-menu a:hover {
+      color: #FFFFFF;
+      transform: scale(1.15);
+    }
+
+    h1 {
+      color: #00B8D9;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    #roll-button {
+      background-color: #FF0000;
+      color: #FFFFFF;
+      border: none;
+      padding: 25px 50px;
+      font-size: 1.8em;
+      cursor: pointer;
+      border-radius: 50px;
+      transition: background-color 0.3s, transform 0.3s;
+      box-shadow: 0 8px 16px rgba(255, 0, 0, 0.8);
+      animation: bounce 1.5s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    #roll-button:hover {
+      background-color: #00FF00;
+      transform: scale(1.1);
+    }
+
+    #roll-button:active {
+      animation: spin 0.5s linear;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #result {
+      font-size: 5em;
+      color: #00FF00;
+      margin: 30px 0;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+      animation: pop-in 0.5s ease-out, glow 1.5s infinite;
+    }
+
+    @keyframes pop-in {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px #00FF00, 0 0 10px #00FF00; }
+      50% { text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00; }
+      100% { text-shadow: 0 0 5px #00FF00, 0 0 10px #00FF00; }
+    }
+
+    #called-list {
+      list-style: none;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #1A1F3A;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px auto;
+      border: 2px solid #00B8D9;
+    }
+
+    #called-list li {
+      margin: 8px 0;
+      color: #00B8D9;
+      font-size: 1.3em;
+      transition: transform 0.2s;
+    }
+
+    #called-list li:hover {
+      transform: scale(1.05);
+    }
+
+    #bingo-card {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      max-width: 500px;
+      margin: 30px auto;
+      perspective: 1000px;
+    }
+
+    .card-cell {
+      background-color: #1A1F3A;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.3em;
+      cursor: pointer;
+      transition: transform 0.3s, background-color 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-cell.marked {
+      background-color: #00FF00;
+      color: #0A0F2A;
+      transform: rotateY(180deg);
+      box-shadow: 0 4px 8px rgba(0, 255, 0, 0.5);
+    }
+
+    .card-cell.header {
+      font-weight: bold;
+      background-color: #00B8D9;
+      color: #FFFFFF;
+    }
+
+    #reset-button {
+      background-color: #00B8D9;
+      color: #FFFFFF;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: background-color 0.3s, transform 0.3s;
+      margin-bottom: 20px;
+    }
+
+    #reset-button:hover {
+      background-color: #FF0000;
+      transform: scale(1.05);
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: url('https://www.transparenttextures.com/patterns/farmer.png') repeat, #1A1F3A; /* Farm texture */
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 184, 217, 0.5);
+      z-index: 1000;
+      text-align: center;
+      color: #00B8D9;
+      border: 2px solid #FF0000;
+    }
+
+    .popup-content {
+      max-width: 400px;
+    }
+
+    .popup h2 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+
+    .popup p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+
+    .follow-button {
+      background-color: #FF0000;
+      color: #FFFFFF;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.5em;
+      cursor: pointer;
+      border-radius: 50px;
+      transition: background-color 0.3s, transform 0.3s;
+      box-shadow: 0 6px 12px rgba(255, 0, 0, 0.6);
+      text-decoration: none;
+    }
+
+    .follow-button:hover {
+      background-color: #00FF00;
+      transform: scale(1.1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      color: #FF0000;
+      cursor: pointer;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+      .nav-menu { top: 50px; }
+      .container { margin: 10px auto; }
+      #bingo-card { max-width: 300px; }
+      .card-cell { padding: 15px; font-size: 1em; }
+      .popup { padding: 15px; }
+      .popup h2 { font-size: 1.5em; }
+      .popup p { font-size: 1em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="parallax"></div>
+  <header>
+    <div class="container">
+      <h1>$BINGO</h1>
+      <button class="hamburger">&#9776;</button>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="/" target="_blank">Home</a></li>
+          <li><a href="#buy" class="smooth-scroll">How to Trade</a></li>
+          <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
+          <li><a href="#community" class="smooth-scroll">Community</a></li>
+          <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1>$BINGO Roller</h1>
+    <p>Roll epic $BINGO numbers during your live streams!<br>Mark your card and have fun!</p>
+    <button id="roll-button">Roll!</button>
+    <div id="result"></div>
+    <button id="reset-button">Reset Game</button>
+    <h2>Your Bingo Card</h2>
+    <div id="bingo-card"></div>
+    <h2>Called Numbers</h2>
+    <ul id="called-list"></ul>
+    <canvas id="confetti-canvas"></canvas>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
+      <div class="community-links">
+        <a href="https://x.com/BingoXRPL" target="_blank">X</a>
+        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank">Discord</a>
+        <a href="https://t.me/bingoonxrp" target="_blank">Telegram</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="popup" id="enjoymentPopup">
+    <button class="close-btn" onclick="document.getElementById('enjoymentPopup').style.display='none'">X</button>
+    <div class="popup-content">
+      <h2>Old MacDonald’s Farm Fun!</h2>
+      <p>Thanks for playing $BINGO with us on the farm! E-I-E-I-O! Give us a follow on X to stay in the loop with the herd.</p>
+      <a href="https://x.com/BingoXRPL" target="_blank" class="follow-button">Follow</a>
+    </div>
+  </div>
+
+  <script>
+    const letters = ['B', 'I', 'N', 'G', 'O'];
+    const ranges = {
+      'B': [1, 15],
+      'I': [16, 30],
+      'N': [31, 45],
+      'G': [46, 60],
+      'O': [61, 75]
+    };
+    let calledNumbers = new Set();
+    let bingoCard = [];
+
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function rollBingo() {
+      let letter, number;
+      do {
+        letter = letters[Math.floor(Math.random() * letters.length)];
+        const [min, max] = ranges[letter];
+        number = getRandomNumber(min, max);
+      } while (calledNumbers.has(`${letter}-${number}`));
+
+      calledNumbers.add(`${letter}-${number}`);
+      return `${letter}-${number}`;
+    }
+
+    function createBingoCard() {
+      bingoCard = [];
+      letters.forEach(letter => {
+        const [min, max] = ranges[letter];
+        const nums = [];
+        while (nums.length < 5) {
+          const num = getRandomNumber(min, max);
+          if (!nums.includes(num)) nums.push(num);
+        }
+        bingoCard.push(nums);
+      });
+      displayBingoCard();
+    }
+
+    function displayBingoCard() {
+      const card = document.getElementById('bingo-card');
+      card.innerHTML = '';
+      letters.forEach((letter, col) => {
+        const header = document.createElement('div');
+        header.classList.add('card-cell', 'header');
+        header.textContent = letter;
+        card.appendChild(header);
+      });
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('card-cell');
+          cell.textContent = bingoCard[col][row];
+          cell.addEventListener('click', () => cell.classList.toggle('marked'));
+          card.appendChild(cell);
+        }
+      }
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      canvas.style.display = 'block';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+
+      const confettiCount = 500;
+      const confetti = [];
+
+      for (let i = 0; i < confettiCount; i++) {
+        confetti.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 8 + 1,
+          d: Math.random() * confettiCount,
+          color: ['#FF0000', '#00FF00', '#00B8D9'][Math.floor(Math.random() * 3)],
+          tilt: Math.random() * 15 - 15,
+          tiltAngle: Math.random() * Math.PI
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confetti.forEach((p, i) => {
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          ctx.stroke();
+          p.tiltAngle += 0.15;
+          p.tilt = Math.sin(p.tiltAngle) * 20;
+          p.y += (Math.cos(p.d) + 4 + p.r / 2) / 2;
+          if (p.y > canvas.height) confetti.splice(i, 1);
+        });
+        if (confetti.length > 0) requestAnimationFrame(draw);
+        else canvas.style.display = 'none';
+      }
+
+      draw();
+    }
+
+    function playRollSound() {
+      const audio = new Audio('https://freesound.org/data/previews/202/202003_1.mp3'); // Bingo roll sound
+      audio.volume = 0.5; // Lower volume for stream comfort
+      audio.play().catch(() => console.log("Audio play blocked; user interaction required."));
+    }
+
+    const rollButton = document.getElementById('roll-button');
+    const result = document.getElementById('result');
+    const calledList = document.getElementById('called-list');
+    const resetButton = document.getElementById('reset-button');
+
+    rollButton.addEventListener('click', () => {
+      const rolled = rollBingo();
+      result.textContent = rolled;
+      result.style.animation = 'pop-in 0.5s ease-out, glow 1.5s infinite';
+      const li = document.createElement('li');
+      li.textContent = rolled;
+      calledList.appendChild(li);
+      calledList.scrollTop = calledList.scrollHeight;
+      triggerConfetti();
+      playRollSound();
+      markBingoCard(rolled);
+      showPopup(); // Trigger popup after first roll
+    });
+
+    resetButton.addEventListener('click', () => {
+      calledNumbers.clear();
+      calledList.innerHTML = '';
+      result.textContent = '';
+      createBingoCard();
+    });
+
+    function markBingoCard(rolled) {
+      const [letter, num] = rolled.split('-');
+      const col = letters.indexOf(letter);
+      const row = bingoCard[col].indexOf(parseInt(num));
+      if (row !== -1) {
+        const cells = document.querySelectorAll('.card-cell');
+        const index = 5 + row * 5 + col; // Skip header row
+        cells[index].style.transition = 'transform 0.5s';
+        cells[index].classList.add('marked');
+      }
+    }
+
+    // Initialize bingo card
+    createBingoCard();
+
+    // Popup functionality
+    const popup = document.getElementById('enjoymentPopup');
+    let popupShown = false;
+
+    function showPopup() {
+      if (!popupShown && calledNumbers.size >= 1) {
+        popup.style.display = 'block';
+        popupShown = true;
+      }
+    }
+
+    // Show popup on page load as well (optional initial engagement)
+    window.addEventListener('load', () => {
+      setTimeout(showPopup, 5000); // Show after 5 seconds
+    });
+  </script>
+</body>
+</html>
