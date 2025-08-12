@@ -6,6 +6,7 @@
   <meta name="description" content="BingoXRPL - $BINGO memecoin on XRP Ledger. Inspired by 'Bingo was his name-o' – fun, fast, and farm-fresh crypto!">
   <meta name="keywords" content="BingoXRPL, $BINGO, memecoin, XRP Ledger, NFT, cryptocurrency">
   <meta name="author" content="BingoXRPL Team">
+  <meta name="robots" content="index, follow">
   <title>BingoXRPL | $BINGO Memecoin on XRP Ledger</title>
   <link rel="icon" href="logo.png" type="image/png">
   <style>
@@ -76,7 +77,7 @@
     .hero {
       text-align: center;
       padding: 150px 0;
-      background-color: #1A1F3A;
+      background: linear-gradient(135deg, #1A1F3A, #0A0F2A);
       position: relative;
       overflow: hidden;
     }
@@ -90,12 +91,13 @@
       height: 100%;
       background: radial-gradient(circle, rgba(0, 184, 217, 0.3), transparent);
       animation: pulse 5s infinite;
+      opacity: 0.8;
     }
 
     @keyframes pulse {
-      0% { opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { opacity: 0.5; }
+      0% { opacity: 0.6; }
+      50% { opacity: 0.9; }
+      100% { opacity: 0.6; }
     }
 
     .hero h2 {
@@ -252,6 +254,7 @@
         left: 0;
         background-color: #00B8D9;
         padding: 10px 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
       .nav-menu.active {
         display: flex;
@@ -260,6 +263,10 @@
         margin: 10px 0;
         text-align: center;
         width: 100%;
+      }
+      .nav-menu li a {
+        padding: 10px;
+        display: block;
       }
       .logo {
         max-width: 200px;
@@ -345,7 +352,7 @@
 <body>
   <noscript>
     <p style="text-align:center; color:#FF0000; padding: 20px;">
-      JavaScript is disabled. Enable it for smooth scrolling and confetti. Core content is still accessible.
+      JavaScript is disabled. Enable it for smooth scrolling and confetti. The trade button will still work.
     </p>
   </noscript>
   <header>
@@ -356,10 +363,11 @@
         <ul class="nav-menu">
           <li><a href="#about" class="smooth-scroll">About</a></li>
           <li><a href="#tokenomics" class="smooth-scroll">Tokenomics</a></li>
+          <li><a href="#buy" class="smooth-scroll">How to Trade</a></li>
           <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
-          <li><a href="#buy" class="smooth-scroll">How to Buy</a></li>
           <li><a href="#community" class="smooth-scroll">Community</a></li>
           <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
+          <li><a href="/bingo-roller.html" target="_blank">Bingo Roller</a></li> <!-- New link added here -->
         </ul>
       </nav>
     </div>
@@ -428,16 +436,9 @@
     </div>
   </section>
 
-  <section id="nft" class="section">
-    <div class="container">
-      <h2>NFT Collection</h2>
-      <p><strong>COMING SOON</strong></p>
-    </div>
-  </section>
-
   <section id="buy" class="section">
     <div class="container">
-      <h2>How to Buy $BINGO</h2>
+      <h2>How to Trade $BINGO</h2>
       <p>Contract Address: rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN</p>
       <ol>
         <li>Set up an XRP Ledger wallet (e.g., Xumm or Trust Wallet).</li>
@@ -445,6 +446,13 @@
         <li>Visit a DEX like xMagnetic: <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" target="_blank" style="color: #00FF00;">Trade $BINGO</a>.</li>
         <li>Search for $BINGO and swap your XRP – Easy as clapping hands!</li>
       </ol>
+    </div>
+  </section>
+
+  <section id="nft" class="section">
+    <div class="container">
+      <h2>NFT Collection</h2>
+      <p><strong>COMING SOON</strong></p>
     </div>
   </section>
 
@@ -493,6 +501,9 @@
         const targetId = this.getAttribute('href').substring(1);
         const target = document.getElementById(targetId);
         target.scrollIntoView({ behavior: 'smooth' });
+        if (window.innerWidth <= 480) {
+          document.querySelector('.nav-menu').classList.remove('active'); // Collapse menu on click
+        }
       });
     });
 
@@ -504,53 +515,53 @@
       navMenu.classList.toggle('active');
     });
 
-    // Confetti and link on trade button click
+    // Confetti on trade button click with guaranteed link
     const tradeButton = document.getElementById('buy-button');
     const confettiCanvas = document.getElementById('confetti-canvas');
     const ctx = confettiCanvas.getContext('2d');
 
-    tradeButton.addEventListener('click', (e) => {
-      e.preventDefault(); // Prevent default anchor behavior to handle manually
-      window.open(tradeButton.href, '_blank'); // Open xMagnetic link in new tab
-      confettiCanvas.style.display = 'block';
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
+    if (tradeButton) {
+      tradeButton.addEventListener('click', () => {
+        confettiCanvas.style.display = 'block';
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
 
-      const confettiCount = 400;
-      const confetti = [];
+        const confettiCount = 400;
+        const confetti = [];
 
-      for (let i = 0; i < confettiCount; i++) {
-        confetti.push({
-          x: Math.random() * confettiCanvas.width,
-          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-          r: Math.random() * 6 + 1,
-          d: Math.random() * confettiCount,
-          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-          tilt: Math.random() * 10 - 10,
-          tiltAngle: Math.random() * Math.PI
-        });
-      }
+        for (let i = 0; i < confettiCount; i++) {
+          confetti.push({
+            x: Math.random() * confettiCanvas.width,
+            y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+            r: Math.random() * 6 + 1,
+            d: Math.random() * confettiCount,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            tilt: Math.random() * 10 - 10,
+            tiltAngle: Math.random() * Math.PI
+          });
+        }
 
-      function draw() {
-        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-        confetti.forEach((p, i) => {
-          ctx.beginPath();
-          ctx.lineWidth = p.r;
-          ctx.strokeStyle = p.color;
-          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-          ctx.stroke();
-          p.tiltAngle += 0.1;
-          p.tilt = Math.sin(p.tiltAngle) * 15;
-          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-          if (p.y > confettiCanvas.height) confetti.splice(i, 1);
-        });
-        if (confetti.length > 0) requestAnimationFrame(draw);
-        else confettiCanvas.style.display = 'none';
-      }
+        function draw() {
+          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+          confetti.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+            ctx.stroke();
+            p.tiltAngle += 0.1;
+            p.tilt = Math.sin(p.tiltAngle) * 15;
+            p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+            if (p.y > confettiCanvas.height) confetti.splice(i, 1);
+          });
+          if (confetti.length > 0) requestAnimationFrame(draw);
+          else confettiCanvas.style.display = 'none';
+        }
 
-      draw();
-    });
+        draw();
+      });
+    }
   </script>
 </body>
 </html>
