@@ -14,12 +14,64 @@
       padding: 0;
       text-align: center;
       overflow-x: hidden;
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQYV2NkYGD4z8DAwMgABXgAAAADYAANzQJ0LAAAAAElFTkSuQmCC'); /* Subtle hay texture */
+      background-size: 50px 50px;
     }
 
     .container {
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
+    }
+
+    header {
+      background-color: #00B8D9;
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 1.5em;
+      background: none;
+      border: none;
+      color: #00FF00;
+      cursor: pointer;
+      padding: 10px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      margin: 0;
+      padding: 0;
+      gap: 15px;
+    }
+
+    .nav-menu li a {
+      color: #00FF00;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1em;
+      transition: color 0.3s, transform 0.3s;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-menu li a:hover {
+      color: #FFFFFF;
+      transform: scale(1.05);
     }
 
     h1 {
@@ -75,12 +127,13 @@
       color: #00FF00;
       margin: 20px 0;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      animation: pop-in 0.5s ease-out;
+      animation: spin-pop 0.8s ease-out;
     }
 
-    @keyframes pop-in {
-      0% { transform: scale(0); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+    @keyframes spin-pop {
+      0% { transform: rotate(0deg) scale(0); opacity: 0; }
+      50% { transform: rotate(360deg) scale(1.2); opacity: 1; }
+      100% { transform: rotate(720deg) scale(1); }
     }
 
     #called-list {
@@ -116,42 +169,65 @@
       background-color: #FF0000;
     }
 
-    #confetti-canvas {
+    #sound-controls {
+      margin: 10px 0;
+    }
+
+    #play-button, #volume-button {
+      background: none;
+      border: none;
+      color: #00FF00;
+      font-size: 1em;
+      cursor: pointer;
+      margin: 0 10px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    #play-button:hover, #volume-button:hover {
+      color: #FF0000;
+    }
+
+    #hay-canvas {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-      display: none;
-    }
-
-    .fireworks {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      display: none;
-    }
-
-    .particle {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background: #FF0000;
-      border-radius: 50%;
-      animation: explode 1s ease-out;
-    }
-
-    @keyframes explode {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0); }
+      display: block;
     }
 
     /* Responsive Design */
     @media (max-width: 480px) {
+      header {
+        padding: 10px 0;
+      }
+      .hamburger {
+        display: block;
+      }
+      .nav-menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        background-color: #00B8D9;
+        padding: 10px 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      .nav-menu.active {
+        display: flex;
+      }
+      .nav-menu li {
+        margin: 8px 0;
+        text-align: center;
+        width: 100%;
+      }
+      .nav-menu li a {
+        padding: 8px;
+        font-size: 0.9em;
+      }
       h1 {
         font-size: 2em;
       }
@@ -169,20 +245,93 @@
         font-size: 1em;
       }
     }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      header {
+        padding: 12px 0;
+      }
+      .nav-menu li a {
+        font-size: 0.95em;
+      }
+      h1 {
+        font-size: 2.5em;
+      }
+      p.tagline {
+        font-size: 1.1em;
+      }
+      #roll-button {
+        font-size: 1.3em;
+      }
+      #result {
+        font-size: 3.5em;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .hamburger {
+        display: none;
+      }
+      .nav-menu {
+        display: flex;
+      }
+      h1 {
+        font-size: 3em;
+      }
+      p.tagline {
+        font-size: 1.3em;
+      }
+      #roll-button {
+        font-size: 1.7em;
+      }
+      #result {
+        font-size: 4.5em;
+      }
+    }
   </style>
 </head>
 <body>
+  <header>
+    <div class="header-inner">
+      <h1>$BINGO Roller</h1>
+      <button class="hamburger">&#9776;</button>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="/" target="_blank">Home</a></li>
+          <li><a href="#about" class="smooth-scroll">About</a></li>
+          <li><a href="#tokenomics" class="smooth-scroll">Tokenomics</a></li>
+          <li><a href="#buy" class="smooth-scroll">How to Trade</a></li>
+          <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
+          <li><a href="#community" class="smooth-scroll">Community</a></li>
+          <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
   <div class="container">
-    <h1>$BINGO Roller</h1>
     <p class="tagline">Roll epic $BINGO numbers during your live streams!<br>Mark your card and have fun!</p>
+    <div id="sound-controls">
+      <button id="play-button">Play Sound</button>
+      <button id="volume-button">Mute</button>
+    </div>
     <button id="roll-button">Roll!</button>
     <div id="result"></div>
     <button id="reset-button">Reset Game</button>
     <h2>Called Numbers</h2>
     <ul id="called-list"></ul>
-    <canvas id="confetti-canvas"></canvas>
-    <div id="fireworks" class="fireworks"></div>
+    <canvas id="hay-canvas"></canvas>
   </div>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
+      <div>
+        <a href="https://x.com/BingoXRPL" target="_blank">X</a>
+        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank">Discord</a>
+        <a href="https://t.me/bingoonxrp" target="_blank">Telegram</a>
+      </div>
+    </div>
+  </footer>
 
   <script>
     const letters = ['B', 'I', 'N', 'G', 'O'];
@@ -194,6 +343,7 @@
       'O': [61, 75]
     };
     let calledNumbers = new Set();
+    let audio = new Audio('https://www.bensound.com/bensound-music/bensound-ukulele.mp3'); // Instrumental "Old MacDonald" alternative (royalty-free)
 
     function getRandomNumber(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -211,95 +361,96 @@
       return `${letter}-${number}`;
     }
 
-    function triggerConfetti() {
-      const canvas = document.getElementById('confetti-canvas');
+    function triggerHay() {
+      const canvas = document.getElementById('hay-canvas');
       canvas.style.display = 'block';
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       const ctx = canvas.getContext('2d');
+      const particles = [];
 
-      const confettiCount = 400;
-      const confetti = [];
-
-      for (let i = 0; i < confettiCount; i++) {
-        confetti.push({
+      for (let i = 0; i < 100; i++) {
+        particles.push({
           x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height - canvas.height,
-          r: Math.random() * 6 + 1,
-          d: Math.random() * confettiCount,
-          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-          tilt: Math.random() * 10 - 10,
-          tiltAngle: Math.random() * Math.PI
+          y: -10,
+          speed: Math.random() * 2 + 1,
+          size: Math.random() * 5 + 2,
+          color: '#D2B48C' // Hay color
         });
       }
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        confetti.forEach((p, i) => {
+        particles.forEach((p, i) => {
           ctx.beginPath();
-          ctx.lineWidth = p.r;
-          ctx.strokeStyle = p.color;
-          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-          ctx.stroke();
-          p.tiltAngle += 0.1;
-          p.tilt = Math.sin(p.tiltAngle) * 15;
-          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-          if (p.y > canvas.height) confetti.splice(i, 1);
+          ctx.fillStyle = p.color;
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          p.y += p.speed;
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
         });
-        if (confetti.length > 0) requestAnimationFrame(draw);
-        else canvas.style.display = 'none';
+        requestAnimationFrame(draw);
       }
 
       draw();
     }
 
-    function triggerFireworks() {
-      const fireworks = document.getElementById('fireworks');
-      fireworks.style.display = 'block';
-      fireworks.innerHTML = '';
-      for (let i = 0; i < 20; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-        particle.style.animationDelay = Math.random() * 0.5 + 's';
-        fireworks.appendChild(particle);
-      }
-      setTimeout(() => {
-        fireworks.style.display = 'none';
-      }, 2000);
-    }
-
     function playRollSound() {
-      const audio = new Audio('https://freesound.org/data/previews/202/202003_1.mp3'); // Free bingo sound
-      audio.play();
+      if (!audio.paused) audio.currentTime = 0; // Restart if playing
+      audio.play().catch(() => console.log('Audio play blocked; user interaction required'));
     }
 
     const rollButton = document.getElementById('roll-button');
     const result = document.getElementById('result');
     const calledList = document.getElementById('called-list');
     const resetButton = document.getElementById('reset-button');
+    const playButton = document.getElementById('play-button');
+    const volumeButton = document.getElementById('volume-button');
 
     rollButton.addEventListener('click', () => {
       const rolled = rollBingo();
       result.textContent = rolled;
-      result.style.animation = 'pop-in 0.5s ease-out';
+      result.style.animation = 'spin-pop 0.8s ease-out';
       const li = document.createElement('li');
       li.textContent = rolled;
       calledList.appendChild(li);
       calledList.scrollTop = calledList.scrollHeight;
-      triggerConfetti();
-      triggerFireworks();
+      triggerHay();
       playRollSound();
     });
 
     resetButton.addEventListener('click', () => {
-      calledNumbers = new Set();
+      calledNumbers.clear();
       calledList.innerHTML = '';
       result.textContent = '';
     });
+
+    playButton.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play().catch(() => console.log('Audio play blocked; user interaction required'));
+        playButton.textContent = 'Pause Sound';
+      } else {
+        audio.pause();
+        playButton.textContent = 'Play Sound';
+      }
+    });
+
+    volumeButton.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      volumeButton.textContent = audio.muted ? 'Unmute' : 'Mute';
+    });
+
+    // Initialize hay animation
+    triggerHay();
+
+    @keyframes spin-pop {
+      0% { transform: rotate(0deg) scale(0); opacity: 0; }
+      50% { transform: rotate(360deg) scale(1.2); opacity: 1; }
+      100% { transform: rotate(720deg) scale(1); }
+    }
   </script>
 </body>
 </html>
