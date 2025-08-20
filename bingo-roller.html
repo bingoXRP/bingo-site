@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) --> <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-HBCFY2880X'); </script>
+    <!-- Google tag (gtag.js) --> <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-HBCFY2880X'); </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!">
@@ -15,12 +15,6 @@
       padding: 0;
       text-align: center;
       overflow-x: hidden;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
     }
 
     header {
@@ -41,14 +35,17 @@
       padding: 0 20px;
     }
 
-    .hamburger {
-      display: none;
-      font-size: 1.5em;
-      background: none;
-      border: none;
-      color: #00FF00;
-      cursor: pointer;
-      padding: 10px;
+    h1 {
+      margin: 0;
+    }
+
+    h1 a {
+      color: #FFFFFF;
+      text-decoration: none;
+    }
+
+    h1 a:hover {
+      text-decoration: underline;
     }
 
     .nav-menu {
@@ -60,30 +57,16 @@
     }
 
     .nav-menu li a {
-      color: #00FF00;
+      color: #000;
       text-decoration: none;
       font-weight: bold;
       font-size: 1em;
       transition: color 0.3s, transform 0.3s;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .nav-menu li a:hover {
       color: #FFFFFF;
       transform: scale(1.05);
-    }
-
-    h1 {
-      color: #00B8D9;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      margin-bottom: 10px;
-    }
-
-    p.tagline {
-      font-size: 1.2em;
-      color: #00FF00;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      margin: 10px 0 30px;
     }
 
     #roll-button {
@@ -103,53 +86,11 @@
       transform: scale(1.1);
     }
 
-    #roll-button:active {
-      animation: shake 0.5s;
-    }
-
-    @keyframes shake {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      10% { transform: translate(-1px, -2px) rotate(-1deg); }
-      20% { transform: translate(-3px, 0px) rotate(1deg); }
-      30% { transform: translate(3px, 2px) rotate(0deg); }
-      40% { transform: translate(1px, -1px) rotate(1deg); }
-      50% { transform: translate(-1px, 2px) rotate(-1deg); }
-      60% { transform: translate(-3px, 1px) rotate(0deg); }
-      70% { transform: translate(3px, 1px) rotate(-1deg); }
-      80% { transform: translate(-1px, -1px) rotate(1deg); }
-      90% { transform: translate(1px, 2px) rotate(0deg); }
-      100% { transform: translate(1px, -2px) rotate(-1deg); }
-    }
-
     #result {
       font-size: 4em;
       color: #00FF00;
       margin: 20px 0;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      animation: pop-in 0.5s ease-out;
-    }
-
-    @keyframes pop-in {
-      0% { transform: scale(0); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .called-numbers {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 10px;
-      background-color: #1A1F3A;
-      border-radius: 10px;
-    }
-
-    .called-numbers div {
-      color: #00B8D9;
-      font-size: 1.2em;
-      padding: 5px;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      text-shadow: 2px 2px 8px rgba(0, 255, 0, 0.7);
     }
 
     #reset-button {
@@ -168,99 +109,78 @@
       background-color: #FF0000;
     }
 
-    #confetti-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
+    /* Bingo Board */
+    .bingo-board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
       width: 100%;
-      height: 100%;
-      pointer-events: none;
-      display: none;
+      max-width: 1400px;
+      margin: 20px auto;
     }
 
-    .fireworks {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      display: none;
+    .bingo-board .column {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      justify-items: center;
     }
 
-    .particle {
-      position: absolute;
-      width: 5px;
-      height: 5px;
-      background: #FF0000;
+    .bingo-board .header {
+      grid-column: span 2;
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #FF0000;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .bingo-board .cell {
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 50%;
-      animation: explode 1s ease-out;
+      background: #0D143A; /* Darker contrast background */
+      color: #00E0FF; /* Brighter cyan text */
+      font-size: 1.1em;
+      transition: all 0.3s;
     }
 
-    @keyframes explode {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0); }
+    .bingo-board .cell.called {
+      background: #00FF00;
+      color: #000;
+      box-shadow: 0 0 15px #00FF00;
+      transform: scale(1.15);
     }
 
-    /* Responsive Design */
-    @media (max-width: 480px) {
-      header {
-        flex-direction: column;
-        padding: 10px 0;
-      }
-      .hamburger {
-        display: block;
-      }
-      .nav-menu {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        background-color: #00B8D9;
-        padding: 10px 0;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      }
-      .nav-menu.active {
-        display: flex;
-      }
-      .nav-menu li {
-        margin: 8px 0;
-        text-align: center;
-        width: 100%;
-      }
-      .nav-menu li a {
-        padding: 8px;
-        font-size: 0.9em;
-      }
-      h1 {
-        font-size: 2em;
-      }
-      p.tagline {
-        font-size: 1em;
-      }
-      #roll-button {
-        padding: 15px 30px;
-        font-size: 1.2em;
-      }
-      #result {
-        font-size: 3em;
-      }
-      .called-numbers {
+    #confetti-canvas, .fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      background: #0A0F2A;
+      color: #ccc;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 768px) {
+      .bingo-board .column {
         grid-template-columns: 1fr;
       }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .called-numbers {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (min-width: 769px) {
-      .called-numbers {
-        grid-template-columns: repeat(3, 1fr);
+      .bingo-board .cell {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9em;
       }
     }
   </style>
@@ -268,15 +188,14 @@
 <body>
   <header>
     <div class="header-inner">
-      <h1>$BINGO</h1>
-      <button class="hamburger">&#9776;</button>
+      <h1><a href="/">$BINGO</a></h1>
       <nav>
         <ul class="nav-menu">
-          <li><a href="/" target="_blank">Home</a></li>
-          <li><a href="#buy" class="smooth-scroll">How to Trade</a></li>
-          <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
-          <li><a href="#community" class="smooth-scroll">Community</a></li>
-          <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="#buy">How to Trade</a></li>
+          <li><a href="#nft">NFT Collection</a></li>
+          <li><a href="#community">Community</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
         </ul>
       </nav>
     </div>
@@ -285,11 +204,14 @@
   <div class="container">
     <h1>$BINGO Roller</h1>
     <p class="tagline">Roll epic $BINGO numbers during your live streams!<br>Mark your card and have fun!</p>
+
     <button id="roll-button">Roll!</button>
     <div id="result"></div>
     <button id="reset-button">Reset Game</button>
-    <h2>Called Numbers</h2>
-    <div class="called-numbers" id="called-numbers"></div>
+
+    <h2>Game Board</h2>
+    <div id="bingo-board" class="bingo-board"></div>
+
     <canvas id="confetti-canvas"></canvas>
     <div id="fireworks" class="fireworks"></div>
   </div>
@@ -298,8 +220,8 @@
     <div class="container">
       <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
       <div>
-        <a href="https://x.com/BingoXRPL" target="_blank">X</a>
-        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank">Discord</a>
+        <a href="https://x.com/BingoXRPL" target="_blank">X</a> |
+        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank">Discord</a> |
         <a href="https://t.me/bingoonxrp" target="_blank">Telegram</a>
       </div>
     </div>
@@ -332,15 +254,35 @@
       return `${letter}-${number}`;
     }
 
-    function updateCalledNumbers() {
-      const calledNumbersDiv = document.getElementById('called-numbers');
-      calledNumbersDiv.innerHTML = '';
-      const numbersArray = Array.from(calledNumbers);
-      numbersArray.forEach((num, index) => {
-        const div = document.createElement('div');
-        div.textContent = num;
-        calledNumbersDiv.appendChild(div);
+    function createBoard() {
+      const board = document.getElementById('bingo-board');
+      board.innerHTML = '';
+
+      letters.forEach(l => {
+        const col = document.createElement('div');
+        col.classList.add('column');
+
+        const header = document.createElement('div');
+        header.textContent = l;
+        header.classList.add('header');
+        col.appendChild(header);
+
+        const [min, max] = ranges[l];
+        for (let n = min; n <= max; n++) {
+          const div = document.createElement('div');
+          div.textContent = n;
+          div.classList.add('cell');
+          div.id = `${l}-${n}`;
+          col.appendChild(div);
+        }
+
+        board.appendChild(col);
       });
+    }
+
+    function highlightNumber(letter, number) {
+      const cell = document.getElementById(`${letter}-${number}`);
+      if (cell) cell.classList.add('called');
     }
 
     function triggerConfetti() {
@@ -350,7 +292,7 @@
       canvas.height = window.innerHeight;
       const ctx = canvas.getContext('2d');
 
-      const confettiCount = 400;
+      const confettiCount = 200;
       const confetti = [];
 
       for (let i = 0; i < confettiCount; i++) {
@@ -405,20 +347,19 @@
     }
 
     function playRollSound() {
-      const audio = new Audio('https://freesound.org/data/previews/202/202003_1.mp3'); // Free bingo sound
+      const audio = new Audio('https://freesound.org/data/previews/202/202003_1.mp3');
       audio.play();
     }
 
     const rollButton = document.getElementById('roll-button');
     const result = document.getElementById('result');
-    const calledNumbersDiv = document.getElementById('called-numbers');
     const resetButton = document.getElementById('reset-button');
 
     rollButton.addEventListener('click', () => {
       const rolled = rollBingo();
+      const [letter, num] = rolled.split('-');
       result.textContent = rolled;
-      result.style.animation = 'pop-in 0.5s ease-out';
-      updateCalledNumbers();
+      highlightNumber(letter, num);
       triggerConfetti();
       triggerFireworks();
       playRollSound();
@@ -426,9 +367,12 @@
 
     resetButton.addEventListener('click', () => {
       calledNumbers.clear();
-      calledNumbersDiv.innerHTML = '';
       result.textContent = '';
+      createBoard();
     });
+
+    // init board
+    createBoard();
   </script>
 </body>
 </html>
