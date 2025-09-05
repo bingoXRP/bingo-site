@@ -16,7 +16,7 @@
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background: linear-gradient(to bottom, #0A0F2A, #1A1F3A);
+      background: #0A0F2A;
       color: #FFFFFF;
       margin: 0;
       padding: 0;
@@ -26,23 +26,6 @@
       display: flex;
       flex-direction: column;
       position: relative;
-    }
-    /* Subtle background stars for epic effect */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.3)" /><circle cx="50" cy="50" r="1.5" fill="rgba(255,255,255,0.2)" /><circle cx="90" cy="90" r="2.5" fill="rgba(255,255,255,0.4)" /></svg>') repeat;
-      opacity: 0.3;
-      animation: twinkle 10s infinite;
-      z-index: -1;
-    }
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.5; }
     }
     .container {
       max-width: 95%;
@@ -363,7 +346,7 @@
           <li><a href="https://bingoxrp.com/#community" aria-label="Join Community">Community</a></li>
           <li><a href="https://bingoxrp.com/#roadmap" aria-label="View Roadmap">Roadmap</a></li>
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false" aria-label="View Partners">Partners</a>
+            <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false" aria-label="View Sponsors">Sponsors</a>
             <ul class="submenu">
               <li><a href="#" class="partner-link" data-partner="xmeme">XMEME</a></li>
               <li><a href="#" class="partner-link" data-partner="kedas">Kedas Brew</a></li>
@@ -415,7 +398,7 @@
       'O': [61, 75]
     };
     let calledNumbers = new Set(JSON.parse(localStorage.getItem('calledNumbers') || '[]'));
-    
+   
     const partners = {
       xmeme: {
         name: "XMEME",
@@ -491,11 +474,11 @@
         ]
       }
     };
-    
+   
     function getRandomNumber(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    
+   
     function rollBingo() {
       let letter, number;
       do {
@@ -507,7 +490,7 @@
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
       return `${letter}-${number}`;
     }
-    
+   
     function createBoard() {
       const board = document.getElementById('bingo-board');
       board.innerHTML = '';
@@ -557,12 +540,12 @@
         });
       }
     }
-    
+   
     function highlightNumber(letter, number) {
       const cell = document.getElementById(`${letter}-${number}`);
       if (cell) cell.classList.add('called');
     }
-    
+   
     function triggerConfetti() {
       const canvas = document.getElementById('confetti-canvas');
       canvas.style.display = 'block';
@@ -601,7 +584,7 @@
       }
       draw();
     }
-    
+   
     function triggerFireworks() {
       const fireworks = document.getElementById('fireworks');
       fireworks.style.display = 'block';
@@ -619,18 +602,18 @@
         fireworks.style.display = 'none';
       }, 2000);
     }
-    
+   
     function playRollSound() {
       const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
       audio.play();
     }
-    
+   
     const rollButton = document.getElementById('roll-button');
     const result = document.getElementById('result');
     const resetButton = document.getElementById('reset-button');
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
-    
+   
     rollButton.addEventListener('click', () => {
       const rolled = rollBingo();
       const [letter, num] = rolled.split('-');
@@ -640,30 +623,30 @@
       triggerFireworks();
       playRollSound();
     });
-    
+   
     resetButton.addEventListener('click', () => {
       calledNumbers.clear();
       localStorage.removeItem('calledNumbers');
       result.textContent = '';
       createBoard();
     });
-    
-    // Partners submenu toggle
+   
+    // Sponsors submenu toggle
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const submenu = document.querySelector('.submenu');
     dropdownToggle.addEventListener('click', (e) => {
       e.preventDefault();
       submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
     });
-    
+   
     // Close submenu on outside click
     document.addEventListener('click', (e) => {
       if (!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) {
         submenu.style.display = 'none';
       }
     });
-    
-    // Partner links
+   
+    // Sponsor links
     document.querySelectorAll('.partner-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -680,7 +663,7 @@
                    <button id="close-modal">Close</button>`;
           modalContent.innerHTML = html;
           partnerModal.style.display = 'flex';
-          
+         
           // Close button
           document.getElementById('close-modal').addEventListener('click', () => {
             partnerModal.style.display = 'none';
@@ -688,14 +671,14 @@
         }
       });
     });
-    
+   
     // Close modal on outside click
     partnerModal.addEventListener('click', (e) => {
       if (e.target === partnerModal) {
         partnerModal.style.display = 'none';
       }
     });
-    
+   
     // Initialize board and restore called numbers
     createBoard();
   </script>
