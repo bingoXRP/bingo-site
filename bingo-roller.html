@@ -563,10 +563,10 @@
       'G': [46, 60],
       'O': [61, 75]
     };
-    let calledNumbers = new Set(JSON.parse(localStorage.getItem('calledNumbers') || '[]'));
+    let calledNumbers = new Set(); // Start empty, load only when joining/hosting
     let isHost = false;
-    let gameId = localStorage.getItem('gameId') || null;
-    let playerCard = JSON.parse(localStorage.getItem('playerCard')) || null;
+    let gameId = null; // Start null, set when joining/hosting
+    let playerCard = null; // Start null, generate when joining
     let xHandle = localStorage.getItem('xHandle') || null;
     let gameRef = null;
     let gameType = 'singleLine';
@@ -685,7 +685,7 @@
     }
 
     function createBoard() {
-      console.log('Creating board...');
+      console.log('Creating board, calledNumbers:', [...calledNumbers]);
       const board = document.getElementById('bingo-board');
       board.innerHTML = '';
       letters.forEach(l => {
@@ -745,7 +745,7 @@
     }
 
     function generatePlayerCard() {
-      console.log('Generating player card...');
+      console.log('Generating new player card...');
       const card = { B: [], I: [], N: [], G: [], O: [] };
       letters.forEach(letter => {
         const [min, max] = ranges[letter];
@@ -939,6 +939,8 @@
             isHost = true;
             hostControls.style.display = 'block';
             playerControls.style.display = 'none';
+            calledNumbers.clear();
+            localStorage.removeItem('calledNumbers');
             if (!gameId) {
               gameId = Math.random().toString(36).substring(2, 10);
               localStorage.setItem('gameId', gameId);
@@ -971,6 +973,8 @@
         isHost = false;
         hostControls.style.display = 'none';
         playerControls.style.display = 'block';
+        calledNumbers.clear();
+        localStorage.removeItem('calledNumbers');
         if (playerCard && xHandle) displayPlayerCard();
         createBoard();
       } catch (error) {
@@ -988,7 +992,10 @@
         if (!xHandle || !xHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
         localStorage.setItem('gameId', gameId);
         localStorage.setItem('xHandle', xHandle);
-        if (!playerCard) playerCard = generatePlayerCard();
+        localStorage.removeItem('playerCard'); // Clear old card
+        calledNumbers.clear();
+        localStorage.removeItem('calledNumbers'); // Clear old called numbers
+        playerCard = generatePlayerCard();
         displayPlayerCard();
         setupGame(gameId);
         firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
@@ -1046,6 +1053,7 @@
           const rolled = snap.val();
           console.log('Received roll:', rolled);
           calledNumbers.add(rolled);
+          localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
           const [letter, num] = rolled.split('-');
           result.textContent = rolled;
           highlightNumber(letter, num);
@@ -1089,10 +1097,12 @@
       try {
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
+        localStorage.removeItem('playerCard');
+        playerCard = null;
         if (gameRef) gameRef.remove();
         result.textContent = '';
         createBoard();
-        if (playerCard) displayPlayerCard();
+        if (playerCard && xHandle) displayPlayerCard();
         gameId = null;
         localStorage.removeItem('gameId');
         localStorage.removeItem('xHandle');
@@ -1178,14 +1188,6 @@
     // Initialize
     console.log('Initializing page...');
     createBoard();
-    if (gameId) {
-      if (playerCard && xHandle) {
-        playerModeBtn.click();
-      } else if (isHost && authState) {
-        hostModeBtn.click();
-      }
-      setupGame(gameId);
-    }
   </script>
 </body>
 </html>
