@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -686,6 +685,7 @@
     }
 
     function createBoard() {
+      console.log('Creating board...');
       const board = document.getElementById('bingo-board');
       board.innerHTML = '';
       letters.forEach(l => {
@@ -730,6 +730,7 @@
     }
 
     function displayWinPattern() {
+      console.log('Displaying win pattern for:', gameType);
       const winPatternDiv = document.getElementById('win-pattern');
       winPatternDiv.innerHTML = '';
       const pattern = gamePatterns[gameType];
@@ -744,6 +745,7 @@
     }
 
     function generatePlayerCard() {
+      console.log('Generating player card...');
       const card = { B: [], I: [], N: [], G: [], O: [] };
       letters.forEach(letter => {
         const [min, max] = ranges[letter];
@@ -760,6 +762,7 @@
     }
 
     function displayPlayerCard() {
+      console.log('Displaying player card for:', xHandle);
       const cardDiv = document.getElementById('player-card');
       cardDiv.innerHTML = '';
       letters.forEach(l => {
@@ -783,6 +786,7 @@
     }
 
     function highlightNumber(letter, number) {
+      console.log('Highlighting:', letter, number);
       const cell = document.getElementById(`${letter}-${number}`);
       if (cell) cell.classList.add('called');
       if (playerCard) highlightOnPlayerCard(letter, number);
@@ -815,6 +819,7 @@
     }
 
     function winGame() {
+      console.log('Winner:', xHandle);
       alert(`BINGO! ${xHandle} won!`);
       triggerConfetti();
       triggerFireworks();
@@ -825,6 +830,7 @@
     }
 
     function updateLeaderboard(winners) {
+      console.log('Updating leaderboard:', winners);
       const leaderboard = document.getElementById('leaderboard');
       leaderboard.innerHTML = '<h3>Winners</h3>';
       if (Object.keys(winners).length === 0) {
@@ -924,27 +930,36 @@
     const modalContent = partnerModal.querySelector('.modal-content');
 
     hostModeBtn.addEventListener('click', () => {
+      console.log('Host mode clicked, authenticating...');
       signInAnonymously(firebaseAuth)
         .then(() => {
+          console.log('Authenticated as host');
           isHost = true;
           hostControls.style.display = 'block';
           playerControls.style.display = 'none';
           if (!gameId) {
             gameId = Math.random().toString(36).substring(2, 10);
             localStorage.setItem('gameId', gameId);
+            console.log('Generated new gameId:', gameId);
           }
           gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
           const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
           xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
           setupGame(gameId);
           gameType = gameTypeSelect.value;
-          set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType);
+          set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType)
+            .then(() => console.log('Game type set in Firebase:', gameType))
+            .catch(error => console.error('Error setting game type:', error));
           displayWinPattern();
         })
-        .catch((error) => alert(`Authentication failed: ${error.message}`));
+        .catch((error) => {
+          console.error('Authentication failed:', error);
+          alert(`Authentication failed: ${error.message}`);
+        });
     });
 
     playerModeBtn.addEventListener('click', () => {
+      console.log('Player mode clicked');
       isHost = false;
       hostControls.style.display = 'none';
       playerControls.style.display = 'block';
@@ -952,6 +967,7 @@
     });
 
     joinGameBtn.addEventListener('click', () => {
+      console.log('Join game clicked');
       gameId = gameIdInput.value.trim();
       xHandle = xHandleInput.value.trim();
       if (!gameId) return alert('Enter a valid Game ID');
@@ -961,14 +977,21 @@
       if (!playerCard) playerCard = generatePlayerCard();
       displayPlayerCard();
       setupGame(gameId);
-      set(ref(firebaseDatabase, `games/${gameId}/players/${xHandle.replace('@', '')}`), xHandle);
+      set(ref(firebaseDatabase, `games/${gameId}/players/${xHandle.replace('@', '')}`), xHandle)
+        .then(() => console.log('Player registered:', xHandle))
+        .catch(error => console.error('Error registering player:', error));
     });
 
     gameTypeSelect.addEventListener('change', () => {
-      if (!isHost || !gameRef || !authState) return alert('Host a game first');
+      console.log('Game type changed to:', gameTypeSelect.value);
+      if (!isHost || !gameRef) return alert('Host a game first');
       gameType = gameTypeSelect.value;
-      set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType);
-      displayWinPattern();
+      set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType)
+        .then(() => {
+          console.log('Game type updated in Firebase:', gameType);
+          displayWinPattern();
+        })
+        .catch(error => console.error('Error updating game type:', error));
     });
 
     copyGameIdBtn.addEventListener('click', () => {
@@ -982,9 +1005,11 @@
 
     // Setup Real-Time Game
     function setupGame(id) {
+      console.log('Setting up game:', id);
       gameRef = ref(firebaseDatabase, `games/${id}`);
       onChildAdded(ref(firebaseDatabase, `games/${id}/called`), (snap) => {
         const rolled = snap.val();
+        console.log('Received roll:', rolled);
         calledNumbers.add(rolled);
         const [letter, num] = rolled.split('-');
         result.textContent = rolled;
@@ -993,6 +1018,7 @@
       });
       onValue(ref(firebaseDatabase, `games/${id}/gameType`), (snap) => {
         gameType = snap.val() || 'singleLine';
+        console.log('Game type synced:', gameType);
         if (isHost) gameTypeSelect.value = gameType;
         displayWinPattern();
       });
@@ -1002,14 +1028,20 @@
     }
 
     rollButton.addEventListener('click', () => {
-      if (!isHost || !gameRef || !authState) return alert('Host a game first');
+      console.log('Roll button clicked, isHost:', isHost, 'gameRef:', !!gameRef);
+      if (!isHost || !gameRef) return alert('Host a game first');
       const rolled = rollBingo();
-      push(ref(firebaseDatabase, `games/${gameId}/called`), rolled);
-      triggerConfetti();
-      triggerFireworks();
+      push(ref(firebaseDatabase, `games/${gameId}/called`), rolled)
+        .then(() => {
+          console.log('Roll pushed to Firebase:', rolled);
+          triggerConfetti();
+          triggerFireworks();
+        })
+        .catch(error => console.error('Error pushing roll:', error));
     });
 
     resetButton.addEventListener('click', () => {
+      console.log('Resetting game...');
       calledNumbers.clear();
       localStorage.removeItem('calledNumbers');
       if (gameRef) remove(gameRef);
@@ -1029,6 +1061,7 @@
 
     // Authentication State
     onAuthStateChanged(firebaseAuth, (user) => {
+      console.log('Auth state changed:', user ? 'Authenticated' : 'Not authenticated');
       authState = user;
     });
 
@@ -1082,6 +1115,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const urlGameId = urlParams.get('gameId');
     if (urlGameId) {
+      console.log('Auto-joining game from URL:', urlGameId);
       gameId = urlGameId;
       localStorage.setItem('gameId', gameId);
       playerModeBtn.click();
@@ -1089,6 +1123,7 @@
     }
 
     // Initialize
+    console.log('Initializing page...');
     createBoard();
     if (gameId) {
       if (playerCard && xHandle) {
@@ -1101,4 +1136,3 @@
   </script>
 </body>
 </html>
-```
