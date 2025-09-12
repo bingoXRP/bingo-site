@@ -563,14 +563,15 @@
       'G': [46, 60],
       'O': [61, 75]
     };
-    let calledNumbers = new Set(); // Start empty, load only when joining/hosting
+    let calledNumbers = new Set();
     let isHost = false;
-    let gameId = null; // Start null, set when joining/hosting
-    let playerCard = null; // Start null, generate when joining
+    let gameId = null;
+    let playerCard = null;
     let xHandle = localStorage.getItem('xHandle') || null;
     let gameRef = null;
     let gameType = 'singleLine';
     let authState = null;
+    let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
 
     const partners = {
       xmeme: {
@@ -686,230 +687,287 @@
 
     function createBoard() {
       console.log('Creating board, calledNumbers:', [...calledNumbers]);
-      const board = document.getElementById('bingo-board');
-      board.innerHTML = '';
-      letters.forEach(l => {
-        const div = document.createElement('div');
-        div.textContent = l;
-        div.classList.add('header');
-        board.appendChild(div);
-      });
-      const numbersPerLetter = {};
-      letters.forEach(l => {
-        const [min, max] = ranges[l];
-        const nums = [];
-        for (let i = min; i <= max; i++) nums.push(i);
-        numbersPerLetter[l] = [nums.slice(0, 7), nums.slice(7, 15)];
-      });
-      for (let i = 0; i < 8; i++) {
+      try {
+        const board = document.getElementById('bingo-board');
+        if (!board) {
+          console.error('Bingo board element not found');
+          return;
+        }
+        board.innerHTML = '';
         letters.forEach(l => {
-          if (i < numbersPerLetter[l][0].length) {
-            const num = numbersPerLetter[l][0][i];
-            const div = document.createElement('div');
-            div.textContent = num;
-            div.classList.add('cell');
-            div.id = `${l}-${num}`;
-            if (calledNumbers.has(`${l}-${num}`)) div.classList.add('called');
-            board.appendChild(div);
-          } else {
-            board.appendChild(document.createElement('div'));
-          }
-          if (i < numbersPerLetter[l][1].length) {
-            const num = numbersPerLetter[l][1][i];
-            const div = document.createElement('div');
-            div.textContent = num;
-            div.classList.add('cell');
-            div.id = `${l}-${num}`;
-            if (calledNumbers.has(`${l}-${num}`)) div.classList.add('called');
-            board.appendChild(div);
-          } else {
-            board.appendChild(document.createElement('div'));
-          }
+          const div = document.createElement('div');
+          div.textContent = l;
+          div.classList.add('header');
+          board.appendChild(div);
         });
+        const numbersPerLetter = {};
+        letters.forEach(l => {
+          const [min, max] = ranges[l];
+          const nums = [];
+          for (let i = min; i <= max; i++) nums.push(i);
+          numbersPerLetter[l] = [nums.slice(0, 7), nums.slice(7, 15)];
+        });
+        for (let i = 0; i < 8; i++) {
+          letters.forEach(l => {
+            if (i < numbersPerLetter[l][0].length) {
+              const num = numbersPerLetter[l][0][i];
+              const div = document.createElement('div');
+              div.textContent = num;
+              div.classList.add('cell');
+              div.id = `${l}-${num}`;
+              if (calledNumbers.has(`${l}-${num}`)) div.classList.add('called');
+              board.appendChild(div);
+            } else {
+              board.appendChild(document.createElement('div'));
+            }
+            if (i < numbersPerLetter[l][1].length) {
+              const num = numbersPerLetter[l][1][i];
+              const div = document.createElement('div');
+              div.textContent = num;
+              div.classList.add('cell');
+              div.id = `${l}-${num}`;
+              if (calledNumbers.has(`${l}-${num}`)) div.classList.add('called');
+              board.appendChild(div);
+            } else {
+              board.appendChild(document.createElement('div'));
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error creating board:', error);
       }
     }
 
     function displayWinPattern() {
       console.log('Displaying win pattern for:', gameType);
-      const winPatternDiv = document.getElementById('win-pattern');
-      winPatternDiv.innerHTML = '';
-      const pattern = gamePatterns[gameType];
-      for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 5; col++) {
-          const cell = document.createElement('div');
-          cell.classList.add('cell');
-          if (pattern[row][col]) cell.classList.add('win');
-          winPatternDiv.appendChild(cell);
+      try {
+        const winPatternDiv = document.getElementById('win-pattern');
+        winPatternDiv.innerHTML = '';
+        const pattern = gamePatterns[gameType];
+        for (let row = 0; row < 5; row++) {
+          for (let col = 0; col < 5; col++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            if (pattern[row][col]) cell.classList.add('win');
+            winPatternDiv.appendChild(cell);
+          }
         }
+      } catch (error) {
+        console.error('Error displaying win pattern:', error);
       }
     }
 
     function generatePlayerCard() {
       console.log('Generating new player card...');
-      const card = { B: [], I: [], N: [], G: [], O: [] };
-      letters.forEach(letter => {
-        const [min, max] = ranges[letter];
-        const nums = [];
-        while (nums.length < 5) {
-          const num = getRandomNumber(min, max);
-          if (!nums.includes(num)) nums.push(num);
-        }
-        card[letter] = nums.sort((a, b) => a - b);
-      });
-      card.N[2] = 'FREE';
-      localStorage.setItem('playerCard', JSON.stringify(card));
-      return card;
+      try {
+        const card = { B: [], I: [], N: [], G: [], O: [] };
+        letters.forEach(letter => {
+          const [min, max] = ranges[letter];
+          const nums = [];
+          while (nums.length < 5) {
+            const num = getRandomNumber(min, max);
+            if (!nums.includes(num)) nums.push(num);
+          }
+          card[letter] = nums.sort((a, b) => a - b);
+        });
+        card.N[2] = 'FREE';
+        localStorage.setItem('playerCard', JSON.stringify(card));
+        return card;
+      } catch (error) {
+        console.error('Error generating player card:', error);
+        return null;
+      }
     }
 
     function displayPlayerCard() {
       console.log('Displaying player card for:', xHandle);
-      const cardDiv = document.getElementById('player-card');
-      cardDiv.innerHTML = '';
-      letters.forEach(l => {
-        const header = document.createElement('div');
-        header.textContent = l;
-        header.classList.add('header');
-        cardDiv.appendChild(header);
-      });
-      for (let row = 0; row < 5; row++) {
-        letters.forEach(letter => {
-          const num = playerCard[letter][row];
-          const cell = document.createElement('div');
-          cell.textContent = num;
-          cell.classList.add('cell');
-          cell.id = `player-${letter}-${num}`;
-          if (num === 'FREE') cell.classList.add('free', 'called');
-          if (calledNumbers.has(`${letter}-${num}`)) cell.classList.add('called');
-          cardDiv.appendChild(cell);
+      try {
+        const cardDiv = document.getElementById('player-card');
+        cardDiv.innerHTML = '';
+        letters.forEach(l => {
+          const header = document.createElement('div');
+          header.textContent = l;
+          header.classList.add('header');
+          cardDiv.appendChild(header);
         });
+        for (let row = 0; row < 5; row++) {
+          letters.forEach(letter => {
+            const num = playerCard[letter][row];
+            const cell = document.createElement('div');
+            cell.textContent = num;
+            cell.classList.add('cell');
+            cell.id = `player-${letter}-${num}`;
+            if (num === 'FREE') cell.classList.add('free', 'called');
+            if (calledNumbers.has(`${letter}-${num}`)) cell.classList.add('called');
+            cardDiv.appendChild(cell);
+          });
+        }
+      } catch (error) {
+        console.error('Error displaying player card:', error);
       }
     }
 
     function highlightNumber(letter, number) {
       console.log('Highlighting:', letter, number);
-      const cell = document.getElementById(`${letter}-${number}`);
-      if (cell) cell.classList.add('called');
-      if (playerCard) highlightOnPlayerCard(letter, number);
+      try {
+        const cell = document.getElementById(`${letter}-${number}`);
+        if (cell) cell.classList.add('called');
+        if (playerCard) highlightOnPlayerCard(letter, number);
+      } catch (error) {
+        console.error('Error highlighting number:', error);
+      }
     }
 
     function highlightOnPlayerCard(letter, number) {
-      const cell = document.getElementById(`player-${letter}-${number}`);
-      if (cell) cell.classList.add('called');
-      checkForBingo();
+      try {
+        const cell = document.getElementById(`player-${letter}-${number}`);
+        if (cell) cell.classList.add('called');
+        checkForBingo();
+      } catch (error) {
+        console.error('Error highlighting player card:', error);
+      }
     }
 
     function checkForBingo() {
       if (!playerCard) return;
-      const pattern = gamePatterns[gameType];
-      let isWin = true;
-      for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 5; col++) {
-          if (pattern[row][col]) {
-            const letter = letters[col];
-            const num = playerCard[letter][row];
-            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-              isWin = false;
-              break;
+      const winKey = `${gameId}_${gameType}`;
+      if (playerWins[winKey]) return;
+      try {
+        const pattern = gamePatterns[gameType];
+        let isWin = true;
+        for (let row = 0; row < 5; row++) {
+          for (let col = 0; col < 5; col++) {
+            if (pattern[row][col]) {
+              const letter = letters[col];
+              const num = playerCard[letter][row];
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                isWin = false;
+                break;
+              }
             }
           }
+          if (!isWin) break;
         }
-        if (!isWin) break;
+        if (isWin) winGame(winKey);
+      } catch (error) {
+        console.error('Error checking for bingo:', error);
       }
-      if (isWin) winGame();
     }
 
-    function winGame() {
-      console.log('Winner:', xHandle);
-      alert(`BINGO! ${xHandle} won!`);
-      triggerConfetti();
-      triggerFireworks();
-      if (gameRef) {
-        const timestamp = new Date().toISOString();
-        firebase.database().ref(`games/${gameId}/winners`).push(`${xHandle}|${timestamp}`)
-          .catch(error => console.error('Error pushing winner:', error));
+    function winGame(winKey) {
+      console.log('Winner:', xHandle, 'for gameType:', gameType);
+      try {
+        playerWins[winKey] = true;
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        alert(`BINGO! ${xHandle} won (${gameType})!`);
+        triggerConfetti();
+        triggerFireworks();
+        if (gameRef) {
+          const timestamp = new Date().toISOString();
+          firebase.database().ref(`games/${gameId}/winners`).push(`${xHandle}|${timestamp}|${gameType}`)
+            .catch(error => console.error('Error pushing winner:', error));
+        }
+      } catch (error) {
+        console.error('Error processing win:', error);
       }
     }
 
     function updateLeaderboard(winners) {
       console.log('Updating leaderboard:', winners);
-      const leaderboard = document.getElementById('leaderboard');
-      leaderboard.innerHTML = '<h3>Winners</h3>';
-      if (!winners || Object.keys(winners).length === 0) {
-        leaderboard.innerHTML += '<p>No winners yet.</p>';
-        return;
+      try {
+        const leaderboard = document.getElementById('leaderboard');
+        leaderboard.innerHTML = '<h3>Winners</h3>';
+        if (!winners || Object.keys(winners).length === 0) {
+          leaderboard.innerHTML += '<p>No winners yet.</p>';
+          return;
+        }
+        const ul = document.createElement('ul');
+        ul.style.listStyle = 'none';
+        ul.style.padding = '0';
+        for (const key in winners) {
+          const [handle, time, mode] = winners[key].split('|');
+          const li = document.createElement('li');
+          li.textContent = `${handle} at ${new Date(time).toLocaleString()} (${mode})`;
+          ul.appendChild(li);
+        }
+        leaderboard.appendChild(ul);
+      } catch (error) {
+        console.error('Error updating leaderboard:', error);
       }
-      const ul = document.createElement('ul');
-      ul.style.listStyle = 'none';
-      ul.style.padding = '0';
-      for (const key in winners) {
-        const [handle, time] = winners[key].split('|');
-        const li = document.createElement('li');
-        li.textContent = `${handle} at ${new Date(time).toLocaleString()}`;
-        ul.appendChild(li);
-      }
-      leaderboard.appendChild(ul);
     }
 
     function triggerConfetti() {
-      const canvas = document.getElementById('confetti-canvas');
-      canvas.style.display = 'block';
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const ctx = canvas.getContext('2d');
-      const confettiCount = 200;
-      const confetti = [];
-      for (let i = 0; i < confettiCount; i++) {
-        confetti.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height - canvas.height,
-          r: Math.random() * 6 + 1,
-          d: Math.random() * confettiCount,
-          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-          tilt: Math.random() * 10 - 10,
-          tiltAngle: Math.random() * Math.PI
-        });
+      try {
+        const canvas = document.getElementById('confetti-canvas');
+        canvas.style.display = 'block';
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        const confettiCount = 200;
+        const confetti = [];
+        for (let i = 0; i < confettiCount; i++) {
+          confetti.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 6 + 1,
+            d: Math.random() * confettiCount,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            tilt: Math.random() * 10 - 10,
+            tiltAngle: Math.random() * Math.PI
+          });
+        }
+        function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          confetti.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+            ctx.stroke();
+            p.tiltAngle += 0.1;
+            p.tilt = Math.sin(p.tiltAngle) * 15;
+            p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+            if (p.y > canvas.height) confetti.splice(i, 1);
+          });
+          if (confetti.length > 0) requestAnimationFrame(draw);
+          else canvas.style.display = 'none';
+        }
+        draw();
+      } catch (error) {
+        console.error('Error triggering confetti:', error);
       }
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        confetti.forEach((p, i) => {
-          ctx.beginPath();
-          ctx.lineWidth = p.r;
-          ctx.strokeStyle = p.color;
-          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-          ctx.stroke();
-          p.tiltAngle += 0.1;
-          p.tilt = Math.sin(p.tiltAngle) * 15;
-          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-          if (p.y > canvas.height) confetti.splice(i, 1);
-        });
-        if (confetti.length > 0) requestAnimationFrame(draw);
-        else canvas.style.display = 'none';
-      }
-      draw();
     }
 
     function triggerFireworks() {
-      const fireworks = document.getElementById('fireworks');
-      fireworks.style.display = 'block';
-      fireworks.innerHTML = '';
-      for (let i = 0; i < 20; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-        particle.style.animationDelay = Math.random() * 0.5 + 's';
-        fireworks.appendChild(particle);
+      try {
+        const fireworks = document.getElementById('fireworks');
+        fireworks.style.display = 'block';
+        fireworks.innerHTML = '';
+        for (let i = 0; i < 20; i++) {
+          const particle = document.createElement('div');
+          particle.classList.add('particle');
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.top = Math.random() * 100 + '%';
+          particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+          particle.style.animationDelay = Math.random() * 0.5 + 's';
+          fireworks.appendChild(particle);
+        }
+        setTimeout(() => {
+          fireworks.style.display = 'none';
+        }, 2000);
+      } catch (error) {
+        console.error('Error triggering fireworks:', error);
       }
-      setTimeout(() => {
-        fireworks.style.display = 'none';
-      }, 2000);
     }
 
     function playRollSound() {
-      const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
-      audio.play();
+      try {
+        const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
+        audio.play();
+      } catch (error) {
+        console.error('Error playing roll sound:', error);
+      }
     }
 
     // Mode Handlers
@@ -992,10 +1050,12 @@
         if (!xHandle || !xHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
         localStorage.setItem('gameId', gameId);
         localStorage.setItem('xHandle', xHandle);
-        localStorage.removeItem('playerCard'); // Clear old card
+        localStorage.removeItem('playerCard');
         calledNumbers.clear();
-        localStorage.removeItem('calledNumbers'); // Clear old called numbers
+        localStorage.removeItem('calledNumbers');
         playerCard = generatePlayerCard();
+        playerWins = {};
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
         displayPlayerCard();
         setupGame(gameId);
         firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
@@ -1016,7 +1076,10 @@
         firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
           .then(() => {
             console.log('Game type updated in Firebase:', gameType);
+            playerWins = {};
+            localStorage.setItem('playerWins', JSON.stringify(playerWins));
             displayWinPattern();
+            createBoard();
           })
           .catch(error => console.error('Error updating game type:', error));
       } catch (error) {
@@ -1058,12 +1121,19 @@
           result.textContent = rolled;
           highlightNumber(letter, num);
           playRollSound();
+          createBoard();
         });
         gameRef.child('gameType').on('value', (snap) => {
-          gameType = snap.val() || 'singleLine';
-          console.log('Game type synced:', gameType);
-          if (isHost) gameTypeSelect.value = gameType;
-          displayWinPattern();
+          const newGameType = snap.val() || 'singleLine';
+          if (newGameType !== gameType) {
+            console.log('Game type synced:', newGameType);
+            gameType = newGameType;
+            if (isHost) gameTypeSelect.value = gameType;
+            playerWins = {};
+            localStorage.setItem('playerWins', JSON.stringify(playerWins));
+            displayWinPattern();
+            createBoard();
+          }
         });
         gameRef.child('winners').on('value', (snap) => {
           updateLeaderboard(snap.val() || {});
@@ -1084,6 +1154,7 @@
             console.log('Roll pushed to Firebase:', rolled);
             triggerConfetti();
             triggerFireworks();
+            createBoard();
           })
           .catch(error => console.error('Error pushing roll:', error));
       } catch (error) {
@@ -1098,7 +1169,9 @@
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
         localStorage.removeItem('playerCard');
+        localStorage.removeItem('playerWins');
         playerCard = null;
+        playerWins = {};
         if (gameRef) gameRef.remove();
         result.textContent = '';
         createBoard();
