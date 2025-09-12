@@ -19,6 +19,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getDatabase, ref, push, onChildAdded, remove, set, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
     
     const firebaseConfig = {
       apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
@@ -33,7 +34,8 @@
     
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
-    window.firebaseDatabase = getDatabase(app); // Expose for global access
+    window.firebaseDatabase = getDatabase(app);
+    window.firebaseAuth = getAuth(app);
   </script>
   <style>
     body {
@@ -255,7 +257,7 @@
     .mode-selector button:hover {
       background: #00FF00;
     }
-    #game-id-display, #game-id-input {
+    #game-id-display, #game-id-input, #x-handle-input {
       font-size: 1.2rem;
       margin: 1rem 0;
       color: #00FF00;
@@ -568,7 +570,8 @@
     let playerCard = JSON.parse(localStorage.getItem('playerCard')) || null;
     let xHandle = localStorage.getItem('xHandle') || null;
     let gameRef = null;
-    let gameType = 'singleLine'; // Default
+    let gameType = 'singleLine';
+    let authState = null;
 
     const partners = {
       xmeme: {
@@ -649,7 +652,7 @@
     // Game Type Patterns
     const gamePatterns = {
       singleLine: [
-        [0,0,0,0,0], [0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [0,0,0,0,0] // Middle row
+        [0,0,0,0,0], [0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [0,0,0,0,0]
       ],
       perimeter: [
         [1,1,1,1,1], [1,0,0,0,1], [1,0,0,0,1], [1,0,0,0,1], [1,1,1,1,1]
@@ -921,18 +924,24 @@
     const modalContent = partnerModal.querySelector('.modal-content');
 
     hostModeBtn.addEventListener('click', () => {
-      isHost = true;
-      hostControls.style.display = 'block';
-      playerControls.style.display = 'none';
-      if (!gameId) {
-        gameId = Math.random().toString(36).substring(2, 10);
-        localStorage.setItem('gameId', gameId);
-      }
-      gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
-      const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
-      xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
-      setupGame(gameId);
-      displayWinPattern();
+      signInAnonymously(firebaseAuth)
+        .then(() => {
+          isHost = true;
+          hostControls.style.display = 'block';
+          playerControls.style.display = 'none';
+          if (!gameId) {
+            gameId = Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('gameId', gameId);
+          }
+          gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
+          const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
+          xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
+          setupGame(gameId);
+          gameType = gameTypeSelect.value;
+          set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType);
+          displayWinPattern();
+        })
+        .catch((error) => alert(`Authentication failed: ${error.message}`));
     });
 
     playerModeBtn.addEventListener('click', () => {
@@ -956,8 +965,9 @@
     });
 
     gameTypeSelect.addEventListener('change', () => {
+      if (!isHost || !gameRef || !authState) return alert('Host a game first');
       gameType = gameTypeSelect.value;
-      if (gameRef) set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType);
+      set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType);
       displayWinPattern();
     });
 
@@ -992,7 +1002,7 @@
     }
 
     rollButton.addEventListener('click', () => {
-      if (!isHost || !gameRef) return alert('Host a game first');
+      if (!isHost || !gameRef || !authState) return alert('Host a game first');
       const rolled = rollBingo();
       push(ref(firebaseDatabase, `games/${gameId}/called`), rolled);
       triggerConfetti();
@@ -1011,9 +1021,15 @@
       localStorage.removeItem('xHandle');
       xHandle = null;
       gameRef = null;
+      authState = null;
       hostControls.style.display = 'none';
       playerControls.style.display = 'none';
       document.getElementById('leaderboard').innerHTML = '';
+    });
+
+    // Authentication State
+    onAuthStateChanged(firebaseAuth, (user) => {
+      authState = user;
     });
 
     // Sponsors submenu toggle
@@ -1077,7 +1093,7 @@
     if (gameId) {
       if (playerCard && xHandle) {
         playerModeBtn.click();
-      } else if (isHost) {
+      } else if (isHost && authState) {
         hostModeBtn.click();
       }
       setupGame(gameId);
