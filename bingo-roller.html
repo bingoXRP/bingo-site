@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,12 +7,33 @@
   <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!">
   <title>$BINGO Roller - BingoXRPL Live Tool</title>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-HBCFY2880X');
+    gtag('config', 'G-H99K0B4L10');
+  </script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, remove, set, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
+      authDomain: "bingoxrpl.firebaseapp.com",
+      databaseURL: "https://bingoxrpl-default-rtdb.firebaseio.com",
+      projectId: "bingoxrpl",
+      storageBucket: "bingoxrpl.firebasestorage.app",
+      messagingSenderId: "1032944729350",
+      appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
+      measurementId: "G-H99K0B4L10"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    window.firebaseDatabase = getDatabase(app); // Expose for global access
   </script>
   <style>
     body {
@@ -180,6 +202,110 @@
       box-shadow: 0 0 15px #00FF00;
       transform: scale(1.15);
     }
+    /* Player Card Styles */
+    .player-card {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: clamp(0.5rem, 1vw, 1rem);
+      max-width: min(80vw, 600px);
+      margin: clamp(1rem, 2vw, 1.5rem) auto;
+      padding: 1rem;
+      border: 2px solid #00FF00;
+      border-radius: 10px;
+    }
+    .player-card .header {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: bold;
+      color: #00FF00;
+    }
+    .player-card .cell {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1A1F3A;
+      color: #00B8D9;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    .player-card .cell.called {
+      background: #00FF00;
+      color: #000;
+      box-shadow: 0 0 10px #00FF00;
+    }
+    .player-card .free {
+      background: #FF0000;
+      color: #FFF;
+      font-weight: bold;
+    }
+    /* Mode Selector */
+    .mode-selector {
+      margin: 1rem 0;
+    }
+    .mode-selector button {
+      background: #00B8D9;
+      color: #FFF;
+      padding: 0.8rem 1.5rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .mode-selector button:hover {
+      background: #00FF00;
+    }
+    #game-id-display, #game-id-input {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+      color: #00FF00;
+    }
+    #join-game-button, #copy-game-id, #copy-winners {
+      background: #FF0000;
+      color: #FFF;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0.5rem;
+    }
+    #join-game-button:hover, #copy-game-id:hover, #copy-winners:hover {
+      background: #00FF00;
+    }
+    #game-type-selector {
+      margin: 1rem 0;
+    }
+    #game-type {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+    }
+    .win-pattern {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      max-width: min(50vw, 300px);
+      margin: 1rem auto;
+    }
+    .win-pattern .cell {
+      aspect-ratio: 1 / 1;
+      background: #1A1F3A;
+      border-radius: 5px;
+    }
+    .win-pattern .cell.win {
+      background: #00FF00;
+    }
+    #leaderboard {
+      margin: 1rem 0;
+      font-size: 1.1rem;
+      color: #00B8D9;
+    }
+    #x-post-template {
+      font-size: 1rem;
+      color: #00FF00;
+      margin: 1rem 0;
+      word-break: break-all;
+    }
     #confetti-canvas, .fireworks {
       position: fixed;
       top: 0;
@@ -283,6 +409,15 @@
       .bingo-board .cell {
         font-size: clamp(0.7rem, 2.5vw, 0.9rem);
       }
+      .player-card {
+        gap: clamp(0.2rem, 0.8vw, 0.4rem);
+      }
+      .player-card .cell {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+      }
+      .win-pattern {
+        max-width: min(70vw, 200px);
+      }
       footer {
         font-size: clamp(0.8rem, 2.5vw, 0.9rem);
       }
@@ -365,10 +500,40 @@
   <div class="container">
     <h1>$BINGO Roller</h1>
     <p class="tagline">Roll epic $BINGO numbers during your live streams!<br>Mark your card and have fun!</p>
-    <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
-    <div id="result" role="status"></div>
-    <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
-    <h2>Game Board</h2>
+    <!-- Mode Selector -->
+    <div class="mode-selector">
+      <button id="host-mode">Host a Game</button>
+      <button id="player-mode">Join as Player</button>
+    </div>
+    <div id="host-controls" style="display: none;">
+      <div id="game-type-selector">
+        <label for="game-type">Select Game Type: </label>
+        <select id="game-type" aria-label="Select Bingo Game Type">
+          <option value="singleLine">Single Line (Any Row)</option>
+          <option value="perimeter">Perimeter</option>
+          <option value="xShape">X-Shape</option>
+          <option value="fourCorners">Four Corners</option>
+          <option value="fullCard">Full Card</option>
+        </select>
+      </div>
+      <div id="win-pattern" class="win-pattern"></div>
+      <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
+      <div id="result" role="status"></div>
+      <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
+      <div id="game-id-display">Game ID: Loading...</div>
+      <button id="copy-game-id">Copy Game ID</button>
+      <div id="x-post-template"></div>
+      <div id="leaderboard"></div>
+      <button id="copy-winners">Copy Winners List</button>
+    </div>
+    <div id="player-controls" style="display: none;">
+      <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle">
+      <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID">
+      <button id="join-game-button">Join Game & Generate Card</button>
+      <div id="player-card" class="player-card"></div>
+      <div id="leaderboard"></div>
+    </div>
+    <h2>Game Board (Called Numbers)</h2>
     <div id="bingo-board" class="bingo-board"></div>
     <canvas id="confetti-canvas"></canvas>
     <div id="fireworks" class="fireworks"></div>
@@ -398,7 +563,13 @@
       'O': [61, 75]
     };
     let calledNumbers = new Set(JSON.parse(localStorage.getItem('calledNumbers') || '[]'));
-   
+    let isHost = false;
+    let gameId = localStorage.getItem('gameId') || null;
+    let playerCard = JSON.parse(localStorage.getItem('playerCard')) || null;
+    let xHandle = localStorage.getItem('xHandle') || null;
+    let gameRef = null;
+    let gameType = 'singleLine'; // Default
+
     const partners = {
       xmeme: {
         name: "XMEME",
@@ -474,11 +645,30 @@
         ]
       }
     };
-   
+
+    // Game Type Patterns
+    const gamePatterns = {
+      singleLine: [
+        [0,0,0,0,0], [0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [0,0,0,0,0] // Middle row
+      ],
+      perimeter: [
+        [1,1,1,1,1], [1,0,0,0,1], [1,0,0,0,1], [1,0,0,0,1], [1,1,1,1,1]
+      ],
+      xShape: [
+        [1,0,0,0,1], [0,1,0,1,0], [0,0,1,0,0], [0,1,0,1,0], [1,0,0,0,1]
+      ],
+      fourCorners: [
+        [1,0,0,0,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [1,0,0,0,1]
+      ],
+      fullCard: [
+        [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]
+      ]
+    };
+
     function getRandomNumber(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-   
+
     function rollBingo() {
       let letter, number;
       do {
@@ -486,34 +676,30 @@
         const [min, max] = ranges[letter];
         number = getRandomNumber(min, max);
       } while (calledNumbers.has(`${letter}-${number}`));
-      calledNumbers.add(`${letter}-${number}`);
+      const rolled = `${letter}-${number}`;
+      calledNumbers.add(rolled);
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-      return `${letter}-${number}`;
+      return rolled;
     }
-   
+
     function createBoard() {
       const board = document.getElementById('bingo-board');
       board.innerHTML = '';
-      // Headers (span 2 columns per letter)
       letters.forEach(l => {
         const div = document.createElement('div');
         div.textContent = l;
         div.classList.add('header');
         board.appendChild(div);
       });
-      // Generate 15 numbers per letter, split into 2 columns (7 and 8 numbers)
       const numbersPerLetter = {};
       letters.forEach(l => {
         const [min, max] = ranges[l];
         const nums = [];
         for (let i = min; i <= max; i++) nums.push(i);
-        // No shuffle, keep sequential
-        numbersPerLetter[l] = [nums.slice(0, 7), nums.slice(7, 15)]; // Split into 2 columns
+        numbersPerLetter[l] = [nums.slice(0, 7), nums.slice(7, 15)];
       });
-      // Create 8 rows (max needed for 8 numbers in second column)
       for (let i = 0; i < 8; i++) {
         letters.forEach(l => {
-          // First column (7 numbers)
           if (i < numbersPerLetter[l][0].length) {
             const num = numbersPerLetter[l][0][i];
             const div = document.createElement('div');
@@ -523,9 +709,8 @@
             if (calledNumbers.has(`${l}-${num}`)) div.classList.add('called');
             board.appendChild(div);
           } else {
-            board.appendChild(document.createElement('div')); // Empty cell
+            board.appendChild(document.createElement('div'));
           }
-          // Second column (8 numbers)
           if (i < numbersPerLetter[l][1].length) {
             const num = numbersPerLetter[l][1][i];
             const div = document.createElement('div');
@@ -535,17 +720,126 @@
             if (calledNumbers.has(`${l}-${num}`)) div.classList.add('called');
             board.appendChild(div);
           } else {
-            board.appendChild(document.createElement('div')); // Empty cell
+            board.appendChild(document.createElement('div'));
           }
         });
       }
     }
-   
+
+    function displayWinPattern() {
+      const winPatternDiv = document.getElementById('win-pattern');
+      winPatternDiv.innerHTML = '';
+      const pattern = gamePatterns[gameType];
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          if (pattern[row][col]) cell.classList.add('win');
+          winPatternDiv.appendChild(cell);
+        }
+      }
+    }
+
+    function generatePlayerCard() {
+      const card = { B: [], I: [], N: [], G: [], O: [] };
+      letters.forEach(letter => {
+        const [min, max] = ranges[letter];
+        const nums = [];
+        while (nums.length < 5) {
+          const num = getRandomNumber(min, max);
+          if (!nums.includes(num)) nums.push(num);
+        }
+        card[letter] = nums.sort((a, b) => a - b);
+      });
+      card.N[2] = 'FREE';
+      localStorage.setItem('playerCard', JSON.stringify(card));
+      return card;
+    }
+
+    function displayPlayerCard() {
+      const cardDiv = document.getElementById('player-card');
+      cardDiv.innerHTML = '';
+      letters.forEach(l => {
+        const header = document.createElement('div');
+        header.textContent = l;
+        header.classList.add('header');
+        cardDiv.appendChild(header);
+      });
+      for (let row = 0; row < 5; row++) {
+        letters.forEach(letter => {
+          const num = playerCard[letter][row];
+          const cell = document.createElement('div');
+          cell.textContent = num;
+          cell.classList.add('cell');
+          cell.id = `player-${letter}-${num}`;
+          if (num === 'FREE') cell.classList.add('free', 'called');
+          if (calledNumbers.has(`${letter}-${num}`)) cell.classList.add('called');
+          cardDiv.appendChild(cell);
+        });
+      }
+    }
+
     function highlightNumber(letter, number) {
       const cell = document.getElementById(`${letter}-${number}`);
       if (cell) cell.classList.add('called');
+      if (playerCard) highlightOnPlayerCard(letter, number);
     }
-   
+
+    function highlightOnPlayerCard(letter, number) {
+      const cell = document.getElementById(`player-${letter}-${number}`);
+      if (cell) cell.classList.add('called');
+      checkForBingo();
+    }
+
+    function checkForBingo() {
+      if (!playerCard) return;
+      const pattern = gamePatterns[gameType];
+      let isWin = true;
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          if (pattern[row][col]) {
+            const letter = letters[col];
+            const num = playerCard[letter][row];
+            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+              isWin = false;
+              break;
+            }
+          }
+        }
+        if (!isWin) break;
+      }
+      if (isWin) winGame();
+    }
+
+    function winGame() {
+      alert(`BINGO! ${xHandle} won!`);
+      triggerConfetti();
+      triggerFireworks();
+      if (gameRef) {
+        const timestamp = new Date().toISOString();
+        push(ref(firebaseDatabase, `games/${gameId}/winners`), `${xHandle}|${timestamp}`);
+      }
+    }
+
+    function updateLeaderboard(winners) {
+      const leaderboard = document.getElementById('leaderboard');
+      leaderboard.innerHTML = '<h3>Winners</h3>';
+      if (Object.keys(winners).length === 0) {
+        leaderboard.innerHTML += '<p>No winners yet.</p>';
+        return;
+      }
+      const ul = document.createElement('ul');
+      ul.style.listStyle = 'none';
+      ul.style.padding = '0';
+      for (const key in winners) {
+        const [handle, time] = winners[key].split('|');
+        const li = document.createElement('li');
+        li.textContent = `${handle} at ${new Date(time).toLocaleString()}`;
+        ul.appendChild(li);
+      }
+      leaderboard.appendChild(ul);
+    }
+
     function triggerConfetti() {
       const canvas = document.getElementById('confetti-canvas');
       canvas.style.display = 'block';
@@ -584,7 +878,7 @@
       }
       draw();
     }
-   
+
     function triggerFireworks() {
       const fireworks = document.getElementById('fireworks');
       fireworks.style.display = 'block';
@@ -602,35 +896,126 @@
         fireworks.style.display = 'none';
       }, 2000);
     }
-   
+
     function playRollSound() {
       const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
       audio.play();
     }
-   
+
+    // Mode Handlers
+    const hostModeBtn = document.getElementById('host-mode');
+    const playerModeBtn = document.getElementById('player-mode');
+    const hostControls = document.getElementById('host-controls');
+    const playerControls = document.getElementById('player-controls');
+    const gameIdDisplay = document.getElementById('game-id-display');
+    const gameIdInput = document.getElementById('game-id-input');
+    const xHandleInput = document.getElementById('x-handle-input');
+    const joinGameBtn = document.getElementById('join-game-button');
     const rollButton = document.getElementById('roll-button');
-    const result = document.getElementById('result');
     const resetButton = document.getElementById('reset-button');
+    const gameTypeSelect = document.getElementById('game-type');
+    const copyGameIdBtn = document.getElementById('copy-game-id');
+    const copyWinnersBtn = document.getElementById('copy-winners');
+    const xPostTemplate = document.getElementById('x-post-template');
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
-   
+
+    hostModeBtn.addEventListener('click', () => {
+      isHost = true;
+      hostControls.style.display = 'block';
+      playerControls.style.display = 'none';
+      if (!gameId) {
+        gameId = Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('gameId', gameId);
+      }
+      gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
+      const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
+      xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
+      setupGame(gameId);
+      displayWinPattern();
+    });
+
+    playerModeBtn.addEventListener('click', () => {
+      isHost = false;
+      hostControls.style.display = 'none';
+      playerControls.style.display = 'block';
+      if (playerCard && xHandle) displayPlayerCard();
+    });
+
+    joinGameBtn.addEventListener('click', () => {
+      gameId = gameIdInput.value.trim();
+      xHandle = xHandleInput.value.trim();
+      if (!gameId) return alert('Enter a valid Game ID');
+      if (!xHandle || !xHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
+      localStorage.setItem('gameId', gameId);
+      localStorage.setItem('xHandle', xHandle);
+      if (!playerCard) playerCard = generatePlayerCard();
+      displayPlayerCard();
+      setupGame(gameId);
+      set(ref(firebaseDatabase, `games/${gameId}/players/${xHandle.replace('@', '')}`), xHandle);
+    });
+
+    gameTypeSelect.addEventListener('change', () => {
+      gameType = gameTypeSelect.value;
+      if (gameRef) set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType);
+      displayWinPattern();
+    });
+
+    copyGameIdBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(gameId).then(() => alert('Game ID copied!'));
+    });
+
+    copyWinnersBtn.addEventListener('click', () => {
+      const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n', '');
+      navigator.clipboard.writeText(winnersList).then(() => alert('Winners list copied!'));
+    });
+
+    // Setup Real-Time Game
+    function setupGame(id) {
+      gameRef = ref(firebaseDatabase, `games/${id}`);
+      onChildAdded(ref(firebaseDatabase, `games/${id}/called`), (snap) => {
+        const rolled = snap.val();
+        calledNumbers.add(rolled);
+        const [letter, num] = rolled.split('-');
+        result.textContent = rolled;
+        highlightNumber(letter, num);
+        playRollSound();
+      });
+      onValue(ref(firebaseDatabase, `games/${id}/gameType`), (snap) => {
+        gameType = snap.val() || 'singleLine';
+        if (isHost) gameTypeSelect.value = gameType;
+        displayWinPattern();
+      });
+      onValue(ref(firebaseDatabase, `games/${id}/winners`), (snap) => {
+        updateLeaderboard(snap.val() || {});
+      });
+    }
+
     rollButton.addEventListener('click', () => {
+      if (!isHost || !gameRef) return alert('Host a game first');
       const rolled = rollBingo();
-      const [letter, num] = rolled.split('-');
-      result.textContent = rolled;
-      highlightNumber(letter, num);
+      push(ref(firebaseDatabase, `games/${gameId}/called`), rolled);
       triggerConfetti();
       triggerFireworks();
-      playRollSound();
     });
-   
+
     resetButton.addEventListener('click', () => {
       calledNumbers.clear();
       localStorage.removeItem('calledNumbers');
+      if (gameRef) remove(gameRef);
       result.textContent = '';
       createBoard();
+      if (playerCard) displayPlayerCard();
+      gameId = null;
+      localStorage.removeItem('gameId');
+      localStorage.removeItem('xHandle');
+      xHandle = null;
+      gameRef = null;
+      hostControls.style.display = 'none';
+      playerControls.style.display = 'none';
+      document.getElementById('leaderboard').innerHTML = '';
     });
-   
+
     // Sponsors submenu toggle
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const submenu = document.querySelector('.submenu');
@@ -638,14 +1023,14 @@
       e.preventDefault();
       submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
     });
-   
+
     // Close submenu on outside click
     document.addEventListener('click', (e) => {
       if (!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) {
         submenu.style.display = 'none';
       }
     });
-   
+
     // Sponsor links
     document.querySelectorAll('.partner-link').forEach(link => {
       link.addEventListener('click', (e) => {
@@ -663,24 +1048,41 @@
                    <button id="close-modal">Close</button>`;
           modalContent.innerHTML = html;
           partnerModal.style.display = 'flex';
-         
-          // Close button
           document.getElementById('close-modal').addEventListener('click', () => {
             partnerModal.style.display = 'none';
           });
         }
       });
     });
-   
+
     // Close modal on outside click
     partnerModal.addEventListener('click', (e) => {
       if (e.target === partnerModal) {
         partnerModal.style.display = 'none';
       }
     });
-   
-    // Initialize board and restore called numbers
+
+    // Auto-join from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlGameId = urlParams.get('gameId');
+    if (urlGameId) {
+      gameId = urlGameId;
+      localStorage.setItem('gameId', gameId);
+      playerModeBtn.click();
+      gameIdInput.value = gameId;
+    }
+
+    // Initialize
     createBoard();
+    if (gameId) {
+      if (playerCard && xHandle) {
+        playerModeBtn.click();
+      } else if (isHost) {
+        hostModeBtn.click();
+      }
+      setupGame(gameId);
+    }
   </script>
 </body>
 </html>
+```
