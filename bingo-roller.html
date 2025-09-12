@@ -13,29 +13,11 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, remove, set, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
-      authDomain: "bingoxrpl.firebaseapp.com",
-      databaseURL: "https://bingoxrpl-default-rtdb.firebaseio.com",
-      projectId: "bingoxrpl",
-      storageBucket: "bingoxrpl.firebasestorage.app",
-      messagingSenderId: "1032944729350",
-      appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
-      measurementId: "G-H99K0B4L10"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    window.firebaseDatabase = getDatabase(app);
-    window.firebaseAuth = getAuth(app);
-  </script>
+  <!-- Firebase SDK (Compatibility Version) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -555,6 +537,24 @@
     </div>
   </footer>
   <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
+      authDomain: "bingoxrpl.firebaseapp.com",
+      databaseURL: "https://bingoxrpl-default-rtdb.firebaseio.com",
+      projectId: "bingoxrpl",
+      storageBucket: "bingoxrpl.firebasestorage.app",
+      messagingSenderId: "1032944729350",
+      appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
+      measurementId: "G-H99K0B4L10"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+    const database = firebase.database();
+    const auth = firebase.auth();
+
     const letters = ['B', 'I', 'N', 'G', 'O'];
     const ranges = {
       'B': [1, 15],
@@ -825,7 +825,8 @@
       triggerFireworks();
       if (gameRef) {
         const timestamp = new Date().toISOString();
-        push(ref(firebaseDatabase, `games/${gameId}/winners`), `${xHandle}|${timestamp}`);
+        firebase.database().ref(`games/${gameId}/winners`).push(`${xHandle}|${timestamp}`)
+          .catch(error => console.error('Error pushing winner:', error));
       }
     }
 
@@ -833,7 +834,7 @@
       console.log('Updating leaderboard:', winners);
       const leaderboard = document.getElementById('leaderboard');
       leaderboard.innerHTML = '<h3>Winners</h3>';
-      if (Object.keys(winners).length === 0) {
+      if (!winners || Object.keys(winners).length === 0) {
         leaderboard.innerHTML += '<p>No winners yet.</p>';
         return;
       }
@@ -931,139 +932,191 @@
 
     hostModeBtn.addEventListener('click', () => {
       console.log('Host mode clicked, authenticating...');
-      signInAnonymously(firebaseAuth)
-        .then(() => {
-          console.log('Authenticated as host');
-          isHost = true;
-          hostControls.style.display = 'block';
-          playerControls.style.display = 'none';
-          if (!gameId) {
-            gameId = Math.random().toString(36).substring(2, 10);
-            localStorage.setItem('gameId', gameId);
-            console.log('Generated new gameId:', gameId);
-          }
-          gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
-          const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
-          xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
-          setupGame(gameId);
-          gameType = gameTypeSelect.value;
-          set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType)
-            .then(() => console.log('Game type set in Firebase:', gameType))
-            .catch(error => console.error('Error setting game type:', error));
-          displayWinPattern();
-        })
-        .catch((error) => {
-          console.error('Authentication failed:', error);
-          alert(`Authentication failed: ${error.message}`);
-        });
+      try {
+        firebase.auth().signInAnonymously()
+          .then(() => {
+            console.log('Authenticated as host');
+            isHost = true;
+            hostControls.style.display = 'block';
+            playerControls.style.display = 'none';
+            if (!gameId) {
+              gameId = Math.random().toString(36).substring(2, 10);
+              localStorage.setItem('gameId', gameId);
+              console.log('Generated new gameId:', gameId);
+            }
+            gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
+            const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
+            xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
+            setupGame(gameId);
+            gameType = gameTypeSelect.value;
+            firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
+              .then(() => console.log('Game type set in Firebase:', gameType))
+              .catch(error => console.error('Error setting game type:', error));
+            displayWinPattern();
+            createBoard();
+          })
+          .catch(error => {
+            console.error('Authentication failed:', error);
+            alert(`Failed to host game: ${error.message}`);
+          });
+      } catch (error) {
+        console.error('Host mode error:', error);
+        alert('Error starting host mode. Please try again.');
+      }
     });
 
     playerModeBtn.addEventListener('click', () => {
       console.log('Player mode clicked');
-      isHost = false;
-      hostControls.style.display = 'none';
-      playerControls.style.display = 'block';
-      if (playerCard && xHandle) displayPlayerCard();
+      try {
+        isHost = false;
+        hostControls.style.display = 'none';
+        playerControls.style.display = 'block';
+        if (playerCard && xHandle) displayPlayerCard();
+        createBoard();
+      } catch (error) {
+        console.error('Player mode error:', error);
+        alert('Error entering player mode. Please try again.');
+      }
     });
 
     joinGameBtn.addEventListener('click', () => {
       console.log('Join game clicked');
-      gameId = gameIdInput.value.trim();
-      xHandle = xHandleInput.value.trim();
-      if (!gameId) return alert('Enter a valid Game ID');
-      if (!xHandle || !xHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
-      localStorage.setItem('gameId', gameId);
-      localStorage.setItem('xHandle', xHandle);
-      if (!playerCard) playerCard = generatePlayerCard();
-      displayPlayerCard();
-      setupGame(gameId);
-      set(ref(firebaseDatabase, `games/${gameId}/players/${xHandle.replace('@', '')}`), xHandle)
-        .then(() => console.log('Player registered:', xHandle))
-        .catch(error => console.error('Error registering player:', error));
+      try {
+        gameId = gameIdInput.value.trim();
+        xHandle = xHandleInput.value.trim();
+        if (!gameId) return alert('Enter a valid Game ID');
+        if (!xHandle || !xHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
+        localStorage.setItem('gameId', gameId);
+        localStorage.setItem('xHandle', xHandle);
+        if (!playerCard) playerCard = generatePlayerCard();
+        displayPlayerCard();
+        setupGame(gameId);
+        firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
+          .then(() => console.log('Player registered:', xHandle))
+          .catch(error => console.error('Error registering player:', error));
+        createBoard();
+      } catch (error) {
+        console.error('Join game error:', error);
+        alert('Error joining game. Please try again.');
+      }
     });
 
     gameTypeSelect.addEventListener('change', () => {
       console.log('Game type changed to:', gameTypeSelect.value);
       if (!isHost || !gameRef) return alert('Host a game first');
-      gameType = gameTypeSelect.value;
-      set(ref(firebaseDatabase, `games/${gameId}/gameType`), gameType)
-        .then(() => {
-          console.log('Game type updated in Firebase:', gameType);
-          displayWinPattern();
-        })
-        .catch(error => console.error('Error updating game type:', error));
+      try {
+        gameType = gameTypeSelect.value;
+        firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
+          .then(() => {
+            console.log('Game type updated in Firebase:', gameType);
+            displayWinPattern();
+          })
+          .catch(error => console.error('Error updating game type:', error));
+      } catch (error) {
+        console.error('Game type change error:', error);
+        alert('Error changing game type. Please try again.');
+      }
     });
 
     copyGameIdBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(gameId).then(() => alert('Game ID copied!'));
+      try {
+        navigator.clipboard.writeText(gameId).then(() => alert('Game ID copied!'));
+      } catch (error) {
+        console.error('Copy game ID error:', error);
+        alert('Error copying Game ID.');
+      }
     });
 
     copyWinnersBtn.addEventListener('click', () => {
-      const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n', '');
-      navigator.clipboard.writeText(winnersList).then(() => alert('Winners list copied!'));
+      try {
+        const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n', '');
+        navigator.clipboard.writeText(winnersList).then(() => alert('Winners list copied!'));
+      } catch (error) {
+        console.error('Copy winners error:', error);
+        alert('Error copying winners list.');
+      }
     });
 
     // Setup Real-Time Game
     function setupGame(id) {
       console.log('Setting up game:', id);
-      gameRef = ref(firebaseDatabase, `games/${id}`);
-      onChildAdded(ref(firebaseDatabase, `games/${id}/called`), (snap) => {
-        const rolled = snap.val();
-        console.log('Received roll:', rolled);
-        calledNumbers.add(rolled);
-        const [letter, num] = rolled.split('-');
-        result.textContent = rolled;
-        highlightNumber(letter, num);
-        playRollSound();
-      });
-      onValue(ref(firebaseDatabase, `games/${id}/gameType`), (snap) => {
-        gameType = snap.val() || 'singleLine';
-        console.log('Game type synced:', gameType);
-        if (isHost) gameTypeSelect.value = gameType;
-        displayWinPattern();
-      });
-      onValue(ref(firebaseDatabase, `games/${id}/winners`), (snap) => {
-        updateLeaderboard(snap.val() || {});
-      });
+      try {
+        gameRef = firebase.database().ref(`games/${id}`);
+        gameRef.child('called').on('child_added', (snap) => {
+          const rolled = snap.val();
+          console.log('Received roll:', rolled);
+          calledNumbers.add(rolled);
+          const [letter, num] = rolled.split('-');
+          result.textContent = rolled;
+          highlightNumber(letter, num);
+          playRollSound();
+        });
+        gameRef.child('gameType').on('value', (snap) => {
+          gameType = snap.val() || 'singleLine';
+          console.log('Game type synced:', gameType);
+          if (isHost) gameTypeSelect.value = gameType;
+          displayWinPattern();
+        });
+        gameRef.child('winners').on('value', (snap) => {
+          updateLeaderboard(snap.val() || {});
+        });
+      } catch (error) {
+        console.error('Setup game error:', error);
+        alert('Error setting up game. Please try again.');
+      }
     }
 
     rollButton.addEventListener('click', () => {
       console.log('Roll button clicked, isHost:', isHost, 'gameRef:', !!gameRef);
       if (!isHost || !gameRef) return alert('Host a game first');
-      const rolled = rollBingo();
-      push(ref(firebaseDatabase, `games/${gameId}/called`), rolled)
-        .then(() => {
-          console.log('Roll pushed to Firebase:', rolled);
-          triggerConfetti();
-          triggerFireworks();
-        })
-        .catch(error => console.error('Error pushing roll:', error));
+      try {
+        const rolled = rollBingo();
+        firebase.database().ref(`games/${gameId}/called`).push(rolled)
+          .then(() => {
+            console.log('Roll pushed to Firebase:', rolled);
+            triggerConfetti();
+            triggerFireworks();
+          })
+          .catch(error => console.error('Error pushing roll:', error));
+      } catch (error) {
+        console.error('Roll error:', error);
+        alert('Error rolling number. Please try again.');
+      }
     });
 
     resetButton.addEventListener('click', () => {
       console.log('Resetting game...');
-      calledNumbers.clear();
-      localStorage.removeItem('calledNumbers');
-      if (gameRef) remove(gameRef);
-      result.textContent = '';
-      createBoard();
-      if (playerCard) displayPlayerCard();
-      gameId = null;
-      localStorage.removeItem('gameId');
-      localStorage.removeItem('xHandle');
-      xHandle = null;
-      gameRef = null;
-      authState = null;
-      hostControls.style.display = 'none';
-      playerControls.style.display = 'none';
-      document.getElementById('leaderboard').innerHTML = '';
+      try {
+        calledNumbers.clear();
+        localStorage.removeItem('calledNumbers');
+        if (gameRef) gameRef.remove();
+        result.textContent = '';
+        createBoard();
+        if (playerCard) displayPlayerCard();
+        gameId = null;
+        localStorage.removeItem('gameId');
+        localStorage.removeItem('xHandle');
+        xHandle = null;
+        gameRef = null;
+        authState = null;
+        hostControls.style.display = 'none';
+        playerControls.style.display = 'none';
+        document.getElementById('leaderboard').innerHTML = '';
+      } catch (error) {
+        console.error('Reset error:', error);
+        alert('Error resetting game. Please try again.');
+      }
     });
 
     // Authentication State
-    onAuthStateChanged(firebaseAuth, (user) => {
-      console.log('Auth state changed:', user ? 'Authenticated' : 'Not authenticated');
-      authState = user;
-    });
+    try {
+      firebase.auth().onAuthStateChanged(user => {
+        console.log('Auth state changed:', user ? 'Authenticated' : 'Not authenticated');
+        authState = user;
+      });
+    } catch (error) {
+      console.error('Auth state error:', error);
+    }
 
     // Sponsors submenu toggle
     const dropdownToggle = document.querySelector('.dropdown-toggle');
