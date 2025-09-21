@@ -238,10 +238,20 @@
     .mode-selector button:hover {
       background: #00FF00;
     }
-    #game-id-display, #game-id-input, #x-handle-input {
+    #game-id-display {
       font-size: 1.2rem;
       margin: 1rem 0;
       color: #00FF00;
+    }
+    #game-id-input {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+      color: #000000; /* Changed from #00FF00 to black */
+    }
+    #x-handle-input {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+      color: #000000; /* Changed from #00FF00 to black */
     }
     #join-game-button, #copy-game-id, #copy-winners {
       background: #FF0000;
@@ -548,13 +558,12 @@
       appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
       measurementId: "G-H99K0B4L10"
     };
-    
+   
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
-
     const letters = ['B', 'I', 'N', 'G', 'O'];
     const ranges = {
       'B': [1, 15],
@@ -572,7 +581,6 @@
     let gameType = 'singleLine';
     let authState = null;
     let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
-
     const partners = {
       xmeme: {
         name: "XMEME",
@@ -648,7 +656,6 @@
         ]
       }
     };
-
     // Game Type Patterns
     const gamePatterns = {
       singleLine: [
@@ -667,11 +674,9 @@
         [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]
       ]
     };
-
     function getRandomNumber(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-
     function rollBingo() {
       let letter, number;
       do {
@@ -684,7 +689,6 @@
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
       return rolled;
     }
-
     function createBoard() {
       console.log('Creating board, calledNumbers:', [...calledNumbers]);
       try {
@@ -737,7 +741,6 @@
         console.error('Error creating board:', error);
       }
     }
-
     function displayWinPattern() {
       console.log('Displaying win pattern for:', gameType);
       try {
@@ -756,7 +759,6 @@
         console.error('Error displaying win pattern:', error);
       }
     }
-
     function generatePlayerCard() {
       console.log('Generating new player card...');
       try {
@@ -778,7 +780,6 @@
         return null;
       }
     }
-
     function displayPlayerCard() {
       console.log('Displaying player card for:', xHandle);
       try {
@@ -806,7 +807,6 @@
         console.error('Error displaying player card:', error);
       }
     }
-
     function highlightNumber(letter, number) {
       console.log('Highlighting:', letter, number);
       try {
@@ -817,7 +817,6 @@
         console.error('Error highlighting number:', error);
       }
     }
-
     function highlightOnPlayerCard(letter, number) {
       try {
         const cell = document.getElementById(`player-${letter}-${number}`);
@@ -827,7 +826,6 @@
         console.error('Error highlighting player card:', error);
       }
     }
-
     function checkForBingo() {
       if (!playerCard) return;
       const winKey = `${gameId}_${gameType}`;
@@ -853,7 +851,6 @@
         console.error('Error checking for bingo:', error);
       }
     }
-
     function winGame(winKey) {
       console.log('Winner:', xHandle, 'for gameType:', gameType);
       try {
@@ -871,7 +868,6 @@
         console.error('Error processing win:', error);
       }
     }
-
     function updateLeaderboard(winners) {
       console.log('Updating leaderboard:', winners);
       try {
@@ -895,7 +891,6 @@
         console.error('Error updating leaderboard:', error);
       }
     }
-
     function triggerConfetti() {
       try {
         const canvas = document.getElementById('confetti-canvas');
@@ -938,7 +933,6 @@
         console.error('Error triggering confetti:', error);
       }
     }
-
     function triggerFireworks() {
       try {
         const fireworks = document.getElementById('fireworks');
@@ -960,7 +954,6 @@
         console.error('Error triggering fireworks:', error);
       }
     }
-
     function playRollSound() {
       try {
         const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
@@ -969,7 +962,6 @@
         console.error('Error playing roll sound:', error);
       }
     }
-
     // Mode Handlers
     const hostModeBtn = document.getElementById('host-mode');
     const playerModeBtn = document.getElementById('player-mode');
@@ -987,7 +979,6 @@
     const xPostTemplate = document.getElementById('x-post-template');
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
-
     hostModeBtn.addEventListener('click', () => {
       console.log('Host mode clicked, authenticating...');
       try {
@@ -1024,7 +1015,6 @@
         alert('Error starting host mode. Please try again.');
       }
     });
-
     playerModeBtn.addEventListener('click', () => {
       console.log('Player mode clicked');
       try {
@@ -1040,7 +1030,6 @@
         alert('Error entering player mode. Please try again.');
       }
     });
-
     joinGameBtn.addEventListener('click', () => {
       console.log('Join game clicked');
       try {
@@ -1067,7 +1056,6 @@
         alert('Error joining game. Please try again.');
       }
     });
-
     gameTypeSelect.addEventListener('change', () => {
       console.log('Game type changed to:', gameTypeSelect.value);
       if (!isHost || !gameRef) return alert('Host a game first');
@@ -1087,7 +1075,6 @@
         alert('Error changing game type. Please try again.');
       }
     });
-
     copyGameIdBtn.addEventListener('click', () => {
       try {
         navigator.clipboard.writeText(gameId).then(() => alert('Game ID copied!'));
@@ -1096,7 +1083,6 @@
         alert('Error copying Game ID.');
       }
     });
-
     copyWinnersBtn.addEventListener('click', () => {
       try {
         const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n', '');
@@ -1106,7 +1092,6 @@
         alert('Error copying winners list.');
       }
     });
-
     // Setup Real-Time Game
     function setupGame(id) {
       console.log('Setting up game:', id);
@@ -1143,7 +1128,6 @@
         alert('Error setting up game. Please try again.');
       }
     }
-
     rollButton.addEventListener('click', () => {
       console.log('Roll button clicked, isHost:', isHost, 'gameRef:', !!gameRef);
       if (!isHost || !gameRef) return alert('Host a game first');
@@ -1162,7 +1146,6 @@
         alert('Error rolling number. Please try again.');
       }
     });
-
     resetButton.addEventListener('click', () => {
       console.log('Resetting game...');
       try {
@@ -1190,7 +1173,6 @@
         alert('Error resetting game. Please try again.');
       }
     });
-
     // Authentication State
     try {
       firebase.auth().onAuthStateChanged(user => {
@@ -1200,7 +1182,6 @@
     } catch (error) {
       console.error('Auth state error:', error);
     }
-
     // Sponsors submenu toggle
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const submenu = document.querySelector('.submenu');
@@ -1208,14 +1189,12 @@
       e.preventDefault();
       submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
     });
-
     // Close submenu on outside click
     document.addEventListener('click', (e) => {
       if (!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) {
         submenu.style.display = 'none';
       }
     });
-
     // Sponsor links
     document.querySelectorAll('.partner-link').forEach(link => {
       link.addEventListener('click', (e) => {
@@ -1239,14 +1218,12 @@
         }
       });
     });
-
     // Close modal on outside click
     partnerModal.addEventListener('click', (e) => {
       if (e.target === partnerModal) {
         partnerModal.style.display = 'none';
       }
     });
-
     // Auto-join from URL
     const urlParams = new URLSearchParams(window.location.search);
     const urlGameId = urlParams.get('gameId');
@@ -1257,7 +1234,6 @@
       playerModeBtn.click();
       gameIdInput.value = gameId;
     }
-
     // Initialize
     console.log('Initializing page...');
     createBoard();
