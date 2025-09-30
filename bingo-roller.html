@@ -293,6 +293,11 @@
       font-size: 1.1rem;
       color: #00B8D9;
     }
+    #current-players {
+      margin: 1rem 0;
+      font-size: 1.1rem;
+      color: #00B8D9;
+    }
     #x-post-template {
       font-size: 1rem;
       color: #00FF00;
@@ -518,6 +523,10 @@
       <div id="x-post-template"></div>
       <div id="leaderboard"></div>
       <button id="copy-winners">Copy Winners List</button>
+      <div id="current-players">
+        <h3>Current Players</h3>
+        <p>No players joined yet.</p>
+      </div>
     </div>
     <div id="player-controls" style="display: none;">
       <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle">
@@ -558,12 +567,13 @@
       appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
       measurementId: "G-H99K0B4L10"
     };
-   
+    
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
+
     const letters = ['B', 'I', 'N', 'G', 'O'];
     const ranges = {
       'B': [1, 15],
@@ -581,6 +591,7 @@
     let gameType = 'singleLine';
     let authState = null;
     let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
+
     const partners = {
       xmeme: {
         name: "XMEME",
@@ -1123,11 +1134,44 @@
         gameRef.child('winners').on('value', (snap) => {
           updateLeaderboard(snap.val() || {});
         });
+        // Add real-time player list for host
+        if (isHost) {
+          gameRef.child('players').on('value', (snap) => {
+            const players = snap.val() || {};
+            updatePlayersList(players);
+          });
+        }
       } catch (error) {
         console.error('Setup game error:', error);
         alert('Error setting up game. Please try again.');
       }
     }
+
+    function updatePlayersList(players) {
+      console.log('Updating players list:', players);
+      try {
+        const playersDiv = document.getElementById('current-players');
+        playersDiv.innerHTML = '<h3>Current Players</h3>';
+        if (Object.keys(players).length === 0) {
+          playersDiv.innerHTML += '<p>No players joined yet.</p>';
+          return;
+        }
+        const ul = document.createElement('ul');
+        ul.style.listStyle = 'none';
+        ul.style.padding = '0';
+        const playerHandles = Object.values(players); // Get all player handles
+        playerHandles.forEach(handle => {
+          const li = document.createElement('li');
+          li.textContent = handle;
+          ul.appendChild(li);
+        });
+        playersDiv.innerHTML = '';
+        playersDiv.appendChild(ul);
+      } catch (error) {
+        console.error('Error updating players list:', error);
+      }
+    }
+
     rollButton.addEventListener('click', () => {
       console.log('Roll button clicked, isHost:', isHost, 'gameRef:', !!gameRef);
       if (!isHost || !gameRef) return alert('Host a game first');
