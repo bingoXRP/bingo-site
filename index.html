@@ -202,6 +202,16 @@
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
     }
 
+    /* Added CSS for NFT images to ensure consistent size */
+    .features-grid .feature img {
+      width: 200px; /* Fixed width for consistency */
+      height: 200px; /* Fixed height for consistency */
+      object-fit: contain; /* Maintains aspect ratio */
+      display: block;
+      margin: 0 auto; /* Center images */
+      border-radius: 5px;
+    }
+
     ol, ul {
       list-style-position: inside;
       text-align: left;
@@ -319,6 +329,10 @@
       .feature h3 {
         font-size: 1.4em; /* Smaller for mobile */
       }
+      .features-grid .feature img {
+        width: 150px; /* Smaller size for mobile */
+        height: 150px;
+      }
     }
 
     @media (min-width: 481px) and (max-width: 768px) {
@@ -351,6 +365,10 @@
       }
       .features-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+      .features-grid .feature img {
+        width: 180px; /* Slightly smaller for tablet */
+        height: 180px;
       }
     }
 
@@ -385,7 +403,7 @@
           <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
           <li><a href="#community" class="smooth-scroll">Community</a></li>
           <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
-          <li><a href="bingo-roller.html" target="_blank">Bingo Roller</a></li> <!-- Added link here -->
+          <li><a href="bingo-roller.html" target="_blank">Bingo Roller</a></li>
         </ul>
       </nav>
     </div>
@@ -473,13 +491,13 @@
       <div class="features-grid">
         <div class="feature">
           <a href="https://xrp.cafe/collection/bingomup" target="_blank">
-            <img src="bingo_monthly_utility_pass.png" alt="$Bingo Monthly Utility Passes" style="max-width: 100%; height: auto;">
+            <img src="bingo_monthly_utility_pass.png" alt="$Bingo Monthly Utility Passes">
           </a>
           <p>$Bingo Monthly Utility Passes</p>
         </div>
         <div class="feature">
           <a href="https://xrp.cafe/collection/vip-bingo-mup" target="_blank">
-            <img src="vip_bingo_monthly_utility_pass.png" alt="VIP $Bingo Monthly Utility Passes" style="max-width: 100%; height: auto;">
+            <img src="vip_bingo_monthly_utility_pass.png" alt="VIP $Bingo Monthly Utility Passes">
           </a>
           <p>VIP $Bingo Monthly Utility Passes</p>
         </div>
