@@ -37,7 +37,6 @@
       margin: clamp(2rem, 3vw, 3rem) auto;
       padding: clamp(1.5rem, 2vw, 2.5rem);
       flex: 1;
-      position: relative;
     }
     header {
       background-color: #00B8D9;
@@ -247,12 +246,12 @@
     #game-id-input {
       font-size: 1.2rem;
       margin: 1rem 0;
-      color: #000000;
+      color: #000000; /* Changed from #00FF00 to black */
     }
     #x-handle-input {
       font-size: 1.2rem;
       margin: 1rem 0;
-      color: #000000;
+      color: #000000; /* Changed from #00FF00 to black */
     }
     #join-game-button, #copy-game-id, #copy-winners {
       background: #FF0000;
@@ -293,14 +292,6 @@
       margin: 1rem 0;
       font-size: 1.1rem;
       color: #00B8D9;
-    }
-    #current-players {
-      margin: 1rem 0;
-      font-size: 1.1rem;
-      color: #00B8D9;
-      max-height: 70vh;
-      overflow-y: auto;
-      display: none;
     }
     #x-post-template {
       font-size: 1rem;
@@ -448,14 +439,6 @@
       #roll-button, #reset-button {
         padding: clamp(0.8rem, 2.5vw, 1.5rem) clamp(1.5rem, 4vw, 3rem);
       }
-      #host-controls {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      #current-players {
-        order: 6;
-      }
     }
     /* Desktop Styles */
     @media (min-width: 1024px) {
@@ -475,52 +458,6 @@
       }
       #roll-button, #reset-button {
         padding: clamp(1.2rem, 2vw, 2rem) clamp(2.5rem, 4vw, 4rem);
-      }
-      #host-controls {
-        position: relative;
-        width: 70%;
-        margin: 0 auto;
-      }
-      #players-sidebar {
-        position: fixed;
-        right: 2rem;
-        top: 120px;
-        width: 25%;
-        max-height: 70vh;
-        overflow-y: auto;
-        background: #1A1F3A;
-        padding: 1rem;
-        border-radius: 10px;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        z-index: 5;
-      }
-      #players-sidebar.collapsed {
-        transform: translateX(100%);
-        opacity: 0;
-        visibility: hidden;
-      }
-      #current-players {
-        display: block;
-      }
-      #players-toggle {
-        display: block;
-        background: #00B8D9;
-        color: #FFF;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-bottom: 1rem;
-        font-size: 1rem;
-        position: absolute;
-        right: -2rem;
-        top: 0;
-      }
-      #players-toggle:hover {
-        background: #00FF00;
-      }
-      #players-checkbox {
-        display: none;
       }
     }
   </style>
@@ -562,7 +499,6 @@
       <button id="player-mode">Join as Player</button>
     </div>
     <div id="host-controls" style="display: none;">
-      <input type="checkbox" id="players-checkbox">
       <div id="game-type-selector">
         <label for="game-type">Select Game Type: </label>
         <select id="game-type" aria-label="Select Bingo Game Type">
@@ -582,13 +518,6 @@
       <div id="x-post-template"></div>
       <div id="leaderboard"></div>
       <button id="copy-winners">Copy Winners List</button>
-    </div>
-    <div id="players-sidebar" class="collapsed">
-      <button id="players-toggle">Toggle Players</button>
-      <div id="current-players">
-        <h3>Current Players</h3>
-        <p>No players joined yet.</p>
-      </div>
     </div>
     <div id="player-controls" style="display: none;">
       <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle">
@@ -629,13 +558,12 @@
       appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
       measurementId: "G-H99K0B4L10"
     };
-    
+   
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
-
     const letters = ['B', 'I', 'N', 'G', 'O'];
     const ranges = {
       'B': [1, 15],
@@ -653,7 +581,6 @@
     let gameType = 'singleLine';
     let authState = null;
     let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
-
     const partners = {
       xmeme: {
         name: "XMEME",
@@ -832,53 +759,20 @@
         console.error('Error displaying win pattern:', error);
       }
     }
-    async function generatePlayerCard() {
+    function generatePlayerCard() {
       console.log('Generating new player card...');
       try {
-        let card;
-        let isUnique = false;
-        const maxAttempts = 1000; // Increased to reduce likelihood of hitting limit
-        let attempts = 0;
-
-        while (!isUnique && attempts < maxAttempts) {
-          card = { B: [], I: [], N: [], G: [], O: [] };
-          letters.forEach(letter => {
-            const [min, max] = ranges[letter];
-            const nums = [];
-            while (nums.length < 5) {
-              const num = getRandomNumber(min, max);
-              if (!nums.includes(num)) nums.push(num);
-            }
-            card[letter] = nums.sort((a, b) => a - b);
-          });
-          card.N[2] = 'FREE';
-
-          const existingCardsRef = gameRef ? gameRef.child('cards') : null;
-          if (existingCardsRef) {
-            const snapshot = await existingCardsRef.once('value');
-            const existingCards = snapshot.val() || {};
-            const cardString = JSON.stringify(card);
-            isUnique = !Object.values(existingCards).some(existingCard => JSON.stringify(existingCard) === cardString);
-            console.log(`Attempt ${attempts + 1}, Unique: ${isUnique}, Existing Cards: ${Object.keys(existingCards).length}`);
-          } else {
-            isUnique = true;
+        const card = { B: [], I: [], N: [], G: [], O: [] };
+        letters.forEach(letter => {
+          const [min, max] = ranges[letter];
+          const nums = [];
+          while (nums.length < 5) {
+            const num = getRandomNumber(min, max);
+            if (!nums.includes(num)) nums.push(num);
           }
-
-          attempts++;
-        }
-
-        if (!isUnique) {
-          console.warn('Max attempts reached, using potentially duplicate card');
-          alert('Warning: Could not generate a unique card after max attempts. Proceeding with possible duplicate.');
-        } else {
-          console.log('Unique card generated after', attempts, 'attempts');
-        }
-
-        if (gameRef && xHandle) {
-          await gameRef.child(`cards/${xHandle.replace('@', '')}`).set(card)
-            .then(() => console.log('Card saved to Firebase for', xHandle))
-            .catch(error => console.error('Failed to save card to Firebase:', error));
-        }
+          card[letter] = nums.sort((a, b) => a - b);
+        });
+        card.N[2] = 'FREE';
         localStorage.setItem('playerCard', JSON.stringify(card));
         return card;
       } catch (error) {
@@ -1085,10 +979,6 @@
     const xPostTemplate = document.getElementById('x-post-template');
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
-    const playersCheckbox = document.getElementById('players-checkbox');
-    const playersToggle = document.getElementById('players-toggle');
-    const playersSidebar = document.getElementById('players-sidebar');
-
     hostModeBtn.addEventListener('click', () => {
       console.log('Host mode clicked, authenticating...');
       try {
@@ -1140,7 +1030,7 @@
         alert('Error entering player mode. Please try again.');
       }
     });
-    joinGameBtn.addEventListener('click', async () => {
+    joinGameBtn.addEventListener('click', () => {
       console.log('Join game clicked');
       try {
         gameId = gameIdInput.value.trim();
@@ -1152,19 +1042,15 @@
         localStorage.removeItem('playerCard');
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
-        playerCard = await generatePlayerCard();
-        if (playerCard) {
-          playerWins = {};
-          localStorage.setItem('playerWins', JSON.stringify(playerWins));
-          displayPlayerCard();
-          setupGame(gameId);
-          await firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
-            .then(() => console.log('Player registered:', xHandle))
-            .catch(error => console.error('Error registering player:', error));
-          createBoard();
-        } else {
-          alert('Failed to generate a unique card. Please try again.');
-        }
+        playerCard = generatePlayerCard();
+        playerWins = {};
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        displayPlayerCard();
+        setupGame(gameId);
+        firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
+          .then(() => console.log('Player registered:', xHandle))
+          .catch(error => console.error('Error registering player:', error));
+        createBoard();
       } catch (error) {
         console.error('Join game error:', error);
         alert('Error joining game. Please try again.');
@@ -1237,45 +1123,11 @@
         gameRef.child('winners').on('value', (snap) => {
           updateLeaderboard(snap.val() || {});
         });
-        // Add real-time player list for host
-        if (isHost) {
-          gameRef.child('players').on('value', (snap) => {
-            const players = snap.val() || {};
-            console.log('Players snapshot:', players);
-            updatePlayersList(players);
-          });
-        }
       } catch (error) {
         console.error('Setup game error:', error);
         alert('Error setting up game. Please try again.');
       }
     }
-
-    function updatePlayersList(players) {
-      console.log('Updating players list:', players);
-      try {
-        const playersDiv = document.getElementById('current-players');
-        playersDiv.innerHTML = '<h3>Current Players</h3>';
-        if (Object.keys(players).length === 0) {
-          playersDiv.innerHTML += '<p>No players joined yet.</p>';
-          return;
-        }
-        const ul = document.createElement('ul');
-        ul.style.listStyle = 'none';
-        ul.style.padding = '0';
-        const playerHandles = Object.values(players);
-        playerHandles.forEach(handle => {
-          const li = document.createElement('li');
-          li.textContent = handle;
-          ul.appendChild(li);
-        });
-        playersDiv.innerHTML = '';
-        playersDiv.appendChild(ul);
-      } catch (error) {
-        console.error('Error updating players list:', error);
-      }
-    }
-
     rollButton.addEventListener('click', () => {
       console.log('Roll button clicked, isHost:', isHost, 'gameRef:', !!gameRef);
       if (!isHost || !gameRef) return alert('Host a game first');
@@ -1316,7 +1168,6 @@
         hostControls.style.display = 'none';
         playerControls.style.display = 'none';
         document.getElementById('leaderboard').innerHTML = '';
-        playersSidebar.classList.add('collapsed');
       } catch (error) {
         console.error('Reset error:', error);
         alert('Error resetting game. Please try again.');
@@ -1372,11 +1223,6 @@
       if (e.target === partnerModal) {
         partnerModal.style.display = 'none';
       }
-    });
-    // Toggle players sidebar
-    playersToggle.addEventListener('click', () => {
-      playersCheckbox.checked = !playersCheckbox.checked;
-      playersSidebar.classList.toggle('collapsed');
     });
     // Auto-join from URL
     const urlParams = new URLSearchParams(window.location.search);
