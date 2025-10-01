@@ -300,7 +300,7 @@
       color: #00B8D9;
       max-height: 70vh;
       overflow-y: auto;
-      display: none; /* Hidden by default */
+      display: none;
     }
     #x-post-template {
       font-size: 1rem;
@@ -484,7 +484,7 @@
       #players-sidebar {
         position: fixed;
         right: 2rem;
-        top: 120px; /* Below header */
+        top: 120px;
         width: 25%;
         max-height: 70vh;
         overflow-y: auto;
@@ -500,7 +500,7 @@
         visibility: hidden;
       }
       #current-players {
-        display: block; /* Ensure it’s visible when sidebar is active */
+        display: block;
       }
       #players-toggle {
         display: block;
@@ -837,7 +837,7 @@
       try {
         let card;
         let isUnique = false;
-        const maxAttempts = 100;
+        const maxAttempts = 1000; // Increased to reduce likelihood of hitting limit
         let attempts = 0;
 
         while (!isUnique && attempts < maxAttempts) {
@@ -859,6 +859,7 @@
             const existingCards = snapshot.val() || {};
             const cardString = JSON.stringify(card);
             isUnique = !Object.values(existingCards).some(existingCard => JSON.stringify(existingCard) === cardString);
+            console.log(`Attempt ${attempts + 1}, Unique: ${isUnique}, Existing Cards: ${Object.keys(existingCards).length}`);
           } else {
             isUnique = true;
           }
@@ -868,10 +869,15 @@
 
         if (!isUnique) {
           console.warn('Max attempts reached, using potentially duplicate card');
+          alert('Warning: Could not generate a unique card after max attempts. Proceeding with possible duplicate.');
+        } else {
+          console.log('Unique card generated after', attempts, 'attempts');
         }
 
         if (gameRef && xHandle) {
-          await gameRef.child(`cards/${xHandle.replace('@', '')}`).set(card);
+          await gameRef.child(`cards/${xHandle.replace('@', '')}`).set(card)
+            .then(() => console.log('Card saved to Firebase for', xHandle))
+            .catch(error => console.error('Failed to save card to Firebase:', error));
         }
         localStorage.setItem('playerCard', JSON.stringify(card));
         return card;
@@ -1152,7 +1158,7 @@
           localStorage.setItem('playerWins', JSON.stringify(playerWins));
           displayPlayerCard();
           setupGame(gameId);
-          firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
+          await firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
             .then(() => console.log('Player registered:', xHandle))
             .catch(error => console.error('Error registering player:', error));
           createBoard();
@@ -1235,6 +1241,7 @@
         if (isHost) {
           gameRef.child('players').on('value', (snap) => {
             const players = snap.val() || {};
+            console.log('Players snapshot:', players);
             updatePlayersList(players);
           });
         }
@@ -1309,7 +1316,7 @@
         hostControls.style.display = 'none';
         playerControls.style.display = 'none';
         document.getElementById('leaderboard').innerHTML = '';
-        playersSidebar.classList.add('collapsed'); // Reset sidebar on game reset
+        playersSidebar.classList.add('collapsed');
       } catch (error) {
         console.error('Reset error:', error);
         alert('Error resetting game. Please try again.');
