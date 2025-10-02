@@ -274,17 +274,20 @@
     }
     #game-type-selector {
       margin: 1rem 0;
+      max-width: 250px;
     }
     #game-type {
       padding: 0.5rem;
-      font-size: clamp(1rem, 2vw, 1.2rem);
+      font-size: clamp(0.9rem, 1.8vw, 1.1rem);
       border-radius: 5px;
-      max-width: 300px;
-      width: 100%;
+      width: 250px;
+      box-sizing: border-box;
       white-space: nowrap;
+      overflow: hidden;
     }
     #game-type option {
       font-size: 1rem;
+      white-space: nowrap;
     }
     .win-pattern {
       display: grid;
@@ -868,32 +871,13 @@
       try {
         const winPatternDiv = document.getElementById('win-pattern');
         winPatternDiv.innerHTML = '';
-        if (gameType === 'singleLine') {
-          const description = document.createElement('p');
-          description.id = 'pattern-description';
-          description.textContent = 'Single Line: Any horizontal, vertical, or diagonal line wins!';
-          description.style.color = '#00FF00';
-          description.style.fontSize = 'clamp(1rem, 2vw, 1.2rem)';
-          description.style.marginBottom = '0.5rem';
-          winPatternDiv.appendChild(description);
-          const pattern = gamePatterns.singleLine;
-          for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 5; col++) {
-              const cell = document.createElement('div');
-              cell.classList.add('cell');
-              if (pattern[row][col]) cell.classList.add('win');
-              winPatternDiv.appendChild(cell);
-            }
-          }
-        } else {
-          const pattern = gamePatterns[gameType];
-          for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 5; col++) {
-              const cell = document.createElement('div');
-              cell.classList.add('cell');
-              if (pattern[row][col]) cell.classList.add('win');
-              winPatternDiv.appendChild(cell);
-            }
+        const pattern = gamePatterns[gameType];
+        for (let row = 0; row < 5; row++) {
+          for (let col = 0; col < 5; col++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            if (pattern[row][col]) cell.classList.add('win');
+            winPatternDiv.appendChild(cell);
           }
         }
       } catch (error) {
