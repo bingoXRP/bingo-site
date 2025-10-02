@@ -561,9 +561,9 @@
       #player-list {
         position: fixed;
         left: 10px;
-        top: 80px;
+        top: 100px;
         width: 250px;
-        max-height: calc(100vh - 100px);
+        max-height: calc(100vh - 120px);
         overflow-y: auto;
         margin: 0;
         z-index: 9;
@@ -1080,7 +1080,7 @@
         alert(`BINGO! ${xHandle} won (${gameType})!`);
         triggerConfetti();
         triggerFireworks();
-        if (isHost && gameRef) {
+        if (gameRef) {
           const timestamp = new Date().toISOString();
           firebase.database().ref(`games/${gameId}/winners`).push(`${xHandle}|${timestamp}|${gameType}`)
             .catch(error => console.error('Error pushing winner:', error));
@@ -1107,6 +1107,9 @@
           const li = document.createElement('li');
           li.textContent = `${handle} at ${new Date(time).toLocaleString()} (${mode})`;
           ul.appendChild(li);
+          if (isHost) {
+            alert(`BINGO! ${handle} won (${mode})!`);
+          }
         }
         leaderboard.appendChild(ul);
       } catch (error) {
