@@ -246,12 +246,12 @@
     #game-id-input {
       font-size: 1.2rem;
       margin: 1rem 0;
-      color: #000000; /* Changed from #00FF00 to black */
+      color: #000000;
     }
     #x-handle-input {
       font-size: 1.2rem;
       margin: 1rem 0;
-      color: #000000; /* Changed from #00FF00 to black */
+      color: #000000;
     }
     #join-game-button, #copy-game-id, #copy-winners {
       background: #FF0000;
@@ -292,6 +292,22 @@
       margin: 1rem 0;
       font-size: 1.1rem;
       color: #00B8D9;
+    }
+    #player-list {
+      margin: 1rem 0;
+      font-size: 1.1rem;
+      color: #00B8D9;
+      background: #1A1F3A;
+      border: 2px solid #00FF00;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    #player-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    #player-list li {
+      margin: 0.5rem 0;
     }
     #x-post-template {
       font-size: 1rem;
@@ -364,6 +380,15 @@
       color: #ccc;
       font-size: clamp(0.9rem, 2vw, 1rem);
     }
+    #host-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .host-main {
+      flex: 1;
+      max-width: 100%;
+    }
     /* Mobile Styles */
     @media (max-width: 767px) {
       .container {
@@ -422,6 +447,9 @@
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
       }
+      #player-list {
+        width: 100%;
+      }
     }
     /* Tablet Styles */
     @media (min-width: 768px) and (max-width: 1023px) {
@@ -458,6 +486,16 @@
       }
       #roll-button, #reset-button {
         padding: clamp(1.2rem, 2vw, 2rem) clamp(2.5rem, 4vw, 4rem);
+      }
+      #host-controls {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+      }
+      #player-list {
+        width: 250px;
+        min-width: 200px;
+        margin-right: 2rem;
+        margin-bottom: 0;
       }
     }
   </style>
@@ -499,25 +537,31 @@
       <button id="player-mode">Join as Player</button>
     </div>
     <div id="host-controls" style="display: none;">
-      <div id="game-type-selector">
-        <label for="game-type">Select Game Type: </label>
-        <select id="game-type" aria-label="Select Bingo Game Type">
-          <option value="singleLine">Single Line (Any Row)</option>
-          <option value="perimeter">Perimeter</option>
-          <option value="xShape">X-Shape</option>
-          <option value="fourCorners">Four Corners</option>
-          <option value="fullCard">Full Card</option>
-        </select>
+      <div id="player-list">
+        <h3>Player List</h3>
+        <p>No players yet.</p>
       </div>
-      <div id="win-pattern" class="win-pattern"></div>
-      <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
-      <div id="result" role="status"></div>
-      <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
-      <div id="game-id-display">Game ID: Loading...</div>
-      <button id="copy-game-id">Copy Game ID</button>
-      <div id="x-post-template"></div>
-      <div id="leaderboard"></div>
-      <button id="copy-winners">Copy Winners List</button>
+      <div class="host-main">
+        <div id="game-type-selector">
+          <label for="game-type">Select Game Type: </label>
+          <select id="game-type" aria-label="Select Bingo Game Type">
+            <option value="singleLine">Single Line (Any Horizontal/Vertical/Diagonal)</option>
+            <option value="perimeter">Perimeter</option>
+            <option value="xShape">X-Shape</option>
+            <option value="fourCorners">Four Corners</option>
+            <option value="fullCard">Full Card</option>
+          </select>
+        </div>
+        <div id="win-pattern" class="win-pattern"></div>
+        <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
+        <div id="result" role="status"></div>
+        <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
+        <div id="game-id-display">Game ID: Loading...</div>
+        <button id="copy-game-id">Copy Game ID</button>
+        <div id="x-post-template"></div>
+        <div id="leaderboard"></div>
+        <button id="copy-winners">Copy Winners List</button>
+      </div>
     </div>
     <div id="player-controls" style="display: none;">
       <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle">
@@ -558,7 +602,7 @@
       appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
       measurementId: "G-H99K0B4L10"
     };
-   
+  
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics();
@@ -746,13 +790,32 @@
       try {
         const winPatternDiv = document.getElementById('win-pattern');
         winPatternDiv.innerHTML = '';
-        const pattern = gamePatterns[gameType];
-        for (let row = 0; row < 5; row++) {
-          for (let col = 0; col < 5; col++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            if (pattern[row][col]) cell.classList.add('win');
-            winPatternDiv.appendChild(cell);
+        if (gameType === 'singleLine') {
+          const description = document.createElement('p');
+          description.id = 'pattern-description';
+          description.textContent = 'Single Line: Any horizontal, vertical, or diagonal line wins!';
+          description.style.color = '#00FF00';
+          description.style.fontSize = 'clamp(1rem, 2vw, 1.2rem)';
+          description.style.marginBottom = '0.5rem';
+          winPatternDiv.appendChild(description);
+          const pattern = gamePatterns.singleLine;
+          for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+              const cell = document.createElement('div');
+              cell.classList.add('cell');
+              if (pattern[row][col]) cell.classList.add('win');
+              winPatternDiv.appendChild(cell);
+            }
+          }
+        } else {
+          const pattern = gamePatterns[gameType];
+          for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+              const cell = document.createElement('div');
+              cell.classList.add('cell');
+              if (pattern[row][col]) cell.classList.add('win');
+              winPatternDiv.appendChild(cell);
+            }
           }
         }
       } catch (error) {
@@ -779,6 +842,20 @@
         console.error('Error generating player card:', error);
         return null;
       }
+    }
+    function computeCardID(card) {
+      let sum = 0;
+      let product = 1;
+      letters.forEach(letter => {
+        card[letter].forEach(num => {
+          if (num !== 'FREE') {
+            sum += num;
+            product = (product * num) % 1000000;  // Mod to prevent overflow
+          }
+        });
+      });
+      const combined = (sum * 31 + product) % 1000;
+      return combined.toString().padStart(3, '0');
     }
     function displayPlayerCard() {
       console.log('Displaying player card for:', xHandle);
@@ -830,23 +907,105 @@
       if (!playerCard) return;
       const winKey = `${gameId}_${gameType}`;
       if (playerWins[winKey]) return;
+      console.log(`Starting bingo check for mode: ${gameType}`);
       try {
-        const pattern = gamePatterns[gameType];
-        let isWin = true;
-        for (let row = 0; row < 5; row++) {
-          for (let col = 0; col < 5; col++) {
-            if (pattern[row][col]) {
+        if (gameType === 'singleLine') {
+          let hasWinningLine = false;
+          // Check horizontal rows
+          for (let row = 0; row < 5; row++) {
+            let rowWin = true;
+            for (let col = 0; col < 5; col++) {
               const letter = letters[col];
               const num = playerCard[letter][row];
               if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                isWin = false;
+                rowWin = false;
+                break;
+              }
+            }
+            if (rowWin) {
+              hasWinningLine = true;
+              console.log(`Horizontal win detected on row ${row}`);
+              break;
+            }
+          }
+          // Check vertical columns
+          if (!hasWinningLine) {
+            for (let col = 0; col < 5; col++) {
+              let colWin = true;
+              const letter = letters[col];
+              for (let row = 0; row < 5; row++) {
+                const num = playerCard[letter][row];
+                if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                  colWin = false;
+                  break;
+                }
+              }
+              if (colWin) {
+                hasWinningLine = true;
+                console.log(`Vertical win detected on column ${letter}`);
                 break;
               }
             }
           }
-          if (!isWin) break;
+          // Check diagonals
+          if (!hasWinningLine) {
+            // Top-left to bottom-right
+            let diag1Win = true;
+            for (let i = 0; i < 5; i++) {
+              const letter = letters[i];
+              const num = playerCard[letter][i];
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                diag1Win = false;
+                break;
+              }
+            }
+            if (diag1Win) {
+              hasWinningLine = true;
+              console.log('Diagonal win detected (top-left to bottom-right)');
+            }
+          }
+          if (!hasWinningLine) {
+            // Top-right to bottom-left
+            let diag2Win = true;
+            for (let i = 0; i < 5; i++) {
+              const letter = letters[4 - i];
+              const num = playerCard[letter][i];
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                diag2Win = false;
+                break;
+              }
+            }
+            if (diag2Win) {
+              hasWinningLine = true;
+              console.log('Diagonal win detected (top-right to bottom-left)');
+            }
+          }
+          console.log(`Single line check result: ${hasWinningLine}`);
+          if (hasWinningLine) {
+            winGame(winKey);
+          }
+        } else {
+          const pattern = gamePatterns[gameType];
+          let isWin = true;
+          for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+              if (pattern[row][col]) {
+                const letter = letters[col];
+                const num = playerCard[letter][row];
+                if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                  isWin = false;
+                  console.log(`Missed required position: ${letter}-${num} (row ${row}, col ${col})`);
+                  break;
+                }
+              }
+            }
+            if (!isWin) break;
+          }
+          console.log(`Pattern check result for ${gameType}: ${isWin}`);
+          if (isWin) {
+            winGame(winKey);
+          }
         }
-        if (isWin) winGame(winKey);
       } catch (error) {
         console.error('Error checking for bingo:', error);
       }
@@ -889,6 +1048,29 @@
         leaderboard.appendChild(ul);
       } catch (error) {
         console.error('Error updating leaderboard:', error);
+      }
+    }
+    function updatePlayerList(players) {
+      console.log('Updating player list:', players);
+      try {
+        const playerList = document.getElementById('player-list');
+        if (!playerList) return;
+        playerList.innerHTML = '<h3>Player List</h3>';
+        if (!players || Object.keys(players).length === 0) {
+          playerList.innerHTML += '<p>No players yet.</p>';
+          return;
+        }
+        const ul = document.createElement('ul');
+        for (const key in players) {
+          const handle = players[key].handle || `@${key}`;
+          const cardID = players[key].cardID || 'N/A';
+          const li = document.createElement('li');
+          li.textContent = `${handle} - Card #${cardID}`;
+          ul.appendChild(li);
+        }
+        playerList.appendChild(ul);
+      } catch (error) {
+        console.error('Error updating player list:', error);
       }
     }
     function triggerConfetti() {
@@ -986,7 +1168,7 @@
           .then(() => {
             console.log('Authenticated as host');
             isHost = true;
-            hostControls.style.display = 'block';
+            hostControls.style.display = 'flex';
             playerControls.style.display = 'none';
             calledNumbers.clear();
             localStorage.removeItem('calledNumbers');
@@ -1043,12 +1225,17 @@
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
         playerCard = generatePlayerCard();
+        const cardID = computeCardID(playerCard);
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
         displayPlayerCard();
         setupGame(gameId);
-        firebase.database().ref(`games/${gameId}/players/${xHandle.replace('@', '')}`).set(xHandle)
-          .then(() => console.log('Player registered:', xHandle))
+        const handleKey = xHandle.replace('@', '');
+        firebase.database().ref(`games/${gameId}/players/${handleKey}`).set({
+          handle: xHandle,
+          cardID: cardID
+        })
+          .then(() => console.log('Player registered with cardID:', xHandle, cardID))
           .catch(error => console.error('Error registering player:', error));
         createBoard();
       } catch (error) {
@@ -1123,6 +1310,11 @@
         gameRef.child('winners').on('value', (snap) => {
           updateLeaderboard(snap.val() || {});
         });
+        if (isHost) {
+          gameRef.child('players').on('value', (snap) => {
+            updatePlayerList(snap.val() || {});
+          });
+        }
       } catch (error) {
         console.error('Setup game error:', error);
         alert('Error setting up game. Please try again.');
