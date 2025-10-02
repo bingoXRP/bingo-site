@@ -449,6 +449,13 @@
       }
       #player-list {
         width: 100%;
+        position: static;
+      }
+      .host-main {
+        margin-left: 0;
+      }
+      #ad-box {
+        display: none; /* Hide on mobile to save space */
       }
     }
     /* Tablet Styles */
@@ -466,6 +473,17 @@
       }
       #roll-button, #reset-button {
         padding: clamp(0.8rem, 2.5vw, 1.5rem) clamp(1.5rem, 4vw, 3rem);
+      }
+      #player-list {
+        position: static;
+      }
+      .host-main {
+        margin-left: 0;
+      }
+      #ad-box {
+        left: 10px;
+        width: 120px;
+        height: 120px;
       }
     }
     /* Desktop Styles */
@@ -487,15 +505,35 @@
       #roll-button, #reset-button {
         padding: clamp(1.2rem, 2vw, 2rem) clamp(2.5rem, 4vw, 4rem);
       }
-      #host-controls {
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-      }
       #player-list {
+        position: fixed;
+        left: 0;
+        top: 80px; /* Below header */
         width: 250px;
-        min-width: 200px;
-        margin-right: 2rem;
-        margin-bottom: 0;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        margin: 0;
+        z-index: 9;
+      }
+      .host-main {
+        margin-left: 270px;
+        max-width: calc(100% - 270px);
+      }
+      #ad-box {
+        position: fixed;
+        left: 10px;
+        bottom: 10px;
+        width: 150px;
+        height: 150px;
+        background: #1A1F3A;
+        border: 2px solid #00B8D9;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 8;
+      }
+      #ad-box img {
+        width: 100%;
+        height: auto;
       }
     }
   </style>
@@ -539,7 +577,8 @@
     <div id="host-controls" style="display: none;">
       <div id="player-list">
         <h3>Player List</h3>
-        <p>No players yet.</p>
+        <button id="toggle-player-list">Collapse</button>
+        <div id="player-list-content"></div>
       </div>
       <div class="host-main">
         <div id="game-type-selector">
@@ -568,13 +607,13 @@
       <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID">
       <button id="join-game-button">Join Game & Generate Card</button>
       <div id="player-card" class="player-card"></div>
-      <div id="leaderboard"></div>
     </div>
     <h2>Game Board (Called Numbers)</h2>
     <div id="bingo-board" class="bingo-board"></div>
     <canvas id="confetti-canvas"></canvas>
     <div id="fireworks" class="fireworks"></div>
   </div>
+  <div id="ad-box"></div>
   <div id="partner-modal">
     <div class="modal-content">
       <!-- Content will be inserted here -->
@@ -850,7 +889,7 @@
         card[letter].forEach(num => {
           if (num !== 'FREE') {
             sum += num;
-            product = (product * num) % 1000000;  // Mod to prevent overflow
+            product = (product * num) % 1000000; // Mod to prevent overflow
           }
         });
       });
@@ -1053,11 +1092,11 @@
     function updatePlayerList(players) {
       console.log('Updating player list:', players);
       try {
-        const playerList = document.getElementById('player-list');
-        if (!playerList) return;
-        playerList.innerHTML = '<h3>Player List</h3>';
+        const playerListContent = document.getElementById('player-list-content');
+        if (!playerListContent) return;
+        playerListContent.innerHTML = '';
         if (!players || Object.keys(players).length === 0) {
-          playerList.innerHTML += '<p>No players yet.</p>';
+          playerListContent.innerHTML += '<p>No players yet.</p>';
           return;
         }
         const ul = document.createElement('ul');
@@ -1068,7 +1107,7 @@
           li.textContent = `${handle} - Card #${cardID}`;
           ul.appendChild(li);
         }
-        playerList.appendChild(ul);
+        playerListContent.appendChild(ul);
       } catch (error) {
         console.error('Error updating player list:', error);
       }
@@ -1429,6 +1468,32 @@
     // Initialize
     console.log('Initializing page...');
     createBoard();
+    // Setup collapsible player list
+    const togglePlayerListBtn = document.getElementById('toggle-player-list');
+    const playerListContent = document.getElementById('player-list-content');
+    if (togglePlayerListBtn && playerListContent) {
+      togglePlayerListBtn.addEventListener('click', () => {
+        if (playerListContent.style.display === 'none') {
+          playerListContent.style.display = 'block';
+          togglePlayerListBtn.textContent = 'Collapse';
+        } else {
+          playerListContent.style.display = 'none';
+          togglePlayerListBtn.textContent = 'Expand';
+        }
+      });
+    }
+    // Setup advertisement box
+    const logos = Object.values(partners).map(p => p.logo);
+    let index = 0;
+    const adBox = document.getElementById('ad-box');
+    function rotateAd() {
+      adBox.innerHTML = `<img src="${logos[index]}" alt="Sponsor Logo">`;
+      index = (index + 1) % logos.length;
+    }
+    if (logos.length > 0) {
+      rotateAd();
+      setInterval(rotateAd, 15000);
+    }
   </script>
 </body>
 </html>
