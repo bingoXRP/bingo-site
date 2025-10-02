@@ -157,6 +157,7 @@
       gap: clamp(0.6rem, 1.2vw, 1rem);
       max-width: min(95vw, 1200px);
       margin: clamp(1.5rem, 2vw, 2rem) auto;
+      z-index: 1;
     }
     .bingo-board .header {
       font-size: clamp(1.5rem, 3vw, 2.5rem);
@@ -245,13 +246,19 @@
     }
     #game-id-input {
       font-size: 1.2rem;
-      margin: 1rem 0;
+      margin: 0.5rem;
+      padding: 0.5rem;
       color: #000000;
+      max-width: 300px;
+      border-radius: 5px;
     }
     #x-handle-input {
       font-size: 1.2rem;
-      margin: 1rem 0;
+      margin: 0.5rem;
+      padding: 0.5rem;
       color: #000000;
+      max-width: 300px;
+      border-radius: 5px;
     }
     #join-game-button, #copy-game-id, #copy-winners {
       background: #FF0000;
@@ -270,8 +277,14 @@
     }
     #game-type {
       padding: 0.5rem;
-      font-size: 1rem;
+      font-size: clamp(1rem, 2vw, 1.2rem);
       border-radius: 5px;
+      max-width: 300px;
+      width: 100%;
+      white-space: nowrap;
+    }
+    #game-type option {
+      font-size: 1rem;
     }
     .win-pattern {
       display: grid;
@@ -294,13 +307,32 @@
       color: #00B8D9;
     }
     #player-list {
-      margin: 1rem 0;
       font-size: 1.1rem;
       color: #00B8D9;
       background: #1A1F3A;
       border: 2px solid #00FF00;
       border-radius: 10px;
       padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 255, 0, 0.3);
+    }
+    #player-list h3 {
+      margin: 0 0 0.5rem;
+    }
+    #toggle-player-list {
+      background: #00B8D9;
+      color: #FFF;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    #toggle-player-list:hover {
+      background: #00FF00;
+    }
+    #player-list-content {
+      display: block;
     }
     #player-list ul {
       list-style: none;
@@ -308,12 +340,6 @@
     }
     #player-list li {
       margin: 0.5rem 0;
-    }
-    #x-post-template {
-      font-size: 1rem;
-      color: #00FF00;
-      margin: 1rem 0;
-      word-break: break-all;
     }
     #confetti-canvas, .fireworks {
       position: fixed;
@@ -323,6 +349,7 @@
       height: 100%;
       pointer-events: none;
       display: none;
+      z-index: 5;
     }
     #partner-modal {
       position: fixed;
@@ -388,6 +415,24 @@
     .host-main {
       flex: 1;
       max-width: 100%;
+    }
+    #ad-box {
+      position: fixed;
+      left: 10px;
+      bottom: 10px;
+      width: 150px;
+      height: 150px;
+      background: #1A1F3A;
+      border: 2px solid #00B8D9;
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 8;
+      box-shadow: 0 4px 8px rgba(0, 184, 217, 0.3);
+    }
+    #ad-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
     /* Mobile Styles */
     @media (max-width: 767px) {
@@ -455,7 +500,7 @@
         margin-left: 0;
       }
       #ad-box {
-        display: none; /* Hide on mobile to save space */
+        display: none; /* Hide on mobile */
       }
     }
     /* Tablet Styles */
@@ -476,6 +521,7 @@
       }
       #player-list {
         position: static;
+        width: 100%;
       }
       .host-main {
         margin-left: 0;
@@ -505,10 +551,14 @@
       #roll-button, #reset-button {
         padding: clamp(1.2rem, 2vw, 2rem) clamp(2.5rem, 4vw, 4rem);
       }
+      #host-controls {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+      }
       #player-list {
         position: fixed;
-        left: 0;
-        top: 80px; /* Below header */
+        left: 10px;
+        top: 80px;
         width: 250px;
         max-height: calc(100vh - 100px);
         overflow-y: auto;
@@ -520,20 +570,10 @@
         max-width: calc(100% - 270px);
       }
       #ad-box {
-        position: fixed;
         left: 10px;
         bottom: 10px;
         width: 150px;
         height: 150px;
-        background: #1A1F3A;
-        border: 2px solid #00B8D9;
-        border-radius: 10px;
-        overflow: hidden;
-        z-index: 8;
-      }
-      #ad-box img {
-        width: 100%;
-        height: auto;
       }
     }
   </style>
@@ -584,7 +624,7 @@
         <div id="game-type-selector">
           <label for="game-type">Select Game Type: </label>
           <select id="game-type" aria-label="Select Bingo Game Type">
-            <option value="singleLine">Single Line (Any Horizontal/Vertical/Diagonal)</option>
+            <option value="singleLine">Single Line (Any Line)</option>
             <option value="perimeter">Perimeter</option>
             <option value="xShape">X-Shape</option>
             <option value="fourCorners">Four Corners</option>
@@ -597,7 +637,6 @@
         <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
         <div id="game-id-display">Game ID: Loading...</div>
         <button id="copy-game-id">Copy Game ID</button>
-        <div id="x-post-template"></div>
         <div id="leaderboard"></div>
         <button id="copy-winners">Copy Winners List</button>
       </div>
@@ -641,7 +680,7 @@
       appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
       measurementId: "G-H99K0B4L10"
     };
-  
+
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const analytics = firebase.analytics();
@@ -1057,7 +1096,7 @@
         alert(`BINGO! ${xHandle} won (${gameType})!`);
         triggerConfetti();
         triggerFireworks();
-        if (gameRef) {
+        if (isHost && gameRef) {
           const timestamp = new Date().toISOString();
           firebase.database().ref(`games/${gameId}/winners`).push(`${xHandle}|${timestamp}|${gameType}`)
             .catch(error => console.error('Error pushing winner:', error));
@@ -1070,6 +1109,7 @@
       console.log('Updating leaderboard:', winners);
       try {
         const leaderboard = document.getElementById('leaderboard');
+        if (!leaderboard) return;
         leaderboard.innerHTML = '<h3>Winners</h3>';
         if (!winners || Object.keys(winners).length === 0) {
           leaderboard.innerHTML += '<p>No winners yet.</p>';
@@ -1096,7 +1136,7 @@
         if (!playerListContent) return;
         playerListContent.innerHTML = '';
         if (!players || Object.keys(players).length === 0) {
-          playerListContent.innerHTML += '<p>No players yet.</p>';
+          playerListContent.innerHTML = '<p>No players yet.</p>';
           return;
         }
         const ul = document.createElement('ul');
@@ -1197,7 +1237,6 @@
     const gameTypeSelect = document.getElementById('game-type');
     const copyGameIdBtn = document.getElementById('copy-game-id');
     const copyWinnersBtn = document.getElementById('copy-winners');
-    const xPostTemplate = document.getElementById('x-post-template');
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
     hostModeBtn.addEventListener('click', () => {
@@ -1217,8 +1256,6 @@
               console.log('Generated new gameId:', gameId);
             }
             gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
-            const url = `${window.location.origin}${window.location.pathname}?gameId=${gameId}`;
-            xPostTemplate.textContent = `Join my $BINGO game! ID: ${gameId} at ${url} #BingoXRPL`;
             setupGame(gameId);
             gameType = gameTypeSelect.value;
             firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
@@ -1346,10 +1383,10 @@
             createBoard();
           }
         });
-        gameRef.child('winners').on('value', (snap) => {
-          updateLeaderboard(snap.val() || {});
-        });
         if (isHost) {
+          gameRef.child('winners').on('value', (snap) => {
+            updateLeaderboard(snap.val() || {});
+          });
           gameRef.child('players').on('value', (snap) => {
             updatePlayerList(snap.val() || {});
           });
@@ -1483,16 +1520,27 @@
       });
     }
     // Setup advertisement box
-    const logos = Object.values(partners).map(p => p.logo);
+    const logos = Object.values(partners).map(p => p.logo).filter(Boolean);
     let index = 0;
     const adBox = document.getElementById('ad-box');
     function rotateAd() {
-      adBox.innerHTML = `<img src="${logos[index]}" alt="Sponsor Logo">`;
-      index = (index + 1) % logos.length;
+      try {
+        if (logos.length === 0) {
+          adBox.innerHTML = '<p>No sponsor logos available</p>';
+          return;
+        }
+        adBox.innerHTML = `<img src="${logos[index]}" alt="Sponsor Logo">`;
+        index = (index + 1) % logos.length;
+      } catch (error) {
+        console.error('Error rotating ad:', error);
+        adBox.innerHTML = '<p>Ad loading failed</p>';
+      }
     }
     if (logos.length > 0) {
       rotateAd();
       setInterval(rotateAd, 15000);
+    } else {
+      adBox.innerHTML = '<p>No sponsor logos available</p>';
     }
   </script>
 </body>
