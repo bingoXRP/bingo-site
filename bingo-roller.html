@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!" />
   <title>$BINGO Roller - BingoXRPL Live Tool</title>
-
   <!-- Firebase & gtag (same versions as before) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
@@ -14,14 +13,12 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
-
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
   <style>
-    /* (Kept your original CSS mostly identical) */
+    /* (Kept your original CSS mostly identical, with targeted fixes) */
     body {
       font-family: 'Arial', sans-serif;
       background: #0A0F2A;
@@ -36,7 +33,7 @@
       position: relative;
     }
     .container {
-      max-width: 95%;
+      max-width: 98%;
       margin: clamp(2rem, 3vw, 3rem) auto;
       padding: clamp(1.5rem, 2vw, 2.5rem);
       flex: 1;
@@ -61,19 +58,17 @@
     .submenu { display:none; position:absolute; top:100%; left:0; background:#00B8D9; list-style:none; padding:10px; margin:0; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:60; min-width:150px; }
     .submenu li a { color:#000; display:block; padding:5px 10px; }
     .submenu li a:hover{ color:#FFF; }
-
     #roll-button{ background:#FF0000; color:#FFF; border:none; padding:clamp(1rem,3vw,1.8rem) clamp(2rem,5vw,3.5rem); font-size:clamp(1.4rem,4vw,2.2rem); cursor:pointer; border-radius:50px; transition:.3s; box-shadow:0 6px 12px rgba(255,0,0,0.6); touch-action:manipulation;}
     #roll-button:hover{ background:#00FF00; transform:scale(1.1); box-shadow:0 8px 16px rgba(0,255,0,0.6); }
     #result { font-size:clamp(2.5rem,8vw,4.5rem); color:#00FF00; margin:clamp(1rem,2vw,1.5rem) 0; text-shadow:2px 2px 8px rgba(0,255,0,0.7); word-break:break-word; }
     #reset-button{ background:#00B8D9; color:#FFF; border:none; padding:clamp(0.6rem,2vw,1.2rem) clamp(1.2rem,3vw,2.5rem); font-size:clamp(1rem,2.5vw,1.3rem); cursor:pointer; border-radius:30px; transition:.3s; margin-bottom:clamp(1rem,2vw,1.5rem); touch-action:manipulation;}
-    #reset-button:hover{ background:#FF0000; transform:scale(1.1); box-shadow:0 6px 12px rgba(255,0,0,0.6);} 
-
+    #reset-button:hover{ background:#FF0000; transform:scale(1.1); box-shadow:0 6px 12px rgba(255,0,0,0.6);}
     /* Bingo Board uses 10 columns for streaming layout (2 subcolumns per letter) */
     .bingo-board {
       display: grid;
       grid-template-columns: repeat(10, minmax(40px, 1fr));
       gap: clamp(0.6rem,1.2vw,1rem);
-      max-width: min(95vw, 1400px);
+      max-width: min(98vw, 1600px);
       margin: clamp(1.5rem, 2vw, 2rem) auto;
       z-index: 1;
       justify-items: center;
@@ -99,16 +94,16 @@
       transition: all .3s;
       margin: auto;
       box-sizing: border-box;
+      transform-origin: center;
     }
-    .bingo-board .cell.called { background:#00FF00; color:#000; box-shadow:0 0 15px #00FF00; transform:scale(1.12); }
-
+    .bingo-board .cell.called { background:#00FF00; color:#000; box-shadow:0 0 15px #00FF00; }
+    /* Remove transform:scale to prevent layout shifts */
     /* other UI kept same */
     .player-card { display:grid; grid-template-columns: repeat(5,1fr); gap:clamp(0.5rem,1vw,1rem); max-width:min(80vw,600px); margin:clamp(1rem,2vw,1.5rem) auto; padding:1rem; border:2px solid #00FF00; border-radius:10px; }
     .player-card .header { font-size:clamp(1.2rem,3vw,1.8rem); font-weight:bold; color:#00FF00; }
     .player-card .cell{ aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#1A1F3A; color:#00B8D9; font-size:clamp(1rem,2.5vw,1.4rem); border-radius:10px; transition:all .3s; }
     .player-card .cell.called { background:#00FF00; color:#000; box-shadow:0 0 10px #00FF00; }
     .player-card .cell.free { background:#FF0000; color:#FFF; font-weight:bold; }
-
     /* toast style */
     .toast {
       position: fixed;
@@ -126,11 +121,74 @@
       transition: opacity .25s, transform .25s;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
-
+    /* Win pattern preview styling to make it visible */
+    .win-pattern {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      max-width: 250px;
+      margin: 1rem auto;
+      border: 2px solid #00FF00;
+      padding: 1rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.5);
+    }
+    .win-pattern .cell {
+      aspect-ratio: 1/1;
+      background: #1A1F3A;
+      border-radius: 10px;
+    }
+    .win-pattern .cell.win {
+      background: #00FF00;
+    }
+    /* Host controls layout to utilize side space on desktop */
+    #host-controls {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    #player-list {
+      width: 100%;
+      max-width: 300px;
+      background: rgba(0,0,0,0.3);
+      padding: 1rem;
+      border-radius: 10px;
+    }
+    .host-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    @media (min-width: 768px) {
+      #player-list {
+        width: 25%;
+      }
+      .host-main {
+        width: 70%;
+      }
+    }
+    /* Ad box: smaller, draggable, positioned bottom-right */
+    #ad-box {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 100;
+      cursor: move;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
     /* smaller tweaks/responsive kept (not repeated verbatim here) */
     @media (max-width:767px) {
       .bingo-board { grid-template-columns: repeat(10, minmax(30px,1fr)); gap:0.3rem; }
       .header-inner { flex-direction:column; align-items:center; }
+      #host-controls { flex-direction: column; }
+      #ad-box { width: 150px; height: 150px; }
     }
   </style>
 </head>
@@ -162,23 +220,19 @@
       </nav>
     </div>
   </header>
-
   <div class="container">
     <h1>$BINGO Roller</h1>
     <p class="tagline">Roll epic $BINGO numbers during your live streams!<br>Mark your card and have fun!</p>
-
     <div class="mode-selector">
       <button id="host-mode">Host a Game</button>
       <button id="player-mode">Join as Player</button>
     </div>
-
     <div id="host-controls" style="display:none;">
       <div id="player-list">
         <h3>Player List</h3>
         <button id="toggle-player-list">Collapse</button>
         <div id="player-list-content"></div>
       </div>
-
       <div class="host-main">
         <div id="game-type-selector">
           <label for="game-type">Select Game Type: </label>
@@ -190,7 +244,6 @@
             <option value="fullCard">Full Card</option>
           </select>
         </div>
-
         <div id="win-pattern" class="win-pattern"></div>
         <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
         <div id="result" role="status"></div>
@@ -201,27 +254,21 @@
         <button id="copy-winners">Copy Winners List</button>
       </div>
     </div>
-
     <div id="player-controls" style="display:none;">
       <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle" />
       <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID" />
       <button id="join-game-button">Join Game & Generate Card</button>
       <div id="player-card" class="player-card"></div>
     </div>
-
     <h2>Game Board (Called Numbers)</h2>
     <div id="bingo-board" class="bingo-board"></div>
-
     <canvas id="confetti-canvas"></canvas>
     <div id="fireworks" class="fireworks"></div>
   </div>
-
   <div id="ad-box"></div>
-
   <div id="partner-modal">
     <div class="modal-content"></div>
   </div>
-
   <footer>
     <div class="container">
       <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
@@ -232,7 +279,6 @@
       </div>
     </div>
   </footer>
-
   <script>
     /* ========================
        Firebase config (unchanged)
@@ -251,13 +297,11 @@
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
-
     /* ==============
        Data & state
        ============== */
     const letters = ['B','I','N','G','O'];
     const ranges = { B: [1,15], I: [16,30], N: [31,45], G: [46,60], O: [61,75] };
-
     let calledNumbers = new Set();
     let isHost = false;
     let gameId = null;
@@ -267,17 +311,14 @@
     let gameType = 'singleLine';
     let authState = null;
     let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
-
     // sets for preventing duplicate toasts/notifications
     const notifiedWinners = new Set();
     const displayedPlayers = new Set();
-
     // Flags to control initial snapshot vs new child events
     let calledInitialLoaded = false;
     let winnersInitialLoaded = false;
     let playersInitialLoaded = false;
-
-    /* Partners (kept same) */
+    /* Partners (kept same, ensured image URLs are valid and file names referenced correctly) */
     const partners = {
       xmeme: { name:"XMEME", logo:"https://pbs.twimg.com/profile_images/1958268891777449984/_B6-D9Dv.jpg", links:[{type:"X",url:"https://x.com/xmemecoinxrpl"}] },
       kedas: { name:"Kedas Brew", logo:"https://pbs.twimg.com/profile_images/1958545581426503680/4Yh0LjXW.jpg", links:[{type:"Website",url:"https://KedasBrew.com"}] },
@@ -288,7 +329,6 @@
       freedom: { name:"Freedom Phoenix Token", logo:"https://pbs.twimg.com/profile_images/1958657458739847168/WPyFBCUF.jpg", links:[{type:"Website",url:"https://freedomphoenix.xyz"}] },
       banana: { name:"$BANANA", logo:"https://pbs.twimg.com/profile_images/1941025687957057536/ltkgXCoo.jpg", links:[{type:"Website",url:"https://www.BananaXRP.com"}] }
     };
-
     /* Game patterns (kept same) */
     const gamePatterns = {
       singleLine: [
@@ -307,10 +347,8 @@
         [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]
       ]
     };
-
     /* Utility */
     function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-
     /* -> Load calledNumbers from localStorage on init */
     function loadCalledNumbersFromStorage(){
       try{
@@ -320,17 +358,15 @@
         calledNumbers = new Set();
       }
     }
-
     /* Create board: KEEP 10 columns (two sub-columns per letter) to preserve stream visibility.
        The earlier implementation used two slices per letter; we keep that concept but ensure consistent
-       ordering so the grid appears centered and stable.
+       ordering so the grid appears centered and stable. Reverted to sequential min-max for each subcolumn as standard.
     */
     function createBoard(){
       try {
         const board = document.getElementById('bingo-board');
         if(!board) return;
         board.innerHTML = '';
-
         // create 5 letter headers each spanning 2 columns
         letters.forEach(l=>{
           const div = document.createElement('div');
@@ -338,12 +374,8 @@
           div.classList.add('header');
           board.appendChild(div);
         });
-
-        // Build two subcolumns per letter: top chunk (first half) then bottom chunk (second half).
-        // We provide 15 numbers per letter (1..15 etc.) and show them arranged across 8 rows * 5*(2)=10 columns
-        // We'll create 8 rows * 10 columns that emulate your previous layout but with stable mapping.
-
-        // For each letter prepare the consistent 15-number array
+        // Build two subcolumns per letter: left subcolumn (low to mid), right subcolumn (mid+1 to high).
+        // For consistency with standard bingo boards, list numbers sequentially top to bottom in each subcolumn.
         const numbersPerLetter = {};
         letters.forEach(letter=>{
           const [min,max] = ranges[letter];
@@ -351,16 +383,16 @@
           for(let n=min; n<=max; n++) arr.push(n);
           numbersPerLetter[letter] = arr;
         });
-
-        // prepare two subcolumns per letter: first 8 numbers (0..7) then remaining (8..14)
-        // Loop rows = 8 (max subcolumn length) and for each letter append either first or second subcell.
-        const topCount = 8; // we render up to 8 rows of subcolumns per half
-        for(let row = 0; row < topCount; row++){
-          // first pass: left subcolumn for each letter
+        // Split into two subcolumns: first half left, second half right, with 8 and 7 for 15 numbers.
+        const leftCount = Math.ceil(15 / 2); // 8
+        const rightCount = 15 - leftCount; // 7
+        const maxRows = Math.max(leftCount, rightCount);
+        for(let row = 0; row < maxRows; row++){
           letters.forEach(letter=>{
-            const idx = row;
-            if(idx < numbersPerLetter[letter].length){
-              const num = numbersPerLetter[letter][idx];
+            // Left subcolumn
+            const leftIdx = row;
+            if(leftIdx < leftCount){
+              const num = numbersPerLetter[letter][leftIdx];
               const div = document.createElement('div');
               div.textContent = num;
               div.classList.add('cell');
@@ -368,18 +400,16 @@
               if(calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
               board.appendChild(div);
             } else {
-              // keep empty placeholder to maintain grid shape
               const ph = document.createElement('div');
               ph.classList.add('cell'); ph.style.visibility='hidden';
               board.appendChild(ph);
             }
           });
-
-          // second pass: right subcolumn for each letter (continuation)
           letters.forEach(letter=>{
-            const idx = row + topCount; // continuation index
-            if(idx < numbersPerLetter[letter].length){
-              const num = numbersPerLetter[letter][idx];
+            // Right subcolumn
+            const rightIdx = row + leftCount;
+            if(rightIdx < 15){
+              const num = numbersPerLetter[letter][rightIdx];
               const div = document.createElement('div');
               div.textContent = num;
               div.classList.add('cell');
@@ -397,8 +427,7 @@
         console.error('Error creating board:', e);
       }
     }
-
-    /* Display win pattern (unchanged logic) */
+    /* Display win pattern (unchanged logic, but ensured visibility with new CSS) */
     function displayWinPattern(){
       try {
         const winPatternDiv = document.getElementById('win-pattern');
@@ -414,7 +443,6 @@
         }
       } catch(e){ console.error('Error displaying win pattern:', e); }
     }
-
     /* Player card generation (kept, small safety checks) */
     function generatePlayerCard(){
       try {
@@ -433,7 +461,6 @@
         return card;
       } catch(e){ console.error('Error generating player card:', e); return null; }
     }
-
     function computeCardID(card){
       let sum=0; let product=1;
       letters.forEach(letter=>{
@@ -444,7 +471,6 @@
       const combined = (sum*31 + product) % 1000;
       return combined.toString().padStart(3,'0');
     }
-
     function displayPlayerCard(){
       try {
         const cardDiv = document.getElementById('player-card');
@@ -470,7 +496,6 @@
         }
       } catch(e){ console.error('Error displaying player card:', e); }
     }
-
     function highlightNumber(letter,number){
       try {
         const id = `${letter}-${number}`;
@@ -479,7 +504,6 @@
         if(playerCard) highlightOnPlayerCard(letter, number);
       } catch(e){ console.error('Error highlighting number:', e); }
     }
-
     function highlightOnPlayerCard(letter, number){
       try {
         const cell = document.getElementById(`player-${letter}-${number}`);
@@ -487,7 +511,6 @@
         checkForBingo();
       } catch(e){ console.error('Error highlighting on player card:', e); }
     }
-
     /* Bingo checking - logic retained from original but with added guards */
     function checkForBingo(){
       if(!playerCard) return;
@@ -560,7 +583,6 @@
         }
       } catch(e) { console.error('Error checking for bingo:', e); }
     }
-
     /* Non-blocking toast (replaces alert spam) */
     function showToast(message, duration=4000){
       const toast = document.createElement('div');
@@ -574,7 +596,6 @@
         setTimeout(()=> toast.remove(), 300);
       }, duration);
     }
-
     /* Actions on winning: store local flag, push to firebase, show toast/non-blocking notification, trigger visuals */
     function winGame(winKey){
       try {
@@ -591,7 +612,6 @@
         }
       } catch(e){ console.error('Error processing win:', e); }
     }
-
     /* Leaderboard rendering — we avoid repeated blocking alerts. We build the list and toast only *new* winners. */
     function updateLeaderboardSnapshot(winnersObj){
       try {
@@ -615,7 +635,6 @@
         leaderboard.appendChild(ul);
       } catch(e){ console.error('Error updating leaderboard snapshot:', e); }
     }
-
     function appendWinnerToLeaderboard(key, value){
       try {
         const leaderboard = document.getElementById('leaderboard');
@@ -630,7 +649,6 @@
         ul.appendChild(li);
       } catch(e){ console.error('Error appending winner:', e); }
     }
-
     /* Player list update */
     function updatePlayerListSnapshot(playersObj){
       try {
@@ -653,13 +671,11 @@
         playerListContent.appendChild(ul);
       } catch(e){ console.error('Error updating player list snapshot:', e); }
     }
-
     function appendPlayerToList(key, value){
       try {
         const playerListContent = document.getElementById('player-list-content');
         if(!playerListContent) return;
         if(playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
-
         let ul = playerListContent.querySelector('ul');
         if(!ul){ ul = document.createElement('ul'); ul.style.padding='0'; ul.style.listStyle='none'; playerListContent.appendChild(ul); }
         const li = document.createElement('li');
@@ -668,7 +684,6 @@
         ul.appendChild(li);
       } catch(e){ console.error('Error appending player:', e); }
     }
-
     /* Confetti & fireworks (kept, small safety) */
     function triggerConfetti(){
       try {
@@ -709,7 +724,6 @@
         draw();
       } catch(e){ console.error('Error triggering confetti:', e); }
     }
-
     function triggerFireworks(){
       try {
         const fireworks = document.getElementById('fireworks');
@@ -730,14 +744,12 @@
         setTimeout(()=> { fireworks.style.display='none'; fireworks.innerHTML=''; }, 2000);
       } catch(e){ console.error('Error triggering fireworks:', e); }
     }
-
     function playRollSound(){
       try {
         const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
         audio.play().catch(()=>{/* ignore autoplay block */});
       } catch(e){ console.error('Error playing roll sound:', e); }
     }
-
     /* ---------------------------
        MODE HANDLERS & UI wiring
        --------------------------- */
@@ -757,7 +769,6 @@
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
     const resultDiv = document.getElementById('result');
-
     /* Cleanup firebase listeners */
     function cleanupListeners(){
       try {
@@ -772,7 +783,6 @@
         playersInitialLoaded = false;
       } catch(e){ console.error('Error cleaning up listeners:', e); }
     }
-
     /* HOST MODE: sign in anonymously and set up a fresh game */
     hostModeBtn.addEventListener('click', ()=>{
       try {
@@ -780,7 +790,6 @@
           isHost = true;
           hostControls.style.display = 'flex';
           playerControls.style.display = 'none';
-
           // Reset ephemeral state
           calledNumbers.clear();
           localStorage.removeItem('calledNumbers');
@@ -788,19 +797,15 @@
           displayedPlayers.clear();
           playerWins = {};
           localStorage.setItem('playerWins', JSON.stringify(playerWins));
-
           // always create a new game id for a host session
           gameId = Math.random().toString(36).substring(2,10);
           localStorage.setItem('gameId', gameId);
           gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
-
           // set up the DB ref and initial fields
           setupGame(gameId);
-
           gameType = gameTypeSelect.value;
           firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
             .catch(err => console.error('Error setting game type:', err));
-
           displayWinPattern();
           loadCalledNumbersFromStorage();
           createBoard();
@@ -811,7 +816,6 @@
         });
       } catch(e){ console.error('Host mode error:', e); alert('Error starting host mode.'); }
     });
-
     /* PLAYER MODE: show player UI only (players sign in when they join) */
     playerModeBtn.addEventListener('click', ()=>{
       try {
@@ -826,7 +830,6 @@
         showToast('Player mode: enter game ID and handle to join.', 2500);
       } catch(e){ console.error('Player mode error:', e); alert('Error entering player mode.'); }
     });
-
     /* JOIN GAME: players authenticate anonymously so writes are covered by security rules */
     joinGameBtn.addEventListener('click', ()=>{
       try {
@@ -834,25 +837,20 @@
         const providedHandle = xHandleInput.value.trim();
         if(!providedGameId) return alert('Enter a valid Game ID');
         if(!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
-
         // Sign in anonymously then register player so we have auth in DB rules
         firebase.auth().signInAnonymously().then(()=>{
           gameId = providedGameId;
           xHandle = providedHandle;
           localStorage.setItem('gameId', gameId);
           localStorage.setItem('xHandle', xHandle);
-
           // generate card
           playerCard = generatePlayerCard();
           const cardID = computeCardID(playerCard);
-
           // reset local wins for this join
           playerWins = {};
           localStorage.setItem('playerWins', JSON.stringify(playerWins));
           notifiedWinners.clear();
-
           displayPlayerCard();
-
           // register player in DB under games/{gameId}/players/{handle}
           const handleKey = xHandle.replace('@','');
           firebase.database().ref(`games/${gameId}/players/${handleKey}`).set({
@@ -871,7 +869,6 @@
         });
       } catch(e){ console.error('Join game error:', e); alert('Error joining game.'); }
     });
-
     /* copy helpers -> replaced alerts with toast */
     copyGameIdBtn.addEventListener('click', ()=>{
       try {
@@ -879,20 +876,17 @@
         navigator.clipboard.writeText(gameId).then(()=> showToast('Game ID copied!',2000));
       } catch(e){ console.error('Copy error:', e); showToast('Error copying Game ID', 2000); }
     });
-
     copyWinnersBtn.addEventListener('click', ()=>{
       try {
         const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n','');
         navigator.clipboard.writeText(winnersList).then(()=> showToast('Winners list copied!', 2000));
       } catch(e){ console.error('Copy winners error:', e); showToast('Error copying winners list',2000); }
     });
-
     /* ====== Setup realtime listeners for a game (clean handling for initial snapshot vs new child events) ====== */
     function setupGame(id){
       try {
         cleanupListeners(); // make sure previous refs are cleared
         gameRef = firebase.database().ref(`games/${id}`);
-
         // ---- called numbers: first get snapshot, then attach child_added for *new* calls
         gameRef.child('called').once('value', snap => {
           const obj = snap.val();
@@ -905,7 +899,6 @@
           createBoard();
           calledInitialLoaded = true;
         });
-
         // listen for subsequent child_added (new rolls)
         gameRef.child('called').on('child_added', snap => {
           const rolled = snap.val();
@@ -924,27 +917,25 @@
             triggerConfetti();
           }
         });
-
-        // ---- gameType value sync
+        // ---- gameType value sync (removed playerWins reset to allow multiple modes on same card)
         gameRef.child('gameType').on('value', snap=>{
           const newGameType = snap.val() || 'singleLine';
           if(newGameType !== gameType){
             gameType = newGameType;
             if(isHost) gameTypeSelect.value = gameType;
-            playerWins = {};
-            localStorage.setItem('playerWins', JSON.stringify(playerWins));
+            // Do not reset playerWins here - allow wins to accumulate per mode
             displayWinPattern();
             createBoard();
+            // Trigger checkForBingo in case new pattern is already won with existing calls
+            checkForBingo();
           }
         });
-
         // ---- winners: get a snapshot (initial list) then subscribe to child_added for *new* winners
         gameRef.child('winners').once('value', snap=>{
           const obj = snap.val() || {};
           updateLeaderboardSnapshot(obj);
           winnersInitialLoaded = true;
         });
-
         gameRef.child('winners').on('child_added', snap=>{
           const key = snap.key;
           const val = snap.val();
@@ -959,14 +950,12 @@
             // appendWinnerToLeaderboard will still append duplicate if used here; we rely on snapshot append to fill UI initially.
           }
         });
-
         // ---- players: initial snapshot then child_added for new players
         gameRef.child('players').once('value', snap=>{
           const obj = snap.val() || {};
           updatePlayerListSnapshot(obj);
           playersInitialLoaded = true;
         });
-
         gameRef.child('players').on('child_added', snap=>{
           const key = snap.key;
           const val = snap.val();
@@ -976,28 +965,36 @@
             if(isHost) showToast(`${val.handle || '@'+key} joined`, 2500);
           }
         });
-
       } catch(e){ console.error('Setup game error:', e); alert('Error setting up game.'); }
     }
-
-    /* Rolling logic: generate roll & push to DB (host only) */
+    /* Rolling logic: generate roll & push to DB (host only), prevent infinite loop when all called */
     function rollBingo(){
+      if(calledNumbers.size >= 75) {
+        showToast('All numbers called! Reset or change game mode.', 5000);
+        return null;
+      }
       let letter, number;
+      let attempts = 0;
       do {
         letter = letters[Math.floor(Math.random()*letters.length)];
         const [min,max] = ranges[letter];
         number = getRandomNumber(min,max);
+        attempts++;
+        if(attempts > 100) { // Safety break
+          showToast('Unable to find new number. Reset game.', 5000);
+          return null;
+        }
       } while(calledNumbers.has(`${letter}-${number}`));
       const rolled = `${letter}-${number}`;
       calledNumbers.add(rolled);
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
       return rolled;
     }
-
     rollButton.addEventListener('click', ()=>{
       if(!isHost || !gameRef) return alert('Host a game first');
       try {
         const rolled = rollBingo();
+        if(!rolled) return;
         firebase.database().ref(`games/${gameId}/called`).push(rolled)
           .then(()=> {
             // host feedback is provided by the child_added listener which triggers visuals for new roll.
@@ -1005,7 +1002,6 @@
           }).catch(err => console.error('Error pushing roll:', err));
       } catch(e){ console.error('Roll error:', e); alert('Error rolling number.'); }
     });
-
     /* Reset logic - CLEANLY remove DB listeners and optionally remove game from DB */
     resetButton.addEventListener('click', ()=>{
       try {
@@ -1014,9 +1010,7 @@
           // remove full game node (called/players/winners/gameType)
           gameRef.remove().catch(err => console.warn('Failed to remove game DB node:', err));
         }
-
         cleanupListeners();
-
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
         localStorage.removeItem('playerCard');
@@ -1040,13 +1034,11 @@
         showToast('Game reset complete', 2000);
       } catch(e){ console.error('Reset error:', e); alert('Error resetting game.'); }
     });
-
     /* Auth state listener to keep track */
     firebase.auth().onAuthStateChanged(user=>{
       authState = user;
       // console.log('Auth state:', user ? 'signed in' : 'signed out');
     });
-
     /* Sponsors menu toggle */
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const submenu = document.querySelector('.submenu');
@@ -1057,7 +1049,6 @@
     document.addEventListener('click', (e)=>{
       if(!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) submenu.style.display = 'none';
     });
-
     /* partner links open modal */
     document.querySelectorAll('.partner-link').forEach(link=>{
       link.addEventListener('click', (e)=>{
@@ -1077,9 +1068,7 @@
         }
       });
     });
-
     partnerModal.addEventListener('click', (e) => { if(e.target === partnerModal) partnerModal.style.display = 'none'; });
-
     /* Auto join via URL? (kept) */
     const urlParams = new URLSearchParams(window.location.search);
     const urlGameId = urlParams.get('gameId');
@@ -1090,7 +1079,6 @@
       gameIdInput.value = gameId;
       showToast('Auto-join game ID detected', 2000);
     }
-
     /* Toggle player list collapse */
     const togglePlayerListBtn = document.getElementById('toggle-player-list');
     const playerListContent = document.getElementById('player-list-content');
@@ -1100,8 +1088,7 @@
         else { playerListContent.style.display = 'none'; togglePlayerListBtn.textContent = 'Expand'; }
       });
     }
-
-    /* Ad box rotate (kept) */
+    /* Ad box rotate (kept, but made draggable) */
     const logos = Object.values(partners).map(p=>p.logo).filter(Boolean);
     let idx = 0;
     const adBox = document.getElementById('ad-box');
@@ -1113,14 +1100,35 @@
       } catch(e){ console.error('Error rotating ad:', e); adBox.innerHTML = '<p>Ad loading failed</p>'; }
     }
     if(logos.length > 0){ rotateAd(); setInterval(rotateAd, 15000); } else { adBox.innerHTML = '<p>No sponsor logos</p>'; }
-
+    // Make ad-box draggable
+    let isDragging = false;
+    let startX, startY;
+    adBox.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX - adBox.getBoundingClientRect().left;
+      startY = e.clientY - adBox.getBoundingClientRect().top;
+      adBox.style.cursor = 'grabbing';
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.clientX - startX;
+      const y = e.clientY - startY;
+      adBox.style.left = `${x}px`;
+      adBox.style.top = `${y}px`;
+      adBox.style.right = 'auto';
+      adBox.style.bottom = 'auto';
+    });
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      adBox.style.cursor = 'move';
+    });
     /* INITIALIZE */
     (function init(){
       loadCalledNumbersFromStorage();
       createBoard();
       displayWinPattern();
     })();
-
     /* small window resize handling for canvas */
     window.addEventListener('resize', ()=> {
       const canvas = document.getElementById('confetti-canvas');
