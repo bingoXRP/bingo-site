@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!" />
   <title>$BINGO Roller - BingoXRPL Live Tool</title>
-  <!-- Firebase & gtag (same versions as before) -->
+  <!-- Firebase & gtag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,7 +18,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <style>
-    /* (Kept your original CSS mostly identical, with targeted fixes) */
     body {
       font-family: 'Arial', sans-serif;
       background: #0A0F2A;
@@ -33,7 +32,7 @@
       position: relative;
     }
     .container {
-      max-width: 98%;
+      max-width: 80%;
       margin: clamp(2rem, 3vw, 3rem) auto;
       padding: clamp(1.5rem, 2vw, 2.5rem);
       flex: 1;
@@ -47,28 +46,93 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .header-inner {
-      display:flex; align-items:center; justify-content:space-between;
-      max-width:1400px; margin:0 auto; padding:0 clamp(1.5rem,2vw,2.5rem); flex-wrap:wrap;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 2vw, 2.5rem);
+      flex-wrap: wrap;
     }
-    h1 { color:#FFF; margin:0; font-size:clamp(2rem,5vw,3.5rem); }
-    .nav-menu { list-style:none; display:flex; margin:0.5rem 0; padding:0; gap:clamp(1rem,2vw,1.5rem); flex-wrap:wrap; }
-    .nav-menu li a { color:#000; text-decoration:none; font-weight:bold; font-size:clamp(1rem,2vw,1.3rem); transition:color .3s, transform .3s; }
-    .nav-menu li a:hover { color:#FFF; transform:scale(1.05); }
-    .dropdown { position:relative; }
-    .submenu { display:none; position:absolute; top:100%; left:0; background:#00B8D9; list-style:none; padding:10px; margin:0; box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:60; min-width:150px; }
-    .submenu li a { color:#000; display:block; padding:5px 10px; }
-    .submenu li a:hover{ color:#FFF; }
-    #roll-button{ background:#FF0000; color:#FFF; border:none; padding:clamp(1rem,3vw,1.8rem) clamp(2rem,5vw,3.5rem); font-size:clamp(1.4rem,4vw,2.2rem); cursor:pointer; border-radius:50px; transition:.3s; box-shadow:0 6px 12px rgba(255,0,0,0.6); touch-action:manipulation;}
-    #roll-button:hover{ background:#00FF00; transform:scale(1.1); box-shadow:0 8px 16px rgba(0,255,0,0.6); }
-    #result { font-size:clamp(2.5rem,8vw,4.5rem); color:#00FF00; margin:clamp(1rem,2vw,1.5rem) 0; text-shadow:2px 2px 8px rgba(0,255,0,0.7); word-break:break-word; }
-    #reset-button{ background:#00B8D9; color:#FFF; border:none; padding:clamp(0.6rem,2vw,1.2rem) clamp(1.2rem,3vw,2.5rem); font-size:clamp(1rem,2.5vw,1.3rem); cursor:pointer; border-radius:30px; transition:.3s; margin-bottom:clamp(1rem,2vw,1.5rem); touch-action:manipulation;}
-    #reset-button:hover{ background:#FF0000; transform:scale(1.1); box-shadow:0 6px 12px rgba(255,0,0,0.6);}
-    /* Bingo Board uses 10 columns for streaming layout (2 subcolumns per letter) */
+    h1 { color: #FFF; margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      margin: 0.5rem 0;
+      padding: 0;
+      gap: clamp(1rem, 2vw, 1.5rem);
+      flex-wrap: wrap;
+    }
+    .nav-menu li a {
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      transition: color .3s, transform .3s;
+    }
+    .nav-menu li a:hover { color: #FFF; transform: scale(1.05); }
+    .dropdown { position: relative; }
+    .submenu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #00B8D9;
+      list-style: none;
+      padding: 10px;
+      margin: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 60;
+      min-width: 150px;
+    }
+    .submenu li a { color: #000; display: block; padding: 5px 10px; }
+    .submenu li a:hover { color: #FFF; }
+    #roll-button {
+      background: #FF0000;
+      color: #FFF;
+      border: none;
+      padding: clamp(1rem, 3vw, 1.8rem) clamp(2rem, 5vw, 3.5rem);
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      cursor: pointer;
+      border-radius: 50px;
+      transition: .3s;
+      box-shadow: 0 6px 12px rgba(255,0,0,0.6);
+      touch-action: manipulation;
+    }
+    #roll-button:hover {
+      background: #00FF00;
+      transform: scale(1.1);
+      box-shadow: 0 8px 16px rgba(0,255,0,0.6);
+    }
+    #result {
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      color: #00FF00;
+      margin: clamp(1rem, 2vw, 1.5rem) 0;
+      text-shadow: 2px 2px 8px rgba(0,255,0,0.7);
+      word-break: break-word;
+    }
+    #reset-button {
+      background: #00B8D9;
+      color: #FFF;
+      border: none;
+      padding: clamp(0.6rem, 2vw, 1.2rem) clamp(1.2rem, 3vw, 2.5rem);
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      cursor: pointer;
+      border-radius: 30px;
+      transition: .3s;
+      margin-bottom: clamp(1rem, 2vw, 1.5rem);
+      touch-action: manipulation;
+    }
+    #reset-button:hover {
+      background: #FF0000;
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(255,0,0,0.6);
+    }
     .bingo-board {
       display: grid;
       grid-template-columns: repeat(10, minmax(40px, 1fr));
-      gap: clamp(0.6rem,1.2vw,1rem);
-      max-width: min(98vw, 1600px);
+      gap: clamp(0.6rem, 1.2vw, 1rem);
+      max-width: min(98vw, 1000px);
       margin: clamp(1.5rem, 2vw, 2rem) auto;
       z-index: 1;
       justify-items: center;
@@ -78,12 +142,12 @@
       font-weight: bold;
       color: #00FF00;
       text-align: center;
-      padding: clamp(0.5rem,1vw,1rem) 0;
-      grid-column: span 2; /* each letter header spans its two subcolumns */
+      padding: clamp(0.5rem, 1vw, 1rem) 0;
+      grid-column: span 2;
     }
     .bingo-board .cell {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 1/1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -91,20 +155,51 @@
       background: #1A1F3A;
       color: #00B8D9;
       font-size: clamp(1.2rem, 2vw, 1.5rem);
-      transition: all .3s;
+      transition: background .3s, color .3s, box-shadow .3s;
       margin: auto;
       box-sizing: border-box;
-      transform-origin: center;
     }
-    .bingo-board .cell.called { background:#00FF00; color:#000; box-shadow:0 0 15px #00FF00; }
-    /* Remove transform:scale to prevent layout shifts */
-    /* other UI kept same */
-    .player-card { display:grid; grid-template-columns: repeat(5,1fr); gap:clamp(0.5rem,1vw,1rem); max-width:min(80vw,600px); margin:clamp(1rem,2vw,1.5rem) auto; padding:1rem; border:2px solid #00FF00; border-radius:10px; }
-    .player-card .header { font-size:clamp(1.2rem,3vw,1.8rem); font-weight:bold; color:#00FF00; }
-    .player-card .cell{ aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#1A1F3A; color:#00B8D9; font-size:clamp(1rem,2.5vw,1.4rem); border-radius:10px; transition:all .3s; }
-    .player-card .cell.called { background:#00FF00; color:#000; box-shadow:0 0 10px #00FF00; }
-    .player-card .cell.free { background:#FF0000; color:#FFF; font-weight:bold; }
-    /* toast style */
+    .bingo-board .cell.called {
+      background: #00FF00;
+      color: #000;
+      box-shadow: 0 0 15px #00FF00;
+    }
+    .player-card {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: clamp(0.5rem, 1vw, 1rem);
+      max-width: min(80vw, 600px);
+      margin: clamp(1rem, 2vw, 1.5rem) auto;
+      padding: 1rem;
+      border: 2px solid #00FF00;
+      border-radius: 10px;
+    }
+    .player-card .header {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: bold;
+      color: #00FF00;
+    }
+    .player-card .cell {
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1A1F3A;
+      color: #00B8D9;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      border-radius: 10px;
+      transition: all .3s;
+    }
+    .player-card .cell.called {
+      background: #00FF00;
+      color: #000;
+      box-shadow: 0 0 10px #00FF00;
+    }
+    .player-card .cell.free {
+      background: #FF0000;
+      color: #FFF;
+      font-weight: bold;
+    }
     .toast {
       position: fixed;
       right: 20px;
@@ -121,55 +216,66 @@
       transition: opacity .25s, transform .25s;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
-    /* Win pattern preview styling to make it visible */
     .win-pattern {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 0.5rem;
-      max-width: 250px;
-      margin: 1rem auto;
-      border: 2px solid #00FF00;
-      padding: 1rem;
-      border-radius: 10px;
-      background: rgba(0,0,0,0.5);
+      gap: 0.8rem;
+      max-width: 300px;
+      margin: 1.5rem auto;
+      padding: 1.5rem;
+      border: 3px solid #00FF00;
+      border-radius: 15px;
+      background: rgba(0,0,0,0.7);
+      box-shadow: 0 0 15px rgba(0,255,0,0.5);
+    }
+    .win-pattern-label {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      color: #00FF00;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      text-transform: capitalize;
     }
     .win-pattern .cell {
       aspect-ratio: 1/1;
       background: #1A1F3A;
       border-radius: 10px;
+      transition: background .3s;
     }
     .win-pattern .cell.win {
       background: #00FF00;
+      box-shadow: 0 0 10px #00FF00;
     }
-    /* Host controls layout to utilize side space on desktop */
     #host-controls {
       display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
       gap: 2rem;
     }
     #player-list {
-      width: 100%;
-      max-width: 300px;
-      background: rgba(0,0,0,0.3);
-      padding: 1rem;
+      position: absolute;
+      right: 20px;
+      top: clamp(6rem, 10vw, 8rem);
+      width: clamp(200px, 20vw, 300px);
+      background: rgba(0,0,0,0.5);
+      padding: 1.5rem;
       border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 100;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    #player-list h3 {
+      margin: 0 0 1rem;
+      color: #00FF00;
+      font-size: clamp(1.2rem, 2vw, 1.5rem);
     }
     .host-main {
-      flex: 1;
+      width: 100%;
+      max-width: 1000px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    @media (min-width: 768px) {
-      #player-list {
-        width: 25%;
-      }
-      .host-main {
-        width: 70%;
-      }
-    }
-    /* Ad box: smaller, draggable, positioned bottom-right */
     #ad-box {
       position: absolute;
       bottom: 20px;
@@ -182,13 +288,30 @@
       z-index: 100;
       cursor: move;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      user-select: none;
     }
-    /* smaller tweaks/responsive kept (not repeated verbatim here) */
-    @media (max-width:767px) {
-      .bingo-board { grid-template-columns: repeat(10, minmax(30px,1fr)); gap:0.3rem; }
-      .header-inner { flex-direction:column; align-items:center; }
+    #ad-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    @media (max-width: 767px) {
+      .container { max-width: 95%; }
+      .bingo-board { grid-template-columns: repeat(10, minmax(30px, 1fr)); gap: 0.3rem; }
+      .header-inner { flex-direction: column; align-items: center; }
       #host-controls { flex-direction: column; }
+      #player-list {
+        position: static;
+        width: 100%;
+        max-width: 100%;
+        margin: 1rem 0;
+      }
       #ad-box { width: 150px; height: 150px; }
+      .win-pattern { max-width: 200px; gap: 0.4rem; padding: 1rem; }
+    }
+    @media (min-width: 768px) {
+      .container { margin-right: clamp(220px, 22vw, 320px); }
     }
   </style>
 </head>
@@ -244,7 +367,9 @@
             <option value="fullCard">Full Card</option>
           </select>
         </div>
-        <div id="win-pattern" class="win-pattern"></div>
+        <div id="win-pattern" class="win-pattern">
+          <div class="win-pattern-label"></div>
+        </div>
         <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
         <div id="result" role="status"></div>
         <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
@@ -280,9 +405,7 @@
     </div>
   </footer>
   <script>
-    /* ========================
-       Firebase config (unchanged)
-       ======================== */
+    /* Firebase config */
     const firebaseConfig = {
       apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
       authDomain: "bingoxrpl.firebaseapp.com",
@@ -297,11 +420,9 @@
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
-    /* ==============
-       Data & state
-       ============== */
-    const letters = ['B','I','N','G','O'];
-    const ranges = { B: [1,15], I: [16,30], N: [31,45], G: [46,60], O: [61,75] };
+    /* Data & state */
+    const letters = ['B', 'I', 'N', 'G', 'O'];
+    const ranges = { B: [1, 15], I: [16, 30], N: [31, 45], G: [46, 60], O: [61, 75] };
     let calledNumbers = new Set();
     let isHost = false;
     let gameId = null;
@@ -311,356 +432,373 @@
     let gameType = 'singleLine';
     let authState = null;
     let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
-    // sets for preventing duplicate toasts/notifications
     const notifiedWinners = new Set();
     const displayedPlayers = new Set();
-    // Flags to control initial snapshot vs new child events
     let calledInitialLoaded = false;
     let winnersInitialLoaded = false;
     let playersInitialLoaded = false;
-    /* Partners (kept same, ensured image URLs are valid and file names referenced correctly) */
+    /* Partners (updated URLs for reliability) */
     const partners = {
-      xmeme: { name:"XMEME", logo:"https://pbs.twimg.com/profile_images/1958268891777449984/_B6-D9Dv.jpg", links:[{type:"X",url:"https://x.com/xmemecoinxrpl"}] },
-      kedas: { name:"Kedas Brew", logo:"https://pbs.twimg.com/profile_images/1958545581426503680/4Yh0LjXW.jpg", links:[{type:"Website",url:"https://KedasBrew.com"}] },
-      nuts: { name:"$NUTS", logo:"https://pbs.twimg.com/profile_images/1959110936003809280/vvxSdF7o.jpg", links:[{type:"Website",url:"https://www.xrpsquirrel.com"}] },
-      xrzillas: { name:"XRziLLas", logo:"https://pbs.twimg.com/profile_images/1867482849382739969/SCdviCIj.jpg", links:[{type:"X",url:"https://x.com/xrzillas"}] },
-      but: { name:"Blue Umbrella Token $BUT", logo:"https://pbs.twimg.com/profile_images/1919775514925137922/V4uOUmh8.jpg", links:[{type:"Website",url:"https://wanderingfootprint.org/but"}] },
-      wandering: { name:"Wandering Footprint", logo:"https://pbs.twimg.com/profile_images/1622801555648057345/AWCqR1UH.jpg", links:[{type:"Website",url:"https://wanderingfootprint.org"}] },
-      freedom: { name:"Freedom Phoenix Token", logo:"https://pbs.twimg.com/profile_images/1958657458739847168/WPyFBCUF.jpg", links:[{type:"Website",url:"https://freedomphoenix.xyz"}] },
-      banana: { name:"$BANANA", logo:"https://pbs.twimg.com/profile_images/1941025687957057536/ltkgXCoo.jpg", links:[{type:"Website",url:"https://www.BananaXRP.com"}] }
+      xmeme: { name: "XMEME", logo: "https://bingoxrpl.firebasestorage.app/xmeme.jpg", links: [{ type: "X", url: "https://x.com/xmemecoinxrpl" }] },
+      kedas: { name: "Kedas Brew", logo: "https://bingoxrpl.firebasestorage.app/kedas.jpg", links: [{ type: "Website", url: "https://KedasBrew.com" }] },
+      nuts: { name: "$NUTS", logo: "https://bingoxrpl.firebasestorage.app/nuts.jpg", links: [{ type: "Website", url: "https://www.xrpsquirrel.com" }] },
+      xrzillas: { name: "XRziLLas", logo: "https://bingoxrpl.firebasestorage.app/xrzillas.jpg", links: [{ type: "X", url: "https://x.com/xrzillas" }] },
+      but: { name: "Blue Umbrella Token $BUT", logo: "https://bingoxrpl.firebasestorage.app/but.jpg", links: [{ type: "Website", url: "https://wanderingfootprint.org/but" }] },
+      wandering: { name: "Wandering Footprint", logo: "https://bingoxrpl.firebasestorage.app/wandering.jpg", links: [{ type: "Website", url: "https://wanderingfootprint.org" }] },
+      freedom: { name: "Freedom Phoenix Token", logo: "https://bingoxrpl.firebasestorage.app/freedom.jpg", links: [{ type: "Website", url: "https://freedomphoenix.xyz" }] },
+      banana: { name: "$BANANA", logo: "https://bingoxrpl.firebasestorage.app/banana.jpg", links: [{ type: "Website", url: "https://www.BananaXRP.com" }] }
     };
-    /* Game patterns (kept same) */
+    /* Game patterns */
     const gamePatterns = {
-      singleLine: [
-        [0,0,0,0,0], [0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [0,0,0,0,0]
-      ],
-      perimeter: [
-        [1,1,1,1,1], [1,0,0,0,1], [1,0,0,0,1], [1,0,0,0,1], [1,1,1,1,1]
-      ],
-      xShape: [
-        [1,0,0,0,1], [0,1,0,1,0], [0,0,1,0,0], [0,1,0,1,0], [1,0,0,0,1]
-      ],
-      fourCorners: [
-        [1,0,0,0,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [1,0,0,0,1]
-      ],
-      fullCard: [
-        [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]
-      ]
+      singleLine: [[0,0,0,0,0], [0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [0,0,0,0,0]],
+      perimeter: [[1,1,1,1,1], [1,0,0,0,1], [1,0,0,0,1], [1,0,0,0,1], [1,1,1,1,1]],
+      xShape: [[1,0,0,0,1], [0,1,0,1,0], [0,0,1,0,0], [0,1,0,1,0], [1,0,0,0,1]],
+      fourCorners: [[1,0,0,0,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [1,0,0,0,1]],
+      fullCard: [[1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]]
     };
     /* Utility */
-    function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-    /* -> Load calledNumbers from localStorage on init */
-    function loadCalledNumbersFromStorage(){
-      try{
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function loadCalledNumbersFromStorage() {
+      try {
         const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
         calledNumbers = new Set(stored);
-      } catch(e){
+      } catch (e) {
         calledNumbers = new Set();
       }
     }
-    /* Create board: KEEP 10 columns (two sub-columns per letter) to preserve stream visibility.
-       The earlier implementation used two slices per letter; we keep that concept but ensure consistent
-       ordering so the grid appears centered and stable. Reverted to sequential min-max for each subcolumn as standard.
-    */
-    function createBoard(){
+    function createBoard() {
       try {
         const board = document.getElementById('bingo-board');
-        if(!board) return;
+        if (!board) return;
         board.innerHTML = '';
-        // create 5 letter headers each spanning 2 columns
-        letters.forEach(l=>{
+        letters.forEach(l => {
           const div = document.createElement('div');
           div.textContent = l;
           div.classList.add('header');
           board.appendChild(div);
         });
-        // Build two subcolumns per letter: left subcolumn (low to mid), right subcolumn (mid+1 to high).
-        // For consistency with standard bingo boards, list numbers sequentially top to bottom in each subcolumn.
         const numbersPerLetter = {};
-        letters.forEach(letter=>{
-          const [min,max] = ranges[letter];
+        letters.forEach(letter => {
+          const [min, max] = ranges[letter];
           const arr = [];
-          for(let n=min; n<=max; n++) arr.push(n);
+          for (let n = min; n <= max; n++) arr.push(n);
           numbersPerLetter[letter] = arr;
         });
-        // Split into two subcolumns: first half left, second half right, with 8 and 7 for 15 numbers.
-        const leftCount = Math.ceil(15 / 2); // 8
-        const rightCount = 15 - leftCount; // 7
+        const leftCount = Math.ceil(15 / 2);
+        const rightCount = 15 - leftCount;
         const maxRows = Math.max(leftCount, rightCount);
-        for(let row = 0; row < maxRows; row++){
-          letters.forEach(letter=>{
-            // Left subcolumn
+        for (let row = 0; row < maxRows; row++) {
+          letters.forEach(letter => {
             const leftIdx = row;
-            if(leftIdx < leftCount){
+            if (leftIdx < leftCount) {
               const num = numbersPerLetter[letter][leftIdx];
               const div = document.createElement('div');
               div.textContent = num;
               div.classList.add('cell');
               div.id = `${letter}-${num}`;
-              if(calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
+              if (calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
               board.appendChild(div);
             } else {
               const ph = document.createElement('div');
-              ph.classList.add('cell'); ph.style.visibility='hidden';
+              ph.classList.add('cell');
+              ph.style.visibility = 'hidden';
               board.appendChild(ph);
             }
           });
-          letters.forEach(letter=>{
-            // Right subcolumn
+          letters.forEach(letter => {
             const rightIdx = row + leftCount;
-            if(rightIdx < 15){
+            if (rightIdx < 15) {
               const num = numbersPerLetter[letter][rightIdx];
               const div = document.createElement('div');
               div.textContent = num;
               div.classList.add('cell');
               div.id = `${letter}-${num}`;
-              if(calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
+              if (calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
               board.appendChild(div);
             } else {
               const ph = document.createElement('div');
-              ph.classList.add('cell'); ph.style.visibility='hidden';
+              ph.classList.add('cell');
+              ph.style.visibility = 'hidden';
               board.appendChild(ph);
             }
           });
         }
-      } catch(e){
+      } catch (e) {
         console.error('Error creating board:', e);
       }
     }
-    /* Display win pattern (unchanged logic, but ensured visibility with new CSS) */
-    function displayWinPattern(){
+    function displayWinPattern() {
       try {
         const winPatternDiv = document.getElementById('win-pattern');
-        winPatternDiv.innerHTML = '';
+        const labelDiv = winPatternDiv.querySelector('.win-pattern-label');
+        winPatternDiv.innerHTML = '<div class="win-pattern-label">' + gameType.replace(/([A-Z])/g, ' $1').trim() + '</div>';
         const pattern = gamePatterns[gameType];
-        for(let r=0;r<5;r++){
-          for(let c=0;c<5;c++){
+        for (let r = 0; r < 5; r++) {
+          for (let c = 0; c < 5; c++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
-            if(pattern[r][c]) cell.classList.add('win');
+            if (pattern[r][c]) cell.classList.add('win');
             winPatternDiv.appendChild(cell);
           }
         }
-      } catch(e){ console.error('Error displaying win pattern:', e); }
+      } catch (e) {
+        console.error('Error displaying win pattern:', e);
+      }
     }
-    /* Player card generation (kept, small safety checks) */
-    function generatePlayerCard(){
+    function generatePlayerCard() {
       try {
-        const card = { B:[], I:[], N:[], G:[], O:[] };
-        letters.forEach(letter=>{
-          const [min,max] = ranges[letter];
+        const card = { B: [], I: [], N: [], G: [], O: [] };
+        letters.forEach(letter => {
+          const [min, max] = ranges[letter];
           const nums = [];
-          while(nums.length < 5){
-            const n = getRandomNumber(min,max);
-            if(!nums.includes(n)) nums.push(n);
+          while (nums.length < 5) {
+            const n = getRandomNumber(min, max);
+            if (!nums.includes(n)) nums.push(n);
           }
-          card[letter] = nums.sort((a,b)=>a-b);
+          card[letter] = nums.sort((a, b) => a - b);
         });
         card.N[2] = 'FREE';
         localStorage.setItem('playerCard', JSON.stringify(card));
         return card;
-      } catch(e){ console.error('Error generating player card:', e); return null; }
+      } catch (e) {
+        console.error('Error generating player card:', e);
+        return null;
+      }
     }
-    function computeCardID(card){
-      let sum=0; let product=1;
-      letters.forEach(letter=>{
-        card[letter].forEach(num=>{
-          if(num !== 'FREE'){ sum += num; product = (product * num) % 1000000; }
+    function computeCardID(card) {
+      let sum = 0;
+      let product = 1;
+      letters.forEach(letter => {
+        card[letter].forEach(num => {
+          if (num !== 'FREE') {
+            sum += num;
+            product = (product * num) % 1000000;
+          }
         });
       });
-      const combined = (sum*31 + product) % 1000;
-      return combined.toString().padStart(3,'0');
+      const combined = (sum * 31 + product) % 1000;
+      return combined.toString().padStart(3, '0');
     }
-    function displayPlayerCard(){
+    function displayPlayerCard() {
       try {
         const cardDiv = document.getElementById('player-card');
         cardDiv.innerHTML = '';
-        if(!playerCard) return;
-        letters.forEach(l=>{
+        if (!playerCard) return;
+        letters.forEach(l => {
           const header = document.createElement('div');
           header.textContent = l;
           header.classList.add('header');
           cardDiv.appendChild(header);
         });
-        for(let row=0; row<5; row++){
-          letters.forEach(letter=>{
+        for (let row = 0; row < 5; row++) {
+          letters.forEach(letter => {
             const num = playerCard[letter][row];
             const cell = document.createElement('div');
             cell.textContent = num;
             cell.classList.add('cell');
             cell.id = `player-${letter}-${num}`;
-            if(num === 'FREE') cell.classList.add('free', 'called');
-            if(calledNumbers.has(`${letter}-${num}`)) cell.classList.add('called');
+            if (num === 'FREE') cell.classList.add('free', 'called');
+            if (calledNumbers.has(`${letter}-${num}`)) cell.classList.add('called');
             cardDiv.appendChild(cell);
           });
         }
-      } catch(e){ console.error('Error displaying player card:', e); }
+      } catch (e) {
+        console.error('Error displaying player card:', e);
+      }
     }
-    function highlightNumber(letter,number){
+    function highlightNumber(letter, number) {
       try {
         const id = `${letter}-${number}`;
         const cell = document.getElementById(id);
-        if(cell) cell.classList.add('called');
-        if(playerCard) highlightOnPlayerCard(letter, number);
-      } catch(e){ console.error('Error highlighting number:', e); }
+        if (cell) cell.classList.add('called');
+        if (playerCard) highlightOnPlayerCard(letter, number);
+      } catch (e) {
+        console.error('Error highlighting number:', e);
+      }
     }
-    function highlightOnPlayerCard(letter, number){
+    function highlightOnPlayerCard(letter, number) {
       try {
         const cell = document.getElementById(`player-${letter}-${number}`);
-        if(cell) cell.classList.add('called');
+        if (cell) cell.classList.add('called');
         checkForBingo();
-      } catch(e){ console.error('Error highlighting on player card:', e); }
+      } catch (e) {
+        console.error('Error highlighting on player card:', e);
+      }
     }
-    /* Bingo checking - logic retained from original but with added guards */
-    function checkForBingo(){
-      if(!playerCard) return;
+    function checkForBingo() {
+      if (!playerCard) return;
       const winKey = `${gameId}_${gameType}`;
-      if(playerWins[winKey]) return; // already won for this game/type
+      if (playerWins[winKey]) return;
       try {
-        // singleLine checks horizontal/vertical/diagonals
         let hasWinningLine = false;
-        if(gameType === 'singleLine'){
-          // horizontal
-          for(let row=0; row<5; row++){
+        if (gameType === 'singleLine') {
+          for (let row = 0; row < 5; row++) {
             let rowWin = true;
-            for(let col=0; col<5; col++){
+            for (let col = 0; col < 5; col++) {
               const letter = letters[col];
               const num = playerCard[letter][row];
-              if(num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) { rowWin = false; break; }
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                rowWin = false;
+                break;
+              }
             }
-            if(rowWin){ hasWinningLine = true; break; }
+            if (rowWin) {
+              hasWinningLine = true;
+              break;
+            }
           }
-          // vertical
-          if(!hasWinningLine){
-            for(let col=0; col<5; col++){
+          if (!hasWinningLine) {
+            for (let col = 0; col < 5; col++) {
               let colWin = true;
               const letter = letters[col];
-              for(let row=0; row<5; row++){
+              for (let row = 0; row < 5; row++) {
                 const num = playerCard[letter][row];
-                if(num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) { colWin = false; break; }
+                if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                  colWin = false;
+                  break;
+                }
               }
-              if(colWin){ hasWinningLine = true; break; }
+              if (colWin) {
+                hasWinningLine = true;
+                break;
+              }
             }
           }
-          // diagonals
-          if(!hasWinningLine){
+          if (!hasWinningLine) {
             let diag1 = true;
-            for(let i=0;i<5;i++){
+            for (let i = 0; i < 5; i++) {
               const letter = letters[i];
               const num = playerCard[letter][i];
-              if(num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)){ diag1 = false; break; }
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                diag1 = false;
+                break;
+              }
             }
-            if(diag1) hasWinningLine = true;
+            if (diag1) hasWinningLine = true;
           }
-          if(!hasWinningLine){
+          if (!hasWinningLine) {
             let diag2 = true;
-            for(let i=0;i<5;i++){
-              const letter = letters[4-i];
+            for (let i = 0; i < 5; i++) {
+              const letter = letters[4 - i];
               const num = playerCard[letter][i];
-              if(num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)){ diag2 = false; break; }
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                diag2 = false;
+                break;
+              }
             }
-            if(diag2) hasWinningLine = true;
+            if (diag2) hasWinningLine = true;
           }
-          if(hasWinningLine) winGame(winKey);
+          if (hasWinningLine) winGame(winKey);
         } else {
-          // pattern-based check
           const pattern = gamePatterns[gameType];
           let isWin = true;
-          for(let r=0;r<5;r++){
-            for(let c=0;c<5;c++){
-              if(pattern[r][c]){
+          for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+              if (pattern[r][c]) {
                 const letter = letters[c];
                 const num = playerCard[letter][r];
-                if(num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)){
+                if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
                   isWin = false;
                   break;
                 }
               }
             }
-            if(!isWin) break;
+            if (!isWin) break;
           }
-          if(isWin) winGame(winKey);
+          if (isWin) winGame(winKey);
         }
-      } catch(e) { console.error('Error checking for bingo:', e); }
+      } catch (e) {
+        console.error('Error checking for bingo:', e);
+      }
     }
-    /* Non-blocking toast (replaces alert spam) */
-    function showToast(message, duration=4000){
+    function showToast(message, duration = 4000) {
       const toast = document.createElement('div');
       toast.className = 'toast';
       toast.textContent = message;
       document.body.appendChild(toast);
-      // trigger show
-      setTimeout(()=> toast.classList.add('show'), 10);
-      setTimeout(()=>{
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(()=> toast.remove(), 300);
+        setTimeout(() => toast.remove(), 300);
       }, duration);
     }
-    /* Actions on winning: store local flag, push to firebase, show toast/non-blocking notification, trigger visuals */
-    function winGame(winKey){
+    function winGame(winKey) {
       try {
         playerWins[winKey] = true;
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
         showToast(`BINGO! ${xHandle} won (${gameType})! 🎉`, 5000);
         triggerConfetti();
         triggerFireworks();
-        if(gameRef){
+        if (gameRef) {
           const timestamp = new Date().toISOString();
-          // push as value so we have unique key
-          firebase.database().ref(`games/${gameId}/winners`).push(`${xHandle}|${timestamp}|${gameType}`)
-            .catch(err => console.error('Error pushing winner:', err));
+          firebase.database().ref(`games/${gameId}/winners`).push({
+            handle: xHandle,
+            timestamp: timestamp,
+            gameType: gameType
+          }).catch(err => console.error('Error pushing winner:', err));
         }
-      } catch(e){ console.error('Error processing win:', e); }
+      } catch (e) {
+        console.error('Error processing win:', e);
+      }
     }
-    /* Leaderboard rendering — we avoid repeated blocking alerts. We build the list and toast only *new* winners. */
-    function updateLeaderboardSnapshot(winnersObj){
+    function updateLeaderboardSnapshot(winnersObj) {
       try {
         const leaderboard = document.getElementById('leaderboard');
-        if(!leaderboard) return;
+        if (!leaderboard) return;
         leaderboard.innerHTML = '<h3>Winners</h3>';
-        if(!winnersObj || Object.keys(winnersObj).length === 0){
-          leaderboard.innerHTML += '<p>No winners yet.</p>'; return;
+        if (!winnersObj || Object.keys(winnersObj).length === 0) {
+          leaderboard.innerHTML += '<p>No winners yet.</p>';
+          return;
         }
         const ul = document.createElement('ul');
-        ul.style.listStyle = 'none'; ul.style.padding = '0';
-        for(const key in winnersObj){
+        ul.style.listStyle = 'none';
+        ul.style.padding = '0';
+        for (const key in winnersObj) {
           const val = winnersObj[key];
-          const [handle, time, mode] = val.split('|');
           const li = document.createElement('li');
-          li.textContent = `${handle} at ${new Date(time).toLocaleString()} (${mode})`;
+          li.textContent = `${val.handle} at ${new Date(val.timestamp).toLocaleString()} (${val.gameType})`;
           ul.appendChild(li);
-          // track as already shown on snapshot to avoid re-notifying when we attach listeners
           notifiedWinners.add(key);
         }
         leaderboard.appendChild(ul);
-      } catch(e){ console.error('Error updating leaderboard snapshot:', e); }
+      } catch (e) {
+        console.error('Error updating leaderboard snapshot:', e);
+      }
     }
-    function appendWinnerToLeaderboard(key, value){
+    function appendWinnerToLeaderboard(key, value) {
       try {
         const leaderboard = document.getElementById('leaderboard');
-        if(!leaderboard) return;
-        // ensure header present
-        if(!leaderboard.querySelector('h3')) leaderboard.innerHTML = '<h3>Winners</h3>';
+        if (!leaderboard) return;
+        if (!leaderboard.querySelector('h3')) leaderboard.innerHTML = '<h3>Winners</h3>';
         let ul = leaderboard.querySelector('ul');
-        if(!ul){ ul = document.createElement('ul'); ul.style.listStyle='none'; ul.style.padding='0'; leaderboard.appendChild(ul); }
-        const [handle, time, mode] = value.split('|');
+        if (!ul) {
+          ul = document.createElement('ul');
+          ul.style.listStyle = 'none';
+          ul.style.padding = '0';
+          leaderboard.appendChild(ul);
+        }
         const li = document.createElement('li');
-        li.textContent = `${handle} at ${new Date(time).toLocaleString()} (${mode})`;
+        li.textContent = `${value.handle} at ${new Date(value.timestamp).toLocaleString()} (${value.gameType})`;
         ul.appendChild(li);
-      } catch(e){ console.error('Error appending winner:', e); }
+      } catch (e) {
+        console.error('Error appending winner:', e);
+      }
     }
-    /* Player list update */
-    function updatePlayerListSnapshot(playersObj){
+    function updatePlayerListSnapshot(playersObj) {
       try {
         const playerListContent = document.getElementById('player-list-content');
-        if(!playerListContent) return;
+        if (!playerListContent) return;
         playerListContent.innerHTML = '';
-        if(!playersObj || Object.keys(playersObj).length === 0){
-          playerListContent.innerHTML = '<p>No players yet.</p>'; return;
+        if (!playersObj || Object.keys(playersObj).length === 0) {
+          playerListContent.innerHTML = '<p>No players yet.</p>';
+          return;
         }
         const ul = document.createElement('ul');
-        ul.style.padding = '0'; ul.style.listStyle = 'none';
-        for(const key in playersObj){
+        ul.style.padding = '0';
+        ul.style.listStyle = 'none';
+        for (const key in playersObj) {
           const handle = playersObj[key].handle || `@${key}`;
           const cardID = playersObj[key].cardID || 'N/A';
           const li = document.createElement('li');
@@ -669,23 +807,31 @@
           displayedPlayers.add(key);
         }
         playerListContent.appendChild(ul);
-      } catch(e){ console.error('Error updating player list snapshot:', e); }
+      } catch (e) {
+        console.error('Error updating player list snapshot:', e);
+      }
     }
-    function appendPlayerToList(key, value){
+    function appendPlayerToList(key, value) {
       try {
         const playerListContent = document.getElementById('player-list-content');
-        if(!playerListContent) return;
-        if(playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
+        if (!playerListContent) return;
+        if (playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
         let ul = playerListContent.querySelector('ul');
-        if(!ul){ ul = document.createElement('ul'); ul.style.padding='0'; ul.style.listStyle='none'; playerListContent.appendChild(ul); }
+        if (!ul) {
+          ul = document.createElement('ul');
+          ul.style.padding = '0';
+          ul.style.listStyle = 'none';
+          playerListContent.appendChild(ul);
+        }
         const li = document.createElement('li');
         const handle = value.handle || `@${key}`;
         li.textContent = `${handle} - Card #${value.cardID || 'N/A'}`;
         ul.appendChild(li);
-      } catch(e){ console.error('Error appending player:', e); }
+      } catch (e) {
+        console.error('Error appending player:', e);
+      }
     }
-    /* Confetti & fireworks (kept, small safety) */
-    function triggerConfetti(){
+    function triggerConfetti() {
       try {
         const canvas = document.getElementById('confetti-canvas');
         canvas.style.display = 'block';
@@ -693,66 +839,73 @@
         canvas.height = window.innerHeight;
         const ctx = canvas.getContext('2d');
         const confetti = [];
-        for(let i=0;i<200;i++){
+        for (let i = 0; i < 200; i++) {
           confetti.push({
-            x: Math.random()*canvas.width,
-            y: Math.random()*canvas.height - canvas.height,
-            r: Math.random()*6+1,
-            d: Math.random()*200,
-            color: `hsl(${Math.random()*360},100%,50%)`,
-            tilt: Math.random()*10-10,
-            tiltAngle: Math.random()*Math.PI
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 6 + 1,
+            d: Math.random() * 200,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            tilt: Math.random() * 10 - 10,
+            tiltAngle: Math.random() * Math.PI
           });
         }
-        function draw(){
-          ctx.clearRect(0,0,canvas.width,canvas.height);
-          confetti.forEach((p,i)=>{
+        function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          confetti.forEach((p, i) => {
             ctx.beginPath();
             ctx.lineWidth = p.r;
             ctx.strokeStyle = p.color;
-            ctx.moveTo(p.x + p.tilt + p.r/4, p.y);
-            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/4);
+            ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
             ctx.stroke();
             p.tiltAngle += 0.1;
-            p.tilt = Math.sin(p.tiltAngle)*15;
+            p.tilt = Math.sin(p.tiltAngle) * 15;
             p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-            if(p.y > canvas.height) confetti.splice(i,1);
+            if (p.y > canvas.height) confetti.splice(i, 1);
           });
-          if(confetti.length > 0) requestAnimationFrame(draw);
+          if (confetti.length > 0) requestAnimationFrame(draw);
           else canvas.style.display = 'none';
         }
         draw();
-      } catch(e){ console.error('Error triggering confetti:', e); }
+      } catch (e) {
+        console.error('Error triggering confetti:', e);
+      }
     }
-    function triggerFireworks(){
+    function triggerFireworks() {
       try {
         const fireworks = document.getElementById('fireworks');
         fireworks.style.display = 'block';
         fireworks.innerHTML = '';
-        for(let i=0;i<20;i++){
+        for (let i = 0; i < 20; i++) {
           const particle = document.createElement('div');
           particle.classList.add('particle');
-          particle.style.position='absolute';
-          particle.style.left = Math.random()*100 + '%';
-          particle.style.top = Math.random()*100 + '%';
-          particle.style.width='8px'; particle.style.height='8px';
-          particle.style.borderRadius='50%';
-          particle.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
+          particle.style.position = 'absolute';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.top = Math.random() * 100 + '%';
+          particle.style.width = '8px';
+          particle.style.height = '8px';
+          particle.style.borderRadius = '50%';
+          particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
           particle.style.opacity = '0.9';
           fireworks.appendChild(particle);
         }
-        setTimeout(()=> { fireworks.style.display='none'; fireworks.innerHTML=''; }, 2000);
-      } catch(e){ console.error('Error triggering fireworks:', e); }
+        setTimeout(() => {
+          fireworks.style.display = 'none';
+          fireworks.innerHTML = '';
+        }, 2000);
+      } catch (e) {
+        console.error('Error triggering fireworks:', e);
+      }
     }
-    function playRollSound(){
+    function playRollSound() {
       try {
         const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
-        audio.play().catch(()=>{/* ignore autoplay block */});
-      } catch(e){ console.error('Error playing roll sound:', e); }
+        audio.play().catch(() => {/* ignore autoplay block */});
+      } catch (e) {
+        console.error('Error playing roll sound:', e);
+      }
     }
-    /* ---------------------------
-       MODE HANDLERS & UI wiring
-       --------------------------- */
     const hostModeBtn = document.getElementById('host-mode');
     const playerModeBtn = document.getElementById('player-mode');
     const hostControls = document.getElementById('host-controls');
@@ -769,10 +922,9 @@
     const partnerModal = document.getElementById('partner-modal');
     const modalContent = partnerModal.querySelector('.modal-content');
     const resultDiv = document.getElementById('result');
-    /* Cleanup firebase listeners */
-    function cleanupListeners(){
+    function cleanupListeners() {
       try {
-        if(gameRef){
+        if (gameRef) {
           gameRef.child('called').off();
           gameRef.child('gameType').off();
           gameRef.child('winners').off();
@@ -781,27 +933,25 @@
         calledInitialLoaded = false;
         winnersInitialLoaded = false;
         playersInitialLoaded = false;
-      } catch(e){ console.error('Error cleaning up listeners:', e); }
+      } catch (e) {
+        console.error('Error cleaning up listeners:', e);
+      }
     }
-    /* HOST MODE: sign in anonymously and set up a fresh game */
-    hostModeBtn.addEventListener('click', ()=>{
+    hostModeBtn.addEventListener('click', () => {
       try {
-        firebase.auth().signInAnonymously().then(()=>{
+        firebase.auth().signInAnonymously().then(() => {
           isHost = true;
           hostControls.style.display = 'flex';
           playerControls.style.display = 'none';
-          // Reset ephemeral state
           calledNumbers.clear();
           localStorage.removeItem('calledNumbers');
           notifiedWinners.clear();
           displayedPlayers.clear();
           playerWins = {};
           localStorage.setItem('playerWins', JSON.stringify(playerWins));
-          // always create a new game id for a host session
-          gameId = Math.random().toString(36).substring(2,10);
+          gameId = Math.random().toString(36).substring(2, 10);
           localStorage.setItem('gameId', gameId);
           gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
-          // set up the DB ref and initial fields
           setupGame(gameId);
           gameType = gameTypeSelect.value;
           firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
@@ -814,10 +964,12 @@
           console.error('Auth error for host:', err);
           alert('Failed to authenticate for host mode: ' + err.message);
         });
-      } catch(e){ console.error('Host mode error:', e); alert('Error starting host mode.'); }
+      } catch (e) {
+        console.error('Host mode error:', e);
+        alert('Error starting host mode.');
+      }
     });
-    /* PLAYER MODE: show player UI only (players sign in when they join) */
-    playerModeBtn.addEventListener('click', ()=>{
+    playerModeBtn.addEventListener('click', () => {
       try {
         isHost = false;
         hostControls.style.display = 'none';
@@ -828,35 +980,33 @@
         loadCalledNumbersFromStorage();
         createBoard();
         showToast('Player mode: enter game ID and handle to join.', 2500);
-      } catch(e){ console.error('Player mode error:', e); alert('Error entering player mode.'); }
+      } catch (e) {
+        console.error('Player mode error:', e);
+        alert('Error entering player mode.');
+      }
     });
-    /* JOIN GAME: players authenticate anonymously so writes are covered by security rules */
-    joinGameBtn.addEventListener('click', ()=>{
+    joinGameBtn.addEventListener('click', () => {
       try {
         const providedGameId = gameIdInput.value.trim();
         const providedHandle = xHandleInput.value.trim();
-        if(!providedGameId) return alert('Enter a valid Game ID');
-        if(!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
-        // Sign in anonymously then register player so we have auth in DB rules
-        firebase.auth().signInAnonymously().then(()=>{
+        if (!providedGameId) return alert('Enter a valid Game ID');
+        if (!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
+        firebase.auth().signInAnonymously().then(() => {
           gameId = providedGameId;
           xHandle = providedHandle;
           localStorage.setItem('gameId', gameId);
           localStorage.setItem('xHandle', xHandle);
-          // generate card
           playerCard = generatePlayerCard();
           const cardID = computeCardID(playerCard);
-          // reset local wins for this join
           playerWins = {};
           localStorage.setItem('playerWins', JSON.stringify(playerWins));
           notifiedWinners.clear();
           displayPlayerCard();
-          // register player in DB under games/{gameId}/players/{handle}
-          const handleKey = xHandle.replace('@','');
+          const handleKey = xHandle.replace('@', '');
           firebase.database().ref(`games/${gameId}/players/${handleKey}`).set({
             handle: xHandle,
             cardID: cardID
-          }).then(()=>{
+          }).then(() => {
             showToast(`Joined ${gameId} as ${xHandle}`, 3000);
             setupGame(gameId);
             createBoard();
@@ -865,33 +1015,39 @@
             alert('Error registering player: ' + err.message);
           });
         }).catch(err => {
-          console.error('Auth error for player join:', err); alert('Failed to authenticate: ' + err.message);
+          console.error('Auth error for player join:', err);
+          alert('Failed to authenticate: ' + err.message);
         });
-      } catch(e){ console.error('Join game error:', e); alert('Error joining game.'); }
+      } catch (e) {
+        console.error('Join game error:', e);
+        alert('Error joining game.');
+      }
     });
-    /* copy helpers -> replaced alerts with toast */
-    copyGameIdBtn.addEventListener('click', ()=>{
+    copyGameIdBtn.addEventListener('click', () => {
       try {
-        if(!gameId) return showToast('No Game ID to copy', 2000);
-        navigator.clipboard.writeText(gameId).then(()=> showToast('Game ID copied!',2000));
-      } catch(e){ console.error('Copy error:', e); showToast('Error copying Game ID', 2000); }
+        if (!gameId) return showToast('No Game ID to copy', 2000);
+        navigator.clipboard.writeText(gameId).then(() => showToast('Game ID copied!', 2000));
+      } catch (e) {
+        console.error('Copy error:', e);
+        showToast('Error copying Game ID', 2000);
+      }
     });
-    copyWinnersBtn.addEventListener('click', ()=>{
+    copyWinnersBtn.addEventListener('click', () => {
       try {
-        const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n','');
-        navigator.clipboard.writeText(winnersList).then(()=> showToast('Winners list copied!', 2000));
-      } catch(e){ console.error('Copy winners error:', e); showToast('Error copying winners list',2000); }
+        const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n', '');
+        navigator.clipboard.writeText(winnersList).then(() => showToast('Winners list copied!', 2000));
+      } catch (e) {
+        console.error('Copy winners error:', e);
+        showToast('Error copying winners list', 2000);
+      }
     });
-    /* ====== Setup realtime listeners for a game (clean handling for initial snapshot vs new child events) ====== */
-    function setupGame(id){
+    function setupGame(id) {
       try {
-        cleanupListeners(); // make sure previous refs are cleared
+        cleanupListeners();
         gameRef = firebase.database().ref(`games/${id}`);
-        // ---- called numbers: first get snapshot, then attach child_added for *new* calls
         gameRef.child('called').once('value', snap => {
           const obj = snap.val();
-          if(obj){
-            // push all existing called numbers into local set (they are keyed by push id => value = "B-12")
+          if (obj) {
             const vals = Object.values(obj);
             vals.forEach(v => calledNumbers.add(v));
             localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
@@ -899,115 +1055,101 @@
           createBoard();
           calledInitialLoaded = true;
         });
-        // listen for subsequent child_added (new rolls)
         gameRef.child('called').on('child_added', snap => {
           const rolled = snap.val();
-          // If initial load hasn't finished yet, the snapshot may fire child_added for existing entries.
-          // We only want to show "new" effects when they happen after initial snapshot.
-          const [letter,num] = rolled.split('-');
+          const [letter, num] = rolled.split('-');
           calledNumbers.add(rolled);
           localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
           resultDiv.textContent = rolled;
           highlightNumber(letter, num);
           createBoard();
-          if(calledInitialLoaded){
-            // only play sound/visuals for new ones after initial load
+          if (calledInitialLoaded) {
             playRollSound();
-            // small visual feedback for host or players
             triggerConfetti();
           }
         });
-        // ---- gameType value sync (removed playerWins reset to allow multiple modes on same card)
-        gameRef.child('gameType').on('value', snap=>{
+        gameRef.child('gameType').on('value', snap => {
           const newGameType = snap.val() || 'singleLine';
-          if(newGameType !== gameType){
+          if (newGameType !== gameType) {
             gameType = newGameType;
-            if(isHost) gameTypeSelect.value = gameType;
-            // Do not reset playerWins here - allow wins to accumulate per mode
+            if (isHost) gameTypeSelect.value = gameType;
             displayWinPattern();
             createBoard();
-            // Trigger checkForBingo in case new pattern is already won with existing calls
             checkForBingo();
           }
         });
-        // ---- winners: get a snapshot (initial list) then subscribe to child_added for *new* winners
-        gameRef.child('winners').once('value', snap=>{
+        gameRef.child('winners').once('value', snap => {
           const obj = snap.val() || {};
           updateLeaderboardSnapshot(obj);
           winnersInitialLoaded = true;
         });
-        gameRef.child('winners').on('child_added', snap=>{
+        gameRef.child('winners').on('child_added', snap => {
           const key = snap.key;
           const val = snap.val();
-          // if we already know about this key (added via initial snapshot) skip toast, but still ensure UI updated
-          if(!notifiedWinners.has(key)){
+          if (!notifiedWinners.has(key)) {
             notifiedWinners.add(key);
             appendWinnerToLeaderboard(key, val);
-            // Only notify host with a toast (non-blocking). Players will also see it in leaderboard.
-            if(isHost) showToast(`BINGO! ${val.split('|')[0]} won (${val.split('|')[2]})!`, 4000);
-          } else {
-            // existing one already present, just ensure UI contains it (avoid duplicates)
-            // appendWinnerToLeaderboard will still append duplicate if used here; we rely on snapshot append to fill UI initially.
+            if (isHost) showToast(`BINGO! ${val.handle} won (${val.gameType})!`, 4000);
           }
         });
-        // ---- players: initial snapshot then child_added for new players
-        gameRef.child('players').once('value', snap=>{
+        gameRef.child('players').once('value', snap => {
           const obj = snap.val() || {};
           updatePlayerListSnapshot(obj);
           playersInitialLoaded = true;
         });
-        gameRef.child('players').on('child_added', snap=>{
+        gameRef.child('players').on('child_added', snap => {
           const key = snap.key;
           const val = snap.val();
-          if(!displayedPlayers.has(key)){
+          if (!displayedPlayers.has(key)) {
             displayedPlayers.add(key);
             appendPlayerToList(key, val);
-            if(isHost) showToast(`${val.handle || '@'+key} joined`, 2500);
+            if (isHost) showToast(`${val.handle || '@' + key} joined`, 2500);
           }
         });
-      } catch(e){ console.error('Setup game error:', e); alert('Error setting up game.'); }
+      } catch (e) {
+        console.error('Setup game error:', e);
+        alert('Error setting up game.');
+      }
     }
-    /* Rolling logic: generate roll & push to DB (host only), prevent infinite loop when all called */
-    function rollBingo(){
-      if(calledNumbers.size >= 75) {
+    function rollBingo() {
+      if (calledNumbers.size >= 75) {
         showToast('All numbers called! Reset or change game mode.', 5000);
         return null;
       }
       let letter, number;
       let attempts = 0;
       do {
-        letter = letters[Math.floor(Math.random()*letters.length)];
-        const [min,max] = ranges[letter];
-        number = getRandomNumber(min,max);
+        letter = letters[Math.floor(Math.random() * letters.length)];
+        const [min, max] = ranges[letter];
+        number = getRandomNumber(min, max);
         attempts++;
-        if(attempts > 100) { // Safety break
+        if (attempts > 100) {
           showToast('Unable to find new number. Reset game.', 5000);
           return null;
         }
-      } while(calledNumbers.has(`${letter}-${number}`));
+      } while (calledNumbers.has(`${letter}-${number}`));
       const rolled = `${letter}-${number}`;
       calledNumbers.add(rolled);
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
       return rolled;
     }
-    rollButton.addEventListener('click', ()=>{
-      if(!isHost || !gameRef) return alert('Host a game first');
+    rollButton.addEventListener('click', () => {
+      if (!isHost || !gameRef) return alert('Host a game first');
       try {
         const rolled = rollBingo();
-        if(!rolled) return;
+        if (!rolled) return;
         firebase.database().ref(`games/${gameId}/called`).push(rolled)
-          .then(()=> {
-            // host feedback is provided by the child_added listener which triggers visuals for new roll.
+          .then(() => {
             createBoard();
           }).catch(err => console.error('Error pushing roll:', err));
-      } catch(e){ console.error('Roll error:', e); alert('Error rolling number.'); }
+      } catch (e) {
+        console.error('Roll error:', e);
+        alert('Error rolling number.');
+      }
     });
-    /* Reset logic - CLEANLY remove DB listeners and optionally remove game from DB */
-    resetButton.addEventListener('click', ()=>{
+    resetButton.addEventListener('click', () => {
       try {
-        // if host, remove the game from DB. If not host but a player, just leave.
-        if(gameRef && isHost){
-          // remove full game node (called/players/winners/gameType)
+        if (gameRef && isHost) {
           gameRef.remove().catch(err => console.warn('Failed to remove game DB node:', err));
         }
         cleanupListeners();
@@ -1021,7 +1163,7 @@
         displayedPlayers.clear();
         resultDiv.textContent = '';
         createBoard();
-        if(playerCard && xHandle) displayPlayerCard();
+        if (playerCard && xHandle) displayPlayerCard();
         gameId = null;
         localStorage.removeItem('gameId');
         localStorage.removeItem('xHandle');
@@ -1032,30 +1174,29 @@
         playerControls.style.display = 'none';
         document.getElementById('leaderboard').innerHTML = '';
         showToast('Game reset complete', 2000);
-      } catch(e){ console.error('Reset error:', e); alert('Error resetting game.'); }
+      } catch (e) {
+        console.error('Reset error:', e);
+        alert('Error resetting game.');
+      }
     });
-    /* Auth state listener to keep track */
-    firebase.auth().onAuthStateChanged(user=>{
+    firebase.auth().onAuthStateChanged(user => {
       authState = user;
-      // console.log('Auth state:', user ? 'signed in' : 'signed out');
     });
-    /* Sponsors menu toggle */
     const dropdownToggle = document.querySelector('.dropdown-toggle');
     const submenu = document.querySelector('.submenu');
-    dropdownToggle.addEventListener('click', (e)=>{
+    dropdownToggle.addEventListener('click', (e) => {
       e.preventDefault();
       submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
     });
-    document.addEventListener('click', (e)=>{
-      if(!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) submenu.style.display = 'none';
+    document.addEventListener('click', (e) => {
+      if (!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) submenu.style.display = 'none';
     });
-    /* partner links open modal */
-    document.querySelectorAll('.partner-link').forEach(link=>{
-      link.addEventListener('click', (e)=>{
+    document.querySelectorAll('.partner-link').forEach(link => {
+      link.addEventListener('click', (e) => {
         e.preventDefault();
         const partnerKey = link.dataset.partner;
         const partner = partners[partnerKey];
-        if(partner){
+        if (partner) {
           let html = `<img src="${partner.logo}" alt="${partner.name} Logo" style="width:100px;margin-bottom:10px;">
                       <h3>${partner.name}</h3><ul style="list-style:none;padding:0;">`;
           partner.links.forEach(l => {
@@ -1064,56 +1205,85 @@
           html += `</ul><button id="close-modal">Close</button>`;
           modalContent.innerHTML = html;
           partnerModal.style.display = 'flex';
-          document.getElementById('close-modal').addEventListener('click', ()=> partnerModal.style.display = 'none' );
+          document.getElementById('close-modal').addEventListener('click', () => partnerModal.style.display = 'none');
         }
       });
     });
-    partnerModal.addEventListener('click', (e) => { if(e.target === partnerModal) partnerModal.style.display = 'none'; });
-    /* Auto join via URL? (kept) */
+    partnerModal.addEventListener('click', (e) => {
+      if (e.target === partnerModal) partnerModal.style.display = 'none';
+    });
     const urlParams = new URLSearchParams(window.location.search);
     const urlGameId = urlParams.get('gameId');
-    if(urlGameId){
+    if (urlGameId) {
       gameId = urlGameId;
       localStorage.setItem('gameId', gameId);
       playerModeBtn.click();
       gameIdInput.value = gameId;
       showToast('Auto-join game ID detected', 2000);
     }
-    /* Toggle player list collapse */
     const togglePlayerListBtn = document.getElementById('toggle-player-list');
     const playerListContent = document.getElementById('player-list-content');
-    if(togglePlayerListBtn && playerListContent){
-      togglePlayerListBtn.addEventListener('click', ()=>{
-        if(playerListContent.style.display === 'none'){ playerListContent.style.display = 'block'; togglePlayerListBtn.textContent = 'Collapse'; }
-        else { playerListContent.style.display = 'none'; togglePlayerListBtn.textContent = 'Expand'; }
+    if (togglePlayerListBtn && playerListContent) {
+      togglePlayerListBtn.addEventListener('click', () => {
+        if (playerListContent.style.display === 'none') {
+          playerListContent.style.display = 'block';
+          togglePlayerListBtn.textContent = 'Collapse';
+        } else {
+          playerListContent.style.display = 'none';
+          togglePlayerListBtn.textContent = 'Expand';
+        }
       });
     }
-    /* Ad box rotate (kept, but made draggable) */
-    const logos = Object.values(partners).map(p=>p.logo).filter(Boolean);
+    const logos = Object.values(partners).map(p => p.logo).filter(Boolean);
     let idx = 0;
     const adBox = document.getElementById('ad-box');
-    function rotateAd(){
+    function rotateAd() {
       try {
-        if(logos.length === 0){ adBox.innerHTML = '<p>No sponsor logos available</p>'; return; }
-        adBox.innerHTML = `<img src="${logos[idx]}" alt="Sponsor Logo" style="width:100%;height:100%;object-fit:contain;">`;
+        if (logos.length === 0) {
+          adBox.innerHTML = '<p>No sponsor logos available</p>';
+          return;
+        }
+        const img = document.createElement('img');
+        img.src = logos[idx];
+        img.alt = 'Sponsor Logo';
+        img.onerror = () => {
+          console.error(`Failed to load logo: ${logos[idx]}`);
+          adBox.innerHTML = '<p>Logo failed to load</p>';
+        };
+        adBox.innerHTML = '';
+        adBox.appendChild(img);
         idx = (idx + 1) % logos.length;
-      } catch(e){ console.error('Error rotating ad:', e); adBox.innerHTML = '<p>Ad loading failed</p>'; }
+      } catch (e) {
+        console.error('Error rotating ad:', e);
+        adBox.innerHTML = '<p>Ad loading failed</p>';
+      }
     }
-    if(logos.length > 0){ rotateAd(); setInterval(rotateAd, 15000); } else { adBox.innerHTML = '<p>No sponsor logos</p>'; }
-    // Make ad-box draggable
+    if (logos.length > 0) {
+      rotateAd();
+      setInterval(rotateAd, 15000);
+    } else {
+      adBox.innerHTML = '<p>No sponsor logos</p>';
+    }
     let isDragging = false;
-    let startX, startY;
+    let currentX, currentY, initialX, initialY;
     adBox.addEventListener('mousedown', (e) => {
+      initialX = e.clientX - currentX;
+      initialY = e.clientY - currentY;
       isDragging = true;
-      startX = e.clientX - adBox.getBoundingClientRect().left;
-      startY = e.clientY - adBox.getBoundingClientRect().top;
       adBox.style.cursor = 'grabbing';
+      e.preventDefault();
     });
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       e.preventDefault();
-      const x = e.clientX - startX;
-      const y = e.clientY - startY;
+      let x = e.clientX - initialX;
+      let y = e.clientY - initialY;
+      const maxX = window.innerWidth - adBox.offsetWidth;
+      const maxY = window.innerHeight - adBox.offsetHeight;
+      x = Math.max(0, Math.min(x, maxX));
+      y = Math.max(0, Math.min(y, maxY));
+      currentX = x;
+      currentY = y;
       adBox.style.left = `${x}px`;
       adBox.style.top = `${y}px`;
       adBox.style.right = 'auto';
@@ -1123,16 +1293,55 @@
       isDragging = false;
       adBox.style.cursor = 'move';
     });
-    /* INITIALIZE */
-    (function init(){
+    adBox.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      initialX = touch.clientX - currentX;
+      initialY = touch.clientY - currentY;
+      isDragging = true;
+      adBox.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      let x = touch.clientX - initialX;
+      let y = touch.clientY - initialY;
+      const maxX = window.innerWidth - adBox.offsetWidth;
+      const maxY = window.innerHeight - adBox.offsetHeight;
+      x = Math.max(0, Math.min(x, maxX));
+      y = Math.max(0, Math.min(y, maxY));
+      currentX = x;
+      currentY = y;
+      adBox.style.left = `${x}px`;
+      adBox.style.top = `${y}px`;
+      adBox.style.right = 'auto';
+      adBox.style.bottom = 'auto';
+    });
+    document.addEventListener('touchend', () => {
+      isDragging = false;
+      adBox.style.cursor = 'move';
+    });
+    (function init() {
       loadCalledNumbersFromStorage();
       createBoard();
       displayWinPattern();
     })();
-    /* small window resize handling for canvas */
-    window.addEventListener('resize', ()=> {
+    window.addEventListener('resize', () => {
       const canvas = document.getElementById('confetti-canvas');
-      if(canvas && canvas.style.display === 'block'){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      if (canvas && canvas.style.display === 'block') {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      const adBox = document.getElementById('ad-box');
+      if (adBox) {
+        const maxX = window.innerWidth - adBox.offsetWidth;
+        const maxY = window.innerHeight - adBox.offsetHeight;
+        currentX = Math.min(currentX || adBox.offsetLeft, maxX);
+        currentY = Math.min(currentY || adBox.offsetTop, maxY);
+        adBox.style.left = `${currentX}px`;
+        adBox.style.top = `${currentY}px`;
+      }
     });
   </script>
 </body>
