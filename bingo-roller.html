@@ -118,6 +118,7 @@
       box-shadow: 0 0 12px rgba(0,255,0,0.25);
       transform: scale(1.05);
     }
+    .bingo-board .empty { visibility: hidden; }
 
     /* Player card */
     .player-card { display:grid; grid-template-columns:repeat(5,1fr); gap:.6rem; max-width: min(80vw,600px); margin: 1rem auto; padding: 1rem; border: 2px solid var(--glow); border-radius:10px; }
@@ -317,27 +318,49 @@
     function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
     function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
 
-    // Board creation
+    // Board creation - fixed to have two columns per letter with correct numbers
     function createBoard(){
       const board = document.getElementById('bingo-board');
       if(!board) return;
       board.innerHTML = '';
+      // Add headers
       letters.forEach(l=>{
         const header = document.createElement('div');
         header.textContent = l;
         header.className = 'header';
         board.appendChild(header);
       });
-      for(let i=0;i<15;i++){
+
+      // For each row (up to 8 rows, since ceil(15/2)=8)
+      const maxRows = 8;
+      for(let row = 0; row < maxRows; row++){
         letters.forEach(letter=>{
+          // Left column: row < 8 ? min + row
           const [min] = ranges[letter];
-          const num = min + i;
-          const div = document.createElement('div');
-          div.textContent = num;
-          div.className = 'cell';
-          div.id = `${letter}-${num}`;
-          if(calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
-          board.appendChild(div);
+          const leftNum = row < 8 ? min + row : null;
+          const leftDiv = document.createElement('div');
+          if (leftNum !== null) {
+            leftDiv.textContent = leftNum;
+            leftDiv.className = 'cell';
+            leftDiv.id = `${letter}-${leftNum}`;
+            if(calledNumbers.has(`${letter}-${leftNum}`)) leftDiv.classList.add('called');
+          } else {
+            leftDiv.className = 'empty';
+          }
+          board.appendChild(leftDiv);
+
+          // Right column: row < 7 ? min + row + 8
+          const rightNum = row < 7 ? min + row + 8 : null;
+          const rightDiv = document.createElement('div');
+          if (rightNum !== null) {
+            rightDiv.textContent = rightNum;
+            rightDiv.className = 'cell';
+            rightDiv.id = `${letter}-${rightNum}`;
+            if(calledNumbers.has(`${letter}-${rightNum}`)) rightDiv.classList.add('called');
+          } else {
+            rightDiv.className = 'empty';
+          }
+          board.appendChild(rightDiv);
         });
       }
     }
@@ -697,13 +720,13 @@
         xHandle = providedHandle;
         localStorage.setItem('gameId', gameId);
         localStorage.setItem('xHandle', xHandle);
+        gameRef = database.ref(`games/${gameId}`);
         const { card, cardID } = await generatePlayerCard();
         playerCard = card;
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
         displayPlayerCard();
         const handleKey = xHandle.replace('@','');
-        gameRef = database.ref(`games/${gameId}`);
         await gameRef.child('players').child(handleKey).set({
           handle: xHandle,
           cardID: cardID,
@@ -713,7 +736,7 @@
         setupGame(gameId);
       } catch(err){
         console.error('Error joining game:', err);
-        showToast('Error joining game: ' + err.message, 3000);
+        showToast('Error joining game: ' + (err.message || 'Unknown error'), 3000);
       }
     });
 
