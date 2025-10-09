@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!" />
   <title>$BINGO Roller - BingoXRPL Live Tool</title>
+
+  <!-- Google Tag Manager (kept as requested) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -12,324 +14,158 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
+
+  <!-- Firebase (kept) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background: #0A0F2A;
-      color: #FFFFFF;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-      overflow-x: hidden;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
+    /* ========== Core layout & theme (kept your neon style) ========== */
+    :root {
+      --bg: #0A0F2A;
+      --accent: #00B8D9;
+      --glow: #00FF00;
+      --card-bg: #1A1F3A;
+      --muted: rgba(255,255,255,0.06);
     }
-    .container {
-      max-width: 80%;
-      margin: clamp(2rem, 3vw, 3rem) auto;
-      padding: clamp(1.5rem, 2vw, 2.5rem);
-      flex: 1;
+    html,body { height:100%; }
+    body {
+      font-family: 'Arial', Helvetica, sans-serif;
+      background: var(--bg);
+      color: #FFF;
+      margin:0;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
     header {
-      background-color: #00B8D9;
-      padding: clamp(1rem, 2vw, 1.5rem) 0;
+      background: var(--accent);
+      padding: clamp(0.8rem, 2vw, 1.2rem);
       position: sticky;
-      top: 0;
-      z-index: 50;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      top:0;
+      z-index:100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
     }
     .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 clamp(1.5rem, 2vw, 2.5rem);
-      flex-wrap: wrap;
-    }
-    h1 { color: #FFF; margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); }
-    .nav-menu {
-      list-style: none;
       display: flex;
-      margin: 0.5rem 0;
-      padding: 0;
-      gap: clamp(1rem, 2vw, 1.5rem);
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.25rem;
+      gap: 1rem;
     }
-    .nav-menu li a {
-      color: #000;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: clamp(1rem, 2vw, 1.3rem);
-      transition: color .3s, transform .3s;
+    h1 { margin:0; color:#000; font-size: clamp(1.5rem, 3.2vw, 2.6rem); }
+    nav .nav-menu { display:flex; gap:1rem; list-style:none; margin:0; padding:0; align-items:center; }
+    nav .nav-menu a { color:#000; font-weight:700; text-decoration:none; }
+
+    .container {
+      max-width: 1200px;
+      margin: clamp(1rem, 2vw, 2rem) auto;
+      padding: 0 1rem;
     }
-    .nav-menu li a:hover { color: #FFF; transform: scale(1.05); }
-    .dropdown { position: relative; }
-    .submenu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: #00B8D9;
-      list-style: none;
-      padding: 10px;
-      margin: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      z-index: 60;
-      min-width: 150px;
-    }
-    .submenu li a { color: #000; display: block; padding: 5px 10px; }
-    .submenu li a:hover { color: #FFF; }
-    #roll-button {
-      background: #FF0000;
-      color: #FFF;
-      border: none;
-      padding: clamp(1rem, 3vw, 1.8rem) clamp(2rem, 5vw, 3.5rem);
-      font-size: clamp(1.4rem, 4vw, 2.2rem);
-      cursor: pointer;
-      border-radius: 50px;
-      transition: .3s;
-      box-shadow: 0 6px 12px rgba(255,0,0,0.6);
-      touch-action: manipulation;
-    }
-    #roll-button:hover {
-      background: #00FF00;
-      transform: scale(1.1);
-      box-shadow: 0 8px 16px rgba(0,255,0,0.6);
-    }
+
+    /* Buttons & controls */
+    button { cursor:pointer; border: none; background: var(--accent); color:#000; padding: .75rem 1.25rem; border-radius: 10px; font-weight:700; }
+    button:active{ transform: translateY(1px); }
+    select, input { padding:.6rem .8rem; border-radius:8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: #fff; }
+    #roll-button { background:#FF0000; color:#fff; padding: 1rem 2rem; border-radius: 999px; font-size: clamp(1.2rem, 3vw, 1.8rem); box-shadow: 0 6px 14px rgba(255,0,0,0.35); }
+    #roll-button:hover{ transform:scale(1.03); background: #00FF00; color:#000; }
+
+    /* Result preview: fixed size, no jumps */
     #result {
-      font-size: clamp(1.6rem, 2.8vw, 2.2rem);
-      color: #00FF00;
-      margin: clamp(1rem, 2vw, 1.5rem) 0;
-      text-shadow: 2px 2px 8px rgba(0,255,0,0.7);
-      word-break: break-word;
-      min-height: 2.8rem;
+      font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+      color: var(--glow);
+      text-shadow: 0 2px 12px rgba(0,255,0,0.35);
+      margin: 1rem 0;
+      height: 3.2rem;            /* fixed height prevents layout shift */
       display:flex;
       align-items:center;
       justify-content:center;
+      overflow:hidden;
+      white-space:nowrap;
     }
-    #reset-button {
-      background: #00B8D9;
-      color: #FFF;
-      border: none;
-      padding: clamp(0.6rem, 2vw, 1.2rem) clamp(1.2rem, 3vw, 2.5rem);
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      cursor: pointer;
-      border-radius: 30px;
-      transition: .3s;
-      margin-bottom: clamp(1rem, 2vw, 1.5rem);
-      touch-action: manipulation;
-    }
-    #reset-button:hover {
-      background: #FF0000;
-      transform: scale(1.1);
-      box-shadow: 0 6px 12px rgba(255,0,0,0.6);
-    }
+
+    /* Bingo Board: kept grid but simplified rendering won't trigger reflow during roll */
     .bingo-board {
       display: grid;
       grid-template-columns: repeat(10, minmax(40px, 1fr));
-      gap: clamp(0.6rem, 1.2vw, 1rem);
-      max-width: min(98vw, 1000px);
-      margin: clamp(1.5rem, 2vw, 2rem) auto;
-      z-index: 1;
+      gap: clamp(.5rem, 1vw, 1rem);
       justify-items: center;
-    }
-    .bingo-board .header {
-      font-size: clamp(1.5rem, 3vw, 2.5rem);
-      font-weight: bold;
-      color: #00FF00;
-      text-align: center;
-      padding: clamp(0.5rem, 1vw, 1rem) 0;
-      grid-column: span 2;
-    }
-    .bingo-board .cell {
-      width: 100%;
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: #1A1F3A;
-      color: #00B8D9;
-      font-size: clamp(1.2rem, 2vw, 1.5rem);
-      transition: background .3s, color .3s, box-shadow .3s;
-      margin: auto;
-      box-sizing: border-box;
-    }
-    .bingo-board .cell.called {
-      background: #00FF00;
-      color: #000;
-      box-shadow: 0 0 15px #00FF00;
-    }
-    .player-card {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: clamp(0.5rem, 1vw, 1rem);
-      max-width: min(80vw, 600px);
-      margin: clamp(1rem, 2vw, 1.5rem) auto;
-      padding: 1rem;
-      border: 2px solid #00FF00;
-      border-radius: 10px;
-    }
-    .player-card .header {
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      font-weight: bold;
-      color: #00FF00;
-    }
-    .player-card .cell {
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #1A1F3A;
-      color: #00B8D9;
-      font-size: clamp(1rem, 2.5vw, 1.4rem);
-      border-radius: 10px;
-      transition: all .3s;
-    }
-    .player-card .cell.called {
-      background: #00FF00;
-      color: #000;
-      box-shadow: 0 0 10px #00FF00;
-    }
-    .player-card .cell.free {
-      background: #FF0000;
-      color: #FFF;
-      font-weight: bold;
-    }
-    .toast {
-      position: fixed;
-      right: 20px;
-      top: 20px;
-      z-index: 9999;
-      background: #00FF00;
-      color: #000;
-      padding: 12px 18px;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      font-weight: bold;
-      opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity .25s, transform .25s;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    .win-pattern {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.8rem;
-      max-width: 300px;
+      max-width: min(98vw, 1000px);
       margin: 1.5rem auto;
-      padding: 1.5rem;
-      border: 3px solid #00FF00;
-      border-radius: 15px;
-      background: rgba(0,0,0,0.7);
-      box-shadow: 0 0 15px rgba(0,255,0,0.5);
     }
-    .win-pattern .cell {
+    .bingo-board .header { grid-column: span 2; color: var(--glow); font-weight:800; font-size: clamp(1rem, 1.8vw, 1.6rem); text-align:center; }
+    .bingo-board .cell {
+      width:100%;
       aspect-ratio: 1/1;
-      background: #1A1F3A;
-      border-radius: 10px;
-      transition: background .3s;
-    }
-    .win-pattern .cell.win {
-      background: #00FF00;
-      box-shadow: 0 0 10px #00FF00;
-    }
-    #host-controls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-    }
-    #player-list {
-      position: absolute;
-      right: 20px;
-      top: clamp(6rem, 10vw, 8rem);
-      width: clamp(200px, 20vw, 300px);
-      background: rgba(0,0,0,0.6);
-      padding: 0.6rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      z-index: 100;
-      max-height: 70vh;
-      overflow-y: auto;
-      cursor: move;
-      user-select: none;
-    }
-    #player-list h3 {
-      margin: 0 0 0.6rem;
-      color: #00FF00;
-      font-size: clamp(1.0rem, 1.6vw, 1.2rem);
-    }
-    #player-widget {
       display:flex;
       align-items:center;
       justify-content:center;
-      min-height:48px;
-      padding:8px;
-      background: rgba(255,255,255,0.03);
-      border-radius:8px;
-      margin-bottom:8px;
-      font-weight:bold;
-      color:#00B8D9;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:ellipsis;
+      border-radius:50%;
+      background: var(--card-bg);
+      color: var(--accent);
+      font-size: clamp(.95rem, 1.4vw, 1.2rem);
+      box-sizing: border-box;
+      transition: background .12s, color .12s, box-shadow .12s;
     }
-    #player-list-content {
-      padding: 6px 8px;
-      max-height: calc(70vh - 140px);
-      overflow-y: auto;
-      background: rgba(0,0,0,0.25);
-      border-radius: 8px;
+    .bingo-board .cell.called {
+      background: var(--glow);
+      color: #000;
+      box-shadow: 0 0 12px rgba(0,255,0,0.25);
     }
-    .player-item {
-      padding: 6px 4px;
-      color: #fff;
-      font-weight: 600;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
+
+    /* Player card / player list styles (kept) */
+    .player-card { display:grid; grid-template-columns:repeat(5,1fr); gap:.6rem; max-width: min(80vw,600px); margin: 1rem auto; padding: 1rem; border: 2px solid var(--glow); border-radius:10px; }
+    .player-card .cell { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:var(--card-bg); color:var(--accent); border-radius:8px; }
+    .player-card .cell.free { background:#FF0000; color:#FFF; font-weight:800; }
+
+    /* Win pattern preview */
+    .win-pattern {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .6rem;
+      max-width: 300px;
+      margin: 1.25rem auto;
+      padding: .6rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
     }
-    .player-item .cardid {
-      color:#00FF00;
-      font-weight:700;
+    .win-pattern .cell { aspect-ratio:1/1; background:var(--card-bg); border-radius:8px; opacity:.3; }
+    .win-pattern .cell.win { background: var(--glow); opacity:1; box-shadow: 0 0 8px rgba(0,255,0,0.15); }
+
+    /* Draggable player list: position fixed to viewport for consistent dragging behavior */
+    #player-list {
+      position: fixed;
+      right: 20px;
+      top: 80px;
+      width: clamp(200px, 18vw, 320px);
+      background: rgba(0,0,0,0.6);
+      padding: 0.6rem;
+      border-radius: 10px;
+      border: 2px solid var(--glow);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      z-index: 9999;
+      cursor: grab;
+      user-select: none;
+      transform: translate(0,0);
+      touch-action: none;
     }
-    .host-main {
-      width: 100%;
-      max-width: 1000px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #ad-box { display:none; }
-    @media (max-width: 767px) {
-      .container { max-width: 95%; }
-      .bingo-board { grid-template-columns: repeat(10, minmax(30px, 1fr)); gap: 0.3rem; }
-      .header-inner { flex-direction: column; align-items: center; }
-      #host-controls { flex-direction: column; }
-      #player-list {
-        position: static;
-        width: 100%;
-        max-width: 100%;
-        margin: 1rem 0;
-        cursor: default;
-      }
-      #player-widget { min-height:40px; }
-      .win-pattern { max-width: 200px; gap: 0.4rem; padding: 1rem; }
-    }
-    @media (min-width: 768px) {
-      .container { margin-right: clamp(220px, 22vw, 320px); }
+    #player-list h3 { margin:0 0 .4rem 0; color:var(--glow); font-size:1rem; }
+    #player-list-content { max-height: 60vh; overflow-y:auto; padding-right:6px; }
+    .player-item { padding:6px 8px; display:flex; justify-content:space-between; align-items:center; gap:8px; border-bottom: 1px solid rgba(255,255,255,0.03); color:#fff; font-weight:600; }
+    .player-item .cardid{ color:var(--glow); font-weight:800; }
+
+    /* small screens */
+    @media (max-width:767px) {
+      .container { padding: 0 12px; }
+      #player-list { position: static; width: 100%; right:auto; top:auto; transform:none; margin: 1rem 0; cursor:default; }
+      .bingo-board { grid-template-columns: repeat(10, minmax(30px, 1fr)); gap: .3rem; }
     }
   </style>
 </head>
+
 <body>
   <header>
     <div class="header-inner">
@@ -337,84 +173,89 @@
       <nav>
         <ul class="nav-menu">
           <li><a href="https://bingoxrp.com/" aria-label="Go to Home">Home</a></li>
-          <li><a href="https://bingoxrp.com/#buy" aria-label="Learn How to Trade">How to Trade</a></li>
-          <li><a href="https://bingoxrp.com/#nft" aria-label="View NFT Collection">NFT Collection</a></li>
-          <li><a href="https://bingoxrp.com/#community" aria-label="Join Community">Community</a></li>
-          <li><a href="https://bingoxrp.com/#roadmap" aria-label="View Roadmap">Roadmap</a></li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false" aria-label="View Sponsors">Sponsors</a>
-            <ul class="submenu">
-              <li><a href="#" class="partner-link" data-partner="xmeme">XMEME</a></li>
-              <li><a href="#" class="partner-link" data-partner="kedas">Kedas Brew</a></li>
-              <li><a href="#" class="partner-link" data-partner="nuts">$NUTS</a></li>
-              <li><a href="#" class="partner-link" data-partner="xrzillas">XRziLLas</a></li>
-              <li><a href="#" class="partner-link" data-partner="but">Blue Umbrella Token $BUT</a></li>
-              <li><a href="#" class="partner-link" data-partner="wandering">Wandering Footprint</a></li>
-              <li><a href="#" class="partner-link" data-partner="freedom">Freedom Phoenix Token</a></li>
-              <li><a href="#" class="partner-link" data-partner="banana">$BANANA</a></li>
-            </ul>
-          </li>
+          <li><a href="https://bingoxrp.com/#buy">How to Trade</a></li>
+          <li><a href="https://bingoxrp.com/#nft">NFT Collection</a></li>
+          <li><a href="https://bingoxrp.com/#community">Community</a></li>
         </ul>
       </nav>
     </div>
   </header>
+
   <div class="container">
     <h1>$BINGO Roller</h1>
-    <p class="tagline">Roll epic $BINGO numbers during your live streams!<br>Mark your card and have fun!</p>
-    <div class="mode-selector">
+    <p class="tagline">Roll epic $BINGO numbers during your live streams!</p>
+
+    <div>
       <button id="host-mode">Host a Game</button>
       <button id="player-mode">Join as Player</button>
     </div>
-    <div id="host-controls" style="display:none;">
-      <div id="player-list">
-        <h3>Player List</h3>
-        <button id="toggle-player-list">Collapse</button>
-        <div id="player-widget"><div id="player-widget-display">No players</div></div>
-        <div id="player-list-content"></div>
+
+    <!-- Host Controls -->
+    <div id="host-controls" style="display:none; margin-top:1rem;">
+      <div style="display:flex; gap:.6rem; align-items:center; justify-content:center; flex-wrap:wrap;">
+        <label for="game-type" style="font-weight:700;">Select Game Type:</label>
+        <select id="game-type" aria-label="Select Bingo Game Type">
+          <option value="singleLine">Single Line (Any Line)</option>
+          <option value="perimeter">Perimeter</option>
+          <option value="xShape">X-Shape</option>
+          <option value="fourCorners">Four Corners</option>
+          <option value="fullCard">Full Card</option>
+        </select>
       </div>
-      <div class="host-main">
-        <div id="game-type-selector">
-          <label for="game-type">Select Game Type: </label>
-          <select id="game-type" aria-label="Select Bingo Game Type">
-            <option value="singleLine">Single Line (Any Line)</option>
-            <option value="perimeter">Perimeter</option>
-            <option value="xShape">X-Shape</option>
-            <option value="fourCorners">Four Corners</option>
-            <option value="fullCard">Full Card</option>
-          </select>
-        </div>
-        <div id="win-pattern" class="win-pattern"></div>
+
+      <!-- Only win pattern grid is used for preview (NO text duplication) -->
+      <div id="win-pattern" class="win-pattern" aria-hidden="false"></div>
+
+      <div style="display:flex; gap:1rem; justify-content:center; margin-top:1rem; align-items:center; flex-wrap:wrap;">
         <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
-        <div id="result" role="status"></div>
+        <div id="result" role="status" aria-live="polite" aria-atomic="true"></div>
         <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
+      </div>
+
+      <div style="margin-top:1rem; display:flex; gap:1rem; justify-content:center; align-items:center; flex-wrap:wrap;">
         <div id="game-id-display">Game ID: Loading...</div>
         <button id="copy-game-id">Copy Game ID</button>
-        <div id="leaderboard"></div>
-        <button id="copy-winners">Copy Winners List</button>
       </div>
+
+      <div id="leaderboard" style="margin-top:1rem;"></div>
     </div>
-    <div id="player-controls" style="display:none;">
+
+    <!-- Player Controls -->
+    <div id="player-controls" style="display:none; margin-top:1rem;">
       <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle" />
       <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID" />
       <button id="join-game-button">Join Game & Generate Card</button>
-      <div id="player-card" class="player-card"></div>
+      <div id="player-card" class="player-card" aria-hidden="true"></div>
     </div>
-    <h2>Game Board (Called Numbers)</h2>
-    <div id="bingo-board" class="bingo-board"></div>
-    <canvas id="confetti-canvas"></canvas>
-    <div id="fireworks" class="fireworks"></div>
+
+    <h2 style="margin-top:2rem;">Game Board (Called Numbers)</h2>
+    <div id="bingo-board" class="bingo-board" aria-hidden="false"></div>
+
   </div>
-  <footer>
+
+  <!-- Floating Player List (draggable) -->
+  <div id="player-list" aria-hidden="true" style="display:none;">
+    <h3>Player List</h3>
+    <div id="player-widget" style="display:flex; align-items:center; justify-content:center; min-height:48px; padding:8px; margin-bottom:8px; background: rgba(255,255,255,0.02); border-radius:8px; font-weight:bold; color:var(--accent); overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+      <div id="player-widget-display">No players</div>
+    </div>
+    <div id="player-list-content"></div>
+  </div>
+
+  <footer style="padding:1.2rem; text-align:center; color:#AAA;">
     <div class="container">
       <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
-      <div>
-        <a href="https://x.com/BingoXRPL" target="_blank" aria-label="Visit BingoXRPL on X">X</a> |
-        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank" aria-label="Join BingoXRPL on Discord">Discord</a> |
-        <a href="https://t.me/bingoonxrp" target="_blank" aria-label="Join BingoXRPL on Telegram">Telegram</a>
+      <div style="margin-top:.5rem;">
+        <a href="https://x.com/BingoXRPL" target="_blank" style="color:#AAA;">X</a> |
+        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank" style="color:#AAA;">Discord</a> |
+        <a href="https://t.me/bingoonxrp" target="_blank" style="color:#AAA;">Telegram</a>
       </div>
     </div>
   </footer>
+
+  <!-- ========== Script: logic & firebase ========== -->
   <script>
+    // Firebase setup (unchanged)
     const firebaseConfig = {
       apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
       authDomain: "bingoxrpl.firebaseapp.com",
@@ -429,8 +270,18 @@
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
-    const letters = ['B', 'I', 'N', 'G', 'O'];
-    const ranges = { B: [1, 15], I: [16, 30], N: [31, 45], G: [46, 60], O: [61, 75] };
+
+    // Constants & state
+    const letters = ['B','I','N','G','O'];
+    const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
+    const gamePatterns = {
+      singleLine:[[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
+      perimeter:[[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+      xShape:[[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+      fourCorners:[[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
+      fullCard:[[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
+    };
+
     let calledNumbers = new Set();
     let isHost = false;
     let gameId = null;
@@ -438,516 +289,12 @@
     let xHandle = localStorage.getItem('xHandle') || null;
     let gameRef = null;
     let gameType = 'singleLine';
-    let authState = null;
     let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
     const notifiedWinners = new Set();
     const displayedPlayers = new Set();
-    let calledInitialLoaded = false;
-    let winnersInitialLoaded = false;
-    let playersInitialLoaded = false;
-    const partners = {
-      xmeme: { name: "XMEME", logo: "https://bingoxrpl.firebasestorage.app/xmeme.jpg", links: [{ type: "X", url: "https://x.com/xmemecoinxrpl" }] },
-      kedas: { name: "Kedas Brew", logo: "https://bingoxrpl.firebasestorage.app/kedas.jpg", links: [{ type: "Website", url: "https://KedasBrew.com" }] },
-      nuts: { name: "$NUTS", logo: "https://bingoxrpl.firebasestorage.app/nuts.jpg", links: [{ type: "Website", url: "https://www.xrpsquirrel.com" }] },
-      xrzillas: { name: "XRziLLas", logo: "https://bingoxrpl.firebasestorage.app/xrzillas.jpg", links: [{ type: "X", url: "https://x.com/xrzillas" }] },
-      but: { name: "Blue Umbrella Token $BUT", logo: "https://bingoxrpl.firebasestorage.app/but.jpg", links: [{ type: "Website", url: "https://wanderingfootprint.org/but" }] },
-      wandering: { name: "Wandering Footprint", logo: "https://bingoxrpl.firebasestorage.app/wandering.jpg", links: [{ type: "Website", url: "https://wanderingfootprint.org" }] },
-      freedom: { name: "Freedom Phoenix Token", logo: "https://bingoxrpl.firebasestorage.app/freedom.jpg", links: [{ type: "Website", url: "https://freedomphoenix.xyz" }] },
-      banana: { name: "$BANANA", logo: "https://bingoxrpl.firebasestorage.app/banana.jpg", links: [{ type: "Website", url: "https://www.BananaXRP.com" }] }
-    };
-    const gamePatterns = {
-      singleLine: [[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
-      perimeter: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-      xShape: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
-      fourCorners: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
-      fullCard: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
-    };
-    function getRandomNumber(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    function loadCalledNumbersFromStorage() {
-      try {
-        const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
-        calledNumbers = new Set(stored);
-      } catch (e) {
-        calledNumbers = new Set();
-      }
-    }
-    function createBoard() {
-      try {
-        const board = document.getElementById('bingo-board');
-        if (!board) return;
-        board.innerHTML = '';
-        letters.forEach(l => {
-          const div = document.createElement('div');
-          div.textContent = l;
-          div.classList.add('header');
-          board.appendChild(div);
-        });
-        const numbersPerLetter = {};
-        letters.forEach(letter => {
-          const [min, max] = ranges[letter];
-          const arr = [];
-          for (let n = min; n <= max; n++) arr.push(n);
-          numbersPerLetter[letter] = arr;
-        });
-        const leftCount = Math.ceil(15 / 2);
-        const rightCount = 15 - leftCount;
-        const maxRows = Math.max(leftCount, rightCount);
-        for (let row = 0; row < maxRows; row++) {
-          letters.forEach(letter => {
-            const leftIdx = row;
-            if (leftIdx < leftCount) {
-              const num = numbersPerLetter[letter][leftIdx];
-              const div = document.createElement('div');
-              div.textContent = num;
-              div.classList.add('cell');
-              div.id = `${letter}-${num}`;
-              if (calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
-              board.appendChild(div);
-            } else {
-              const ph = document.createElement('div');
-              ph.classList.add('cell');
-              ph.style.visibility = 'hidden';
-              board.appendChild(ph);
-            }
-          });
-          letters.forEach(letter => {
-            const rightIdx = row + leftCount;
-            if (rightIdx < 15) {
-              const num = numbersPerLetter[letter][rightIdx];
-              const div = document.createElement('div');
-              div.textContent = num;
-              div.classList.add('cell');
-              div.id = `${letter}-${num}`;
-              if (calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
-              board.appendChild(div);
-            } else {
-              const ph = document.createElement('div');
-              ph.classList.add('cell');
-              ph.style.visibility = 'hidden';
-              board.appendChild(ph);
-            }
-          });
-        }
-      } catch (e) {
-        console.error('Error creating board:', e);
-      }
-    }
-    function displayWinPattern() {
-      try {
-        const winPatternDiv = document.getElementById('win-pattern');
-        winPatternDiv.innerHTML = '';
-        const pattern = gamePatterns[gameType] || gamePatterns.singleLine;
-        for (let r = 0; r < 5; r++) {
-          for (let c = 0; c < 5; c++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            if (pattern[r][c]) cell.classList.add('win');
-            winPatternDiv.appendChild(cell);
-          }
-        }
-      } catch (e) {
-        console.error('Error displaying win pattern:', e);
-      }
-    }
-    function generatePlayerCard() {
-      try {
-        const card = { B: [], I: [], N: [], G: [], O: [] };
-        letters.forEach(letter => {
-          const [min, max] = ranges[letter];
-          const nums = [];
-          while (nums.length < 5) {
-            const n = getRandomNumber(min, max);
-            if (!nums.includes(n)) nums.push(n);
-          }
-          card[letter] = nums.sort((a, b) => a - b);
-        });
-        card.N[2] = 'FREE';
-        localStorage.setItem('playerCard', JSON.stringify(card));
-        return card;
-      } catch (e) {
-        console.error('Error generating player card:', e);
-        return null;
-      }
-    }
-    function computeCardID(card) {
-      let sum = 0;
-      let product = 1;
-      letters.forEach(letter => {
-        card[letter].forEach(num => {
-          if (num !== 'FREE') {
-            sum += num;
-            product = (product * num) % 1000000;
-          }
-        });
-      });
-      const combined = (sum * 31 + product) % 1000;
-      return combined.toString().padStart(3, '0');
-    }
-    function displayPlayerCard() {
-      try {
-        const cardDiv = document.getElementById('player-card');
-        cardDiv.innerHTML = '';
-        if (!playerCard) return;
-        letters.forEach(l => {
-          const header = document.createElement('div');
-          header.textContent = l;
-          header.classList.add('header');
-          cardDiv.appendChild(header);
-        });
-        for (let row = 0; row < 5; row++) {
-          letters.forEach(letter => {
-            const num = playerCard[letter][row];
-            const cell = document.createElement('div');
-            cell.textContent = num;
-            cell.classList.add('cell');
-            cell.id = `player-${letter}-${num}`;
-            if (num === 'FREE') cell.classList.add('free', 'called');
-            if (calledNumbers.has(`${letter}-${num}`)) cell.classList.add('called');
-            cardDiv.appendChild(cell);
-          });
-        }
-      } catch (e) {
-        console.error('Error displaying player card:', e);
-      }
-    }
-    function highlightNumber(letter, number) {
-      try {
-        const id = `${letter}-${number}`;
-        const cell = document.getElementById(id);
-        if (cell) cell.classList.add('called');
-        if (playerCard) highlightOnPlayerCard(letter, number);
-      } catch (e) {
-        console.error('Error highlighting number:', e);
-      }
-    }
-    function highlightOnPlayerCard(letter, number) {
-      try {
-        const cell = document.getElementById(`player-${letter}-${number}`);
-        if (cell) cell.classList.add('called');
-        checkForBingo();
-      } catch (e) {
-        console.error('Error highlighting on player card:', e);
-      }
-    }
-    function checkForBingo() {
-      if (!playerCard) return;
-      const winKey = `${gameId}_${gameType}`;
-      if (playerWins[winKey]) return;
-      try {
-        let hasWinningLine = false;
-        if (gameType === 'singleLine') {
-          for (let row = 0; row < 5; row++) {
-            let rowWin = true;
-            for (let col = 0; col < 5; col++) {
-              const letter = letters[col];
-              const num = playerCard[letter][row];
-              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                rowWin = false;
-                break;
-              }
-            }
-            if (rowWin) {
-              hasWinningLine = true;
-              break;
-            }
-          }
-          if (!hasWinningLine) {
-            for (let col = 0; col < 5; col++) {
-              let colWin = true;
-              const letter = letters[col];
-              for (let row = 0; row < 5; row++) {
-                const num = playerCard[letter][row];
-                if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                  colWin = false;
-                  break;
-                }
-              }
-              if (colWin) {
-                hasWinningLine = true;
-                break;
-              }
-            }
-          }
-          if (!hasWinningLine) {
-            let diag1 = true;
-            for (let i = 0; i < 5; i++) {
-              const letter = letters[i];
-              const num = playerCard[letter][i];
-              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                diag1 = false;
-                break;
-              }
-            }
-            if (diag1) hasWinningLine = true;
-          }
-          if (!hasWinningLine) {
-            let diag2 = true;
-            for (let i = 0; i < 5; i++) {
-              const letter = letters[4 - i];
-              const num = playerCard[letter][i];
-              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                diag2 = false;
-                break;
-              }
-            }
-            if (diag2) hasWinningLine = true;
-          }
-          if (hasWinningLine) winGame(winKey);
-        } else {
-          const pattern = gamePatterns[gameType];
-          let isWin = true;
-          for (let r = 0; r < 5; r++) {
-            for (let c = 0; c < 5; c++) {
-              if (pattern[r][c]) {
-                const letter = letters[c];
-                const num = playerCard[letter][r];
-                if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                  isWin = false;
-                  break;
-                }
-              }
-            }
-            if (!isWin) break;
-          }
-          if (isWin) winGame(winKey);
-        }
-      } catch (e) {
-        console.error('Error checking for bingo:', e);
-      }
-    }
-    function showToast(message, duration = 4000) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.classList.add('show'), 10);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, duration);
-    }
-    function winGame(winKey) {
-      try {
-        playerWins[winKey] = true;
-        localStorage.setItem('playerWins', JSON.stringify(playerWins));
-        showToast(`BINGO! ${xHandle} won (${gameType})! 🎉`, 5000);
-        triggerConfetti();
-        triggerFireworks();
-        if (gameRef) {
-          const timestamp = new Date().toISOString();
-          firebase.database().ref(`games/${gameId}/winners`).push({
-            handle: xHandle,
-            timestamp: timestamp,
-            gameType: gameType
-          }).catch(err => console.error('Error pushing winner:', err));
-        }
-      } catch (e) {
-        console.error('Error processing win:', e);
-      }
-    }
-    function updateLeaderboardSnapshot(winnersObj) {
-      try {
-        const leaderboard = document.getElementById('leaderboard');
-        if (!leaderboard) return;
-        leaderboard.innerHTML = '<h3>Winners</h3>';
-        if (!winnersObj || Object.keys(winnersObj).length === 0) {
-          leaderboard.innerHTML += '<p>No winners yet.</p>';
-          return;
-        }
-        const ul = document.createElement('ul');
-        ul.style.listStyle = 'none';
-        ul.style.padding = '0';
-        for (const key in winnersObj) {
-          const val = winnersObj[key];
-          const li = document.createElement('li');
-          li.textContent = `${val.handle} at ${new Date(val.timestamp).toLocaleString()} (${val.gameType})`;
-          ul.appendChild(li);
-          notifiedWinners.add(key);
-        }
-        leaderboard.appendChild(ul);
-      } catch (e) {
-        console.error('Error updating leaderboard snapshot:', e);
-      }
-    }
-    function appendWinnerToLeaderboard(key, value) {
-      try {
-        const leaderboard = document.getElementById('leaderboard');
-        if (!leaderboard) return;
-        if (!leaderboard.querySelector('h3')) leaderboard.innerHTML = '<h3>Winners</h3>';
-        let ul = leaderboard.querySelector('ul');
-        if (!ul) {
-          ul = document.createElement('ul');
-          ul.style.listStyle = 'none';
-          ul.style.padding = '0';
-          leaderboard.appendChild(ul);
-        }
-        const li = document.createElement('li');
-        li.textContent = `${value.handle} at ${new Date(value.timestamp).toLocaleString()} (${value.gameType})`;
-        ul.appendChild(li);
-      } catch (e) {
-        console.error('Error appending winner:', e);
-      }
-    }
     let playersArray = [];
-    let playerRotationIdx = 0;
-    let playerRotationIntervalId = null;
-    function startPlayerRotation() {
-      if (playerRotationIntervalId) return;
-      if (!playersArray.length) {
-        document.getElementById('player-widget-display').textContent = 'No players';
-        return;
-      }
-      document.getElementById('player-widget-display').textContent = playersArray[playerRotationIdx].handle;
-      playerRotationIntervalId = setInterval(() => {
-        playerRotationIdx = (playerRotationIdx + 1) % playersArray.length;
-        document.getElementById('player-widget-display').textContent = playersArray[playerRotationIdx].handle;
-      }, 3000);
-    }
-    function stopPlayerRotation() {
-      if (playerRotationIntervalId) {
-        clearInterval(playerRotationIntervalId);
-        playerRotationIntervalId = null;
-      }
-    }
-    function updatePlayerListSnapshot(playersObj) {
-      try {
-        const playerListContent = document.getElementById('player-list-content');
-        if (!playerListContent) return;
-        playerListContent.innerHTML = '';
-        playersArray = [];
-        if (!playersObj || Object.keys(playersObj).length === 0) {
-          playerListContent.innerHTML = '<p style="color:#AAA;margin:6px 0;">No players yet.</p>';
-          playersArray = [];
-          stopPlayerRotation();
-          document.getElementById('player-widget-display').textContent = 'No players';
-          return;
-        }
-        const keys = Object.keys(playersObj).sort();
-        keys.forEach(key => {
-          const p = playersObj[key];
-          const handle = p.handle || `@${key}`;
-          const cardID = p.cardID || 'N/A';
-          playersArray.push({ key, handle, cardID });
-          const div = document.createElement('div');
-          div.className = 'player-item';
-          const left = document.createElement('div');
-          left.textContent = handle;
-          const right = document.createElement('div');
-          right.className = 'cardid';
-          right.textContent = `#${cardID}`;
-          div.appendChild(left);
-          div.appendChild(right);
-          playerListContent.appendChild(div);
-          displayedPlayers.add(key);
-        });
-        playerRotationIdx = 0;
-        stopPlayerRotation();
-        startPlayerRotation();
-      } catch (e) {
-        console.error('Error updating player list snapshot:', e);
-      }
-    }
-    function appendPlayerToList(key, value) {
-      try {
-        const playerListContent = document.getElementById('player-list-content');
-        if (!playerListContent) return;
-        if (playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
-        const ul = playerListContent;
-        const handle = value.handle || `@${key}`;
-        const cardID = value.cardID || 'N/A';
-        const div = document.createElement('div');
-        div.className = 'player-item';
-        const left = document.createElement('div');
-        left.textContent = handle;
-        const right = document.createElement('div');
-        right.className = 'cardid';
-        right.textContent = `#${cardID}`;
-        div.appendChild(left);
-        div.appendChild(right);
-        ul.appendChild(div);
-        playersArray.push({ key, handle, cardID });
-        if (!playerRotationIntervalId) startPlayerRotation();
-      } catch (e) {
-        console.error('Error appending player:', e);
-      }
-    }
-    function triggerConfetti() {
-      try {
-        const canvas = document.getElementById('confetti-canvas');
-        canvas.style.display = 'block';
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const ctx = canvas.getContext('2d');
-        const confetti = [];
-        for (let i = 0; i < 200; i++) {
-          confetti.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height - canvas.height,
-            r: Math.random() * 6 + 1,
-            d: Math.random() * 200,
-            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-            tilt: Math.random() * 10 - 10,
-            tiltAngle: Math.random() * Math.PI
-          });
-        }
-        function draw() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          confetti.forEach((p, i) => {
-            ctx.beginPath();
-            ctx.lineWidth = p.r;
-            ctx.strokeStyle = p.color;
-            ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-            ctx.stroke();
-            p.tiltAngle += 0.1;
-            p.tilt = Math.sin(p.tiltAngle) * 15;
-            p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-            if (p.y > canvas.height) confetti.splice(i, 1);
-          });
-          if (confetti.length > 0) requestAnimationFrame(draw);
-          else canvas.style.display = 'none';
-        }
-        draw();
-      } catch (e) {
-        console.error('Error triggering confetti:', e);
-      }
-    }
-    function triggerFireworks() {
-      try {
-        const fireworks = document.getElementById('fireworks');
-        fireworks.style.display = 'block';
-        fireworks.innerHTML = '';
-        for (let i = 0; i < 20; i++) {
-          const particle = document.createElement('div');
-          particle.classList.add('particle');
-          particle.style.position = 'absolute';
-          particle.style.left = Math.random() * 100 + '%';
-          particle.style.top = Math.random() * 100 + '%';
-          particle.style.width = '8px';
-          particle.style.height = '8px';
-          particle.style.borderRadius = '50%';
-          particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
-          particle.style.opacity = '0.9';
-          fireworks.appendChild(particle);
-        }
-        setTimeout(() => {
-          fireworks.style.display = 'none';
-          fireworks.innerHTML = '';
-        }, 2000);
-      } catch (e) {
-        console.error('Error triggering fireworks:', e);
-      }
-    }
-    function playRollSound() {
-      try {
-        const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
-        audio.play().catch(() => {});
-      } catch (e) {
-        console.error('Error playing roll sound:', e);
-      }
-    }
+
+    // DOM refs
     const hostModeBtn = document.getElementById('host-mode');
     const playerModeBtn = document.getElementById('player-mode');
     const hostControls = document.getElementById('host-controls');
@@ -960,68 +307,364 @@
     const resetButton = document.getElementById('reset-button');
     const gameTypeSelect = document.getElementById('game-type');
     const copyGameIdBtn = document.getElementById('copy-game-id');
-    const copyWinnersBtn = document.getElementById('copy-winners');
-    const partnerModal = document.getElementById('partner-modal');
-    const modalContent = partnerModal ? partnerModal.querySelector('.modal-content') : null;
     const resultDiv = document.getElementById('result');
-    function cleanupListeners() {
+    const playerListEl = document.getElementById('player-list');
+    const playerListContent = document.getElementById('player-list-content');
+    const playerWidgetDisplay = document.getElementById('player-widget-display');
+
+    // ---------- Utility helpers ----------
+    function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
+
+    // ---------- Board creation (initial only; avoid re-render on every roll) ----------
+    function createBoard(){
+      const board = document.getElementById('bingo-board');
+      if(!board) return;
+      board.innerHTML = '';
+      // headers (5 letters, displayed as 10 grid columns grouping)
+      letters.forEach(l=>{
+        const header = document.createElement('div');
+        header.textContent = l;
+        header.className = 'header';
+        board.appendChild(header);
+      });
+
+      // Build columns per original layout (two columns per letter to make 10 columns)
+      // We'll list numbers 1..15 for each letter sequentially; each cell has id letter-number
+      for(let i=0;i<15;i++){
+        letters.forEach(letter=>{
+          const [min] = ranges[letter];
+          const num = min + i;
+          const div = document.createElement('div');
+          div.textContent = num;
+          div.className = 'cell';
+          div.id = `${letter}-${num}`;
+          if(calledNumbers.has(`${letter}-${num}`)) div.classList.add('called');
+          board.appendChild(div);
+        });
+      }
+    }
+
+    // ---------- Win pattern preview ----------
+    function displayWinPattern(){
+      const winPatternDiv = document.getElementById('win-pattern');
+      winPatternDiv.innerHTML = '';
+      const pattern = gamePatterns[gameType] || gamePatterns.singleLine;
+      for(let r=0;r<5;r++){
+        for(let c=0;c<5;c++){
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          if(pattern[r][c]) cell.classList.add('win');
+          winPatternDiv.appendChild(cell);
+        }
+      }
+    }
+
+    // ---------- Player card generation & display ----------
+    function generatePlayerCard(){
+      const card = { B:[], I:[], N:[], G:[], O:[] };
+      letters.forEach(letter=>{
+        const [min,max]=ranges[letter];
+        const arr=[];
+        while(arr.length<5){
+          const n=getRandomNumber(min,max);
+          if(!arr.includes(n)) arr.push(n);
+        }
+        card[letter]=arr.sort((a,b)=>a-b);
+      });
+      card.N[2] = 'FREE';
+      localStorage.setItem('playerCard', JSON.stringify(card));
+      return card;
+    }
+    function computeCardID(card){
+      let sum=0,product=1;
+      letters.forEach(letter=>{
+        card[letter].forEach(num=>{
+          if(num!=='FREE'){ sum+=num; product=(product*num)%1000000; }
+        });
+      });
+      const combined=(sum*31 + product) % 1000;
+      return combined.toString().padStart(3,'0');
+    }
+    function displayPlayerCard(){
+      const cardDiv = document.getElementById('player-card');
+      if(!cardDiv) return;
+      cardDiv.innerHTML = '';
+      if(!playerCard) return;
+      letters.forEach(l=>{
+        const header = document.createElement('div');
+        header.className = 'header';
+        header.textContent = l;
+        cardDiv.appendChild(header);
+      });
+      for(let r=0;r<5;r++){
+        letters.forEach(letter=>{
+          const num = playerCard[letter][r];
+          const el = document.createElement('div');
+          el.className = 'cell';
+          el.textContent = num;
+          el.id = `player-${letter}-${num}`;
+          if(num === 'FREE') el.classList.add('free','called');
+          if(calledNumbers.has(`${letter}-${num}`)) el.classList.add('called');
+          cardDiv.appendChild(el);
+        });
+      }
+    }
+
+    // ---------- Highlight called numbers (targeted DOM updates only) ----------
+    function highlightNumber(letter, number){
+      // update board cell
       try {
-        if (gameRef) {
+        const id = `${letter}-${number}`;
+        const boardCell = document.getElementById(id);
+        if(boardCell) boardCell.classList.add('called');
+
+        // player card update
+        const playerCell = document.getElementById(`player-${letter}-${number}`);
+        if(playerCell) playerCell.classList.add('called');
+
+        // update result text (preview)
+        resultDiv.textContent = `${letter}-${number}`;
+      } catch(e){
+        console.error('Highlight error', e);
+      }
+    }
+
+    // ---------- Bingo logic ----------
+    function rollBingo(){
+      if(calledNumbers.size >= 75){ showToast('All numbers called',3000); return null; }
+      let letter,number,attempts=0;
+      do {
+        letter = letters[Math.floor(Math.random()*letters.length)];
+        const [min,max] = ranges[letter];
+        number = getRandomNumber(min,max);
+        attempts++;
+        if(attempts>200){ showToast('Unable to find new number',4000); return null; }
+      } while(calledNumbers.has(`${letter}-${number}`));
+      const rolled = `${letter}-${number}`;
+      calledNumbers.add(rolled);
+      // push to Firebase (host action)
+      if(gameRef && isHost){
+        gameRef.child('called').push(rolled).catch(err=>console.error('DB push error',err));
+      } else {
+        // local fall-back
+        localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+        highlightNumber(letter, number);
+      }
+      return rolled;
+    }
+
+    // ---------- Toast utility ----------
+    function showToast(msg, duration=2500){
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      Object.assign(t.style, { position:'fixed', right:'20px', top:'20px', padding:'10px 14px', background: 'var(--glow)', color:'#000', zIndex:99999, borderRadius:'8px', boxShadow:'0 8px 30px rgba(0,0,0,0.4)', fontWeight:800 });
+      document.body.appendChild(t);
+      setTimeout(()=> t.style.opacity = '1', 20);
+      setTimeout(()=> { t.style.opacity='0'; setTimeout(()=> t.remove(),300); }, duration);
+    }
+
+    // ---------- Leaderboard / winners ----------
+    function updateLeaderboardSnapshot(winnersObj){
+      const lb = document.getElementById('leaderboard');
+      lb.innerHTML = '<h3 style="color:var(--glow)">Winners</h3>';
+      if(!winnersObj || Object.keys(winnersObj).length===0){ lb.innerHTML += '<p style="color:#AAA">No winners yet.</p>'; return; }
+      const ul = document.createElement('ul');
+      ul.style.listStyle='none'; ul.style.padding='0';
+      Object.keys(winnersObj).forEach(k=>{
+        const v = winnersObj[k];
+        const li = document.createElement('li'); li.textContent = `${v.handle} at ${new Date(v.timestamp).toLocaleString()} (${v.gameType})`;
+        ul.appendChild(li);
+      });
+      lb.appendChild(ul);
+    }
+    function appendWinnerToLeaderboard(key, value){
+      const lb = document.getElementById('leaderboard');
+      if(!lb.querySelector('ul')){ const ul = document.createElement('ul'); ul.style.listStyle='none'; ul.style.padding='0'; lb.appendChild(ul); }
+      const ul = lb.querySelector('ul');
+      const li = document.createElement('li'); li.textContent = `${value.handle} at ${new Date(value.timestamp).toLocaleString()} (${value.gameType})`;
+      ul.appendChild(li);
+    }
+
+    // ---------- Player list UI (snapshot + append) ----------
+    function updatePlayerListSnapshot(playersObj){
+      playerListContent.innerHTML = '';
+      playersArray = [];
+      if(!playersObj || Object.keys(playersObj).length===0){
+        playerListContent.innerHTML = '<p style="color:#AAA;margin:6px 0;">No players yet.</p>';
+        playerWidgetDisplay.textContent = 'No players';
+        return;
+      }
+      const keys = Object.keys(playersObj).sort();
+      keys.forEach(k=>{
+        const p = playersObj[k];
+        const handle = p.handle || ('@'+k);
+        const cardID = p.cardID || 'N/A';
+        playersArray.push({key:k,handle,cardID});
+        const div = document.createElement('div'); div.className = 'player-item';
+        const left = document.createElement('div'); left.textContent = handle;
+        const right = document.createElement('div'); right.className = 'cardid'; right.textContent = `#${cardID}`;
+        div.appendChild(left); div.appendChild(right);
+        playerListContent.appendChild(div);
+      });
+      // start a small rotation widget:
+      startPlayerRotation();
+    }
+    function appendPlayerToList(key, value){
+      if(!playerListContent) return;
+      if(playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
+      const handle = value.handle || ('@'+key);
+      const cardID = value.cardID || 'N/A';
+      const div = document.createElement('div'); div.className = 'player-item';
+      const left = document.createElement('div'); left.textContent = handle;
+      const right = document.createElement('div'); right.className='cardid'; right.textContent = `#${cardID}`;
+      div.appendChild(left); div.appendChild(right);
+      playerListContent.appendChild(div);
+      playersArray.push({key,handle,cardID});
+      if(playersArray.length) playerWidgetDisplay.textContent = playersArray[0].handle;
+    }
+
+    // rotation widget for player display
+    let playerRotationIntervalId = null;
+    let playerRotationIdx = 0;
+    function startPlayerRotation(){
+      if(playerRotationIntervalId) return;
+      if(!playersArray.length){ playerWidgetDisplay.textContent = 'No players'; return; }
+      playerWidgetDisplay.textContent = playersArray[playerRotationIdx].handle;
+      playerRotationIntervalId = setInterval(()=>{
+        playerRotationIdx = (playerRotationIdx + 1) % playersArray.length;
+        playerWidgetDisplay.textContent = playersArray[playerRotationIdx].handle;
+      },3000);
+    }
+    function stopPlayerRotation(){ if(playerRotationIntervalId){ clearInterval(playerRotationIntervalId); playerRotationIntervalId = null; } }
+
+    // ---------- Setup / cleanup firebase listeners ----------
+    let gameListeners = { called: false, gameType: false, winners:false, players:false };
+    function cleanupListeners(){
+      if(gameRef){
+        try {
           gameRef.child('called').off();
           gameRef.child('gameType').off();
           gameRef.child('winners').off();
           gameRef.child('players').off();
-        }
-        calledInitialLoaded = false;
-        winnersInitialLoaded = false;
-        playersInitialLoaded = false;
-      } catch (e) {
-        console.error('Error cleaning up listeners:', e);
+        } catch(e){ /* ignore */ }
+      }
+      gameListeners = { called:false, gameType:false, winners:false, players:false };
+    }
+
+    function setupGame(id){
+      try {
+        cleanupListeners();
+        gameRef = database.ref(`games/${id}`);
+        // initial called snapshot (load all called values into Set), but do not re-create board every child
+        gameRef.child('called').once('value', snap=>{
+          const obj = snap.val();
+          if(obj){ Object.values(obj).forEach(v=> { if(isValidCalledFormat(v)) calledNumbers.add(v); }); }
+          localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+          // update DOM cells that are called
+          calledNumbers.forEach(entry => {
+            const [L,N] = entry.split('-');
+            const el = document.getElementById(`${L}-${N}`);
+            if(el) el.classList.add('called');
+          });
+        });
+        // child_added -> highlight only, don't recreate board
+        gameRef.child('called').on('child_added', snap=>{
+          const rolled = snap.val();
+          if(!isValidCalledFormat(rolled)) return;
+          const [letter, num] = rolled.split('-');
+          calledNumbers.add(rolled);
+          localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+          highlightNumber(letter, num);
+        });
+
+        // game type changes: update our UI preview grid only (no textual dump)
+        gameRef.child('gameType').on('value', snap=>{
+          const newGameType = snap.val() || 'singleLine';
+          gameType = newGameType;
+          if(isHost) gameTypeSelect.value = gameType;
+          displayWinPattern();
+        });
+
+        // winners
+        gameRef.child('winners').once('value', snap=>{
+          const obj = snap.val() || {};
+          updateLeaderboardSnapshot(obj);
+        });
+        gameRef.child('winners').on('child_added', snap=>{
+          const key = snap.key, val = snap.val();
+          if(!notifiedWinners.has(key)){ notifiedWinners.add(key); appendWinnerToLeaderboard(key,val); if(isHost) showToast(`BINGO! ${val.handle} won (${val.gameType})!`,4000); }
+        });
+
+        // players
+        gameRef.child('players').once('value', snap=>{
+          const obj = snap.val() || {};
+          updatePlayerListSnapshot(obj);
+        });
+        gameRef.child('players').on('child_added', snap=>{
+          const key = snap.key, val = snap.val();
+          if(!displayedPlayers.has(key)){ displayedPlayers.add(key); appendPlayerToList(key,val); if(isHost) showToast(`${val.handle} joined`,2500); }
+        });
+
+      } catch(e){
+        console.error('Setup game error:', e);
       }
     }
-    hostModeBtn.addEventListener('click', () => {
-      firebase.auth().signInAnonymously().then(() => {
+
+    // ---------- Event handlers ----------
+    hostModeBtn.addEventListener('click', ()=>{
+      auth.signInAnonymously().then(()=>{
         isHost = true;
         hostControls.style.display = 'flex';
         playerControls.style.display = 'none';
+        playerListEl.style.display = 'block';
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
         notifiedWinners.clear();
         displayedPlayers.clear();
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
-        gameId = Math.random().toString(36).substring(2, 10);
+        gameId = Math.random().toString(36).substring(2,10);
         localStorage.setItem('gameId', gameId);
         gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
         setupGame(gameId);
+        // set game type in db
         gameType = gameTypeSelect.value;
-        if (gameRef) firebase.database().ref(`games/${gameId}/gameType`).set(gameType).catch(err => console.error(err));
+        if(gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
         displayWinPattern();
-        loadCalledNumbersFromStorage();
         createBoard();
-        showToast('Host mode enabled. New game created.', 3000);
-      }).catch(err => {
+        showToast('Host mode enabled. New game created.',3000);
+      }).catch(err=>{
         console.error('Auth error for host:', err);
         alert('Failed to authenticate for host mode: ' + err.message);
       });
     });
-    playerModeBtn.addEventListener('click', () => {
+
+    playerModeBtn.addEventListener('click', ()=>{
       isHost = false;
       hostControls.style.display = 'none';
       playerControls.style.display = 'block';
-      calledNumbers.clear();
-      localStorage.removeItem('calledNumbers');
-      notifiedWinners.clear();
-      loadCalledNumbersFromStorage();
+      // load called numbers from storage if present
+      const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+      calledNumbers = new Set(stored);
       createBoard();
-      showToast('Player mode: enter game ID and handle to join.', 2500);
+      // apply called classes
+      calledNumbers.forEach(entry=>{
+        const [L,N] = entry.split('-');
+        const el = document.getElementById(`${L}-${N}`);
+        if(el) el.classList.add('called');
+      });
+      displayWinPattern();
+      showToast('Player mode: enter game ID and handle to join.',2500);
     });
-    joinGameBtn.addEventListener('click', () => {
+
+    joinGameBtn.addEventListener('click', ()=>{
       const providedGameId = gameIdInput.value.trim();
       const providedHandle = xHandleInput.value.trim();
-      if (!providedGameId) return alert('Enter a valid Game ID');
-      if (!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
-      firebase.auth().signInAnonymously().then(() => {
+      if(!providedGameId) return alert('Enter a valid Game ID');
+      if(!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
+      auth.signInAnonymously().then(()=>{
         gameId = providedGameId;
         xHandle = providedHandle;
         localStorage.setItem('gameId', gameId);
@@ -1030,160 +673,65 @@
         const cardID = computeCardID(playerCard);
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
-        notifiedWinners.clear();
         displayPlayerCard();
-        const handleKey = xHandle.replace('@', '');
-        firebase.database().ref(`games/${gameId}/players/${handleKey}`).set({
+        const handleKey = xHandle.replace('@','');
+        gameRef = database.ref(`games/${gameId}`);
+        // write player entry
+        gameRef.child('players').child(handleKey).set({
           handle: xHandle,
           cardID: cardID
-        }).then(() => {
-          showToast(`Joined ${gameId} as ${xHandle}`, 3000);
+        }).then(()=>{
+          showToast(`Joined ${gameId} as ${xHandle}`,3000);
           setupGame(gameId);
           createBoard();
-        }).catch(err => {
+          // apply any previously called numbers
+          const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+          calledNumbers = new Set(stored);
+          calledNumbers.forEach(entry=>{
+            const [L,N] = entry.split('-');
+            const el = document.getElementById(`${L}-${N}`);
+            if(el) el.classList.add('called');
+            const pc = document.getElementById(`player-${L}-${N}`);
+            if(pc) pc.classList.add('called');
+          });
+        }).catch(err=>{
           console.error('Error registering player:', err);
-          alert('Error registering player: ' + err.message);
+          alert('Error registering player: ' + (err.message || err));
         });
-      }).catch(err => {
+      }).catch(err=>{
         console.error('Auth error for player join:', err);
         alert('Failed to authenticate: ' + err.message);
       });
     });
-    copyGameIdBtn.addEventListener('click', () => {
+
+    copyGameIdBtn.addEventListener('click', ()=>{
       try {
-        if (!gameId) return showToast('No Game ID to copy', 2000);
-        navigator.clipboard.writeText(gameId).then(() => showToast('Game ID copied!', 2000));
-      } catch (e) {
-        console.error('Copy error:', e);
-        showToast('Error copying Game ID', 2000);
-      }
+        if(!gameId) return showToast('No Game ID to copy',2000);
+        navigator.clipboard.writeText(gameId).then(()=> showToast('Game ID copied!',2000));
+      } catch(e){ console.error('Copy error', e); showToast('Error copying Game ID',2000); }
     });
-    copyWinnersBtn.addEventListener('click', () => {
-      try {
-        const winnersList = document.getElementById('leaderboard').innerText.replace('Winners\n', '');
-        navigator.clipboard.writeText(winnersList).then(() => showToast('Winners list copied!', 2000));
-      } catch (e) {
-        console.error('Copy winners error:', e);
-        showToast('Error copying winners list', 2000);
-      }
-    });
-    function setupGame(id) {
-      try {
-        cleanupListeners();
-        gameRef = firebase.database().ref(`games/${id}`);
-        gameRef.child('called').once('value', snap => {
-          const obj = snap.val();
-          if (obj) {
-            const vals = Object.values(obj);
-            vals.forEach(v => calledNumbers.add(v));
-            localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-          }
-          createBoard();
-          calledInitialLoaded = true;
-        });
-        gameRef.child('called').on('child_added', snap => {
-          const rolled = snap.val();
-          if (!isValidCalledFormat(rolled)) return;
-          const [letter, num] = rolled.split('-');
-          calledNumbers.add(rolled);
-          localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-          resultDiv.textContent = rolled;
-          highlightNumber(letter, num);
-          createBoard();
-          if (calledInitialLoaded) {
-            playRollSound();
-            triggerConfetti();
-          }
-        });
-        gameRef.child('gameType').on('value', snap => {
-          const newGameType = snap.val() || 'singleLine';
-          if (newGameType !== gameType) {
-            gameType = newGameType;
-            if (isHost) gameTypeSelect.value = gameType;
-            displayWinPattern();
-            createBoard();
-            checkForBingo();
-          } else {
-            displayWinPattern();
-          }
-        });
-        gameRef.child('winners').once('value', snap => {
-          const obj = snap.val() || {};
-          updateLeaderboardSnapshot(obj);
-          winnersInitialLoaded = true;
-        });
-        gameRef.child('winners').on('child_added', snap => {
-          const key = snap.key;
-          const val = snap.val();
-          if (!notifiedWinners.has(key)) {
-            notifiedWinners.add(key);
-            appendWinnerToLeaderboard(key, val);
-            if (isHost) showToast(`BINGO! ${val.handle} won (${val.gameType})!`, 4000);
-          }
-        });
-        gameRef.child('players').once('value', snap => {
-          const obj = snap.val() || {};
-          updatePlayerListSnapshot(obj);
-          playersInitialLoaded = true;
-        });
-        gameRef.child('players').on('child_added', snap => {
-          const key = snap.key;
-          const val = snap.val();
-          if (!displayedPlayers.has(key)) {
-            displayedPlayers.add(key);
-            appendPlayerToList(key, val);
-            if (isHost) showToast(`${val.handle || '@' + key} joined`, 2500);
-          }
-        });
-      } catch (e) {
-        console.error('Setup game error:', e);
-        alert('Error setting up game.');
-      }
-    }
-    function isValidCalledFormat(str) {
-      if (!str || typeof str !== 'string') return false;
-      return /^(?:B|I|N|G|O)-\d{1,2}$/.test(str);
-    }
-    function rollBingo() {
-      if (calledNumbers.size >= 75) {
-        showToast('All numbers called! Reset or change game mode.', 5000);
-        return null;
-      }
-      let letter, number;
-      let attempts = 0;
-      do {
-        letter = letters[Math.floor(Math.random() * letters.length)];
-        const [min, max] = ranges[letter];
-        number = getRandomNumber(min, max);
-        attempts++;
-        if (attempts > 100) {
-          showToast('Unable to find new number. Reset game.', 5000);
-          return null;
-        }
-      } while (calledNumbers.has(`${letter}-${number}`));
-      const rolled = `${letter}-${number}`;
-      calledNumbers.add(rolled);
-      localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-      return rolled;
-    }
-    rollButton.addEventListener('click', () => {
-      if (!isHost || !gameRef) return alert('Host a game first');
+
+    // Roll (host) - targeted DOM update only (no board re-create)
+    rollButton.addEventListener('click', ()=>{
+      if(!isHost || !gameRef) return alert('Host a game first');
       try {
         const rolled = rollBingo();
-        if (!rolled) return;
-        firebase.database().ref(`games/${gameId}/called`).push(rolled)
-          .then(() => {
-            createBoard();
-          }).catch(err => console.error('Error pushing roll:', err));
-      } catch (e) {
+        if(!rolled) return;
+        // we already push inside rollBingo for host; highlightNumber will be triggered by DB child_added
+        // but to minimize latency visually, also highlight locally
+        const [L,N] = rolled.split('-');
+        highlightNumber(L,N);
+      } catch(e){
         console.error('Roll error:', e);
         alert('Error rolling number.');
       }
     });
-    resetButton.addEventListener('click', () => {
+
+    // Reset
+    resetButton.addEventListener('click', ()=>{
       try {
-        if (gameRef && isHost) {
-          gameRef.remove().catch(err => console.warn('Failed to remove game DB node:', err));
+        if(gameRef && isHost){
+          gameRef.remove().catch(err=>console.warn('Failed to remove game DB node:', err));
         }
         cleanupListeners();
         calledNumbers.clear();
@@ -1194,216 +742,141 @@
         playerWins = {};
         notifiedWinners.clear();
         displayedPlayers.clear();
+        // clear visual board called classes without re-creating layout
+        document.querySelectorAll('.bingo-board .cell.called').forEach(el=>el.classList.remove('called'));
         resultDiv.textContent = '';
         createBoard();
-        if (playerCard && xHandle) displayPlayerCard();
+        if(playerCard && xHandle) displayPlayerCard();
         gameId = null;
         localStorage.removeItem('gameId');
         localStorage.removeItem('xHandle');
         xHandle = null;
         gameRef = null;
-        authState = null;
-        hostControls.style.display = 'none';
-        playerControls.style.display = 'none';
+        hostControls.style.display='none';
+        playerControls.style.display='none';
         document.getElementById('leaderboard').innerHTML = '';
-        showToast('Game reset complete', 2000);
-      } catch (e) {
+        showToast('Game reset complete',2000);
+      } catch(e){
         console.error('Reset error:', e);
         alert('Error resetting game.');
       }
     });
-    firebase.auth().onAuthStateChanged(user => {
-      authState = user;
-    });
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
-    const submenu = document.querySelector('.submenu');
-    dropdownToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
-    });
-    document.addEventListener('click', (e) => {
-      if (!dropdownToggle.contains(e.target) && !submenu.contains(e.target)) submenu.style.display = 'none';
-    });
-    document.querySelectorAll('.partner-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const partnerKey = link.dataset.partner;
-        const partner = partners[partnerKey];
-        if (partner) {
-          let html = `<img src="${partner.logo}" alt="${partner.name} Logo" style="width:100px;margin-bottom:10px;">
-                      <h3>${partner.name}</h3><ul style="list-style:none;padding:0;">`;
-          partner.links.forEach(l => {
-            html += `<li style="margin:8px 0;"><a href="${l.url}" target="_blank">${l.type}</a></li>`;
-          });
-          html += `</ul><button id="close-modal">Close</button>`;
-          modalContent.innerHTML = html;
-          partnerModal.style.display = 'flex';
-          document.getElementById('close-modal').addEventListener('click', () => partnerModal.style.display = 'none');
-        }
-      });
-    });
-    partnerModal.addEventListener('click', (e) => {
-      if (e.target === partnerModal) partnerModal.style.display = 'none';
-    });
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlGameId = urlParams.get('gameId');
-    if (urlGameId) {
-      gameId = urlGameId;
-      localStorage.setItem('gameId', gameId);
-      playerModeBtn.click();
-      gameIdInput.value = gameId;
-      showToast('Auto-join game ID detected', 2000);
-    }
-    const togglePlayerListBtn = document.getElementById('toggle-player-list');
-    const playerListContent = document.getElementById('player-list-content');
-    if (togglePlayerListBtn && playerListContent) {
-      togglePlayerListBtn.addEventListener('click', () => {
-        if (playerListContent.style.display === 'none' || playerListContent.style.display === '') {
-          playerListContent.style.display = 'block';
-          togglePlayerListBtn.textContent = 'Collapse';
-        } else {
-          playerListContent.style.display = 'none';
-          togglePlayerListBtn.textContent = 'Expand';
-        }
-      });
-    }
-    function isDesktop() {
-      return window.innerWidth >= 768;
-    }
-    const playerListEl = document.getElementById('player-list');
-    let isDragging = false;
-    let currentX = parseInt(localStorage.getItem('playerListX')) || null;
-    let currentY = parseInt(localStorage.getItem('playerListY')) || null;
-    let initialX = 0;
-    let initialY = 0;
-    if (currentX !== null && currentY !== null && isDesktop()) {
-      playerListEl.style.left = `${currentX}px`;
-      playerListEl.style.top = `${currentY}px`;
-      playerListEl.style.right = 'auto';
-    }
-    playerListEl.addEventListener('mousedown', (e) => {
-      if (!isDesktop()) return;
-      initialX = e.clientX - (currentX || playerListEl.offsetLeft);
-      initialY = e.clientY - (currentY || playerListEl.offsetTop);
-      isDragging = true;
-      playerListEl.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      let x = e.clientX - initialX;
-      let y = e.clientY - initialY;
-      const maxX = window.innerWidth - playerListEl.offsetWidth;
-      const maxY = window.innerHeight - playerListEl.offsetHeight;
-      x = Math.max(0, Math.min(x, maxX));
-      y = Math.max(0, Math.min(y, maxY));
-      currentX = x;
-      currentY = y;
-      playerListEl.style.left = `${x}px`;
-      playerListEl.style.top = `${y}px`;
-      playerListEl.style.right = 'auto';
-      playerListEl.style.bottom = 'auto';
-    });
-    document.addEventListener('mouseup', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      playerListEl.style.cursor = 'move';
-      if (currentX !== null && currentY !== null) {
-        localStorage.setItem('playerListX', currentX);
-        localStorage.setItem('playerListY', currentY);
-      }
-    });
-    playerListEl.addEventListener('touchstart', (e) => {
-      if (!isDesktop()) return;
-      const touch = e.touches[0];
-      initialX = touch.clientX - (currentX || playerListEl.offsetLeft);
-      initialY = touch.clientY - (currentY || playerListEl.offsetTop);
-      isDragging = true;
-      playerListEl.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-    document.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      const touch = e.touches[0];
-      let x = touch.clientX - initialX;
-      let y = touch.clientY - initialY;
-      const maxX = window.innerWidth - playerListEl.offsetWidth;
-      const maxY = window.innerHeight - playerListEl.offsetHeight;
-      x = Math.max(0, Math.min(x, maxX));
-      y = Math.max(0, Math.min(y, maxY));
-      currentX = x;
-      currentY = y;
-      playerListEl.style.left = `${x}px`;
-      playerListEl.style.top = `${y}px`;
-      playerListEl.style.right = 'auto';
-      playerListEl.style.bottom = 'auto';
-    });
-    document.addEventListener('touchend', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      playerListEl.style.cursor = 'move';
-      if (currentX !== null && currentY !== null) {
-        localStorage.setItem('playerListX', currentX);
-        localStorage.setItem('playerListY', currentY);
-      }
-    });
-    function isValidGameTypeValue(val) {
-      return Object.keys(gamePatterns).includes(val);
-    }
-    gameTypeSelect.addEventListener('change', () => {
+
+    // Game type change (host-side writes to DB; everyone updates preview)
+    gameTypeSelect.addEventListener('change', ()=>{
       const val = gameTypeSelect.value;
-      if (!isValidGameTypeValue(val)) return;
+      if(!Object.keys(gamePatterns).includes(val)) return;
       gameType = val;
-      if (isHost && gameRef) {
-        firebase.database().ref(`games/${gameId}/gameType`).set(gameType).catch(err => console.error(err));
-      }
+      if(isHost && gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
       displayWinPattern();
-      createBoard();
-      checkForBingo();
     });
-    function setupLocalUIOnLoad() {
-      loadCalledNumbersFromStorage();
+
+    // Auto-join via URL (keeps behavior)
+    (function checkUrlAutoJoin(){
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlGameId = urlParams.get('gameId');
+      if(urlGameId){
+        gameId = urlGameId;
+        localStorage.setItem('gameId', gameId);
+        playerModeBtn.click();
+        gameIdInput.value = gameId;
+        showToast('Auto-join game ID detected',2000);
+      }
+    })();
+
+    // On load: restore calledNumbers and build board
+    (function init(){
+      const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+      calledNumbers = new Set(stored);
       createBoard();
+      // apply called classes
+      calledNumbers.forEach(entry=>{
+        const [L,N] = entry.split('-');
+        const el = document.getElementById(`${L}-${N}`);
+        if(el) el.classList.add('called');
+      });
       displayWinPattern();
-    }
-    function isValidNumberString(s) {
-      return isValidCalledFormat(s);
-    }
-    function appendCalledLocally(rolled) {
-      if (!isValidNumberString(rolled)) return;
-      const [letter, num] = rolled.split('-');
+
+      // restore player-list position (applies transform)
+      const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
+      const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
+      playerListEl.style.transform = `translate(${savedX}px, ${savedY}px)`;
+    })();
+
+    // ---------- Dragging logic for player-list (transform-based) ----------
+    (function makePlayerListDraggable(){
+      const el = playerListEl;
+      let dragging = false, startX=0, startY=0, currentX=0, currentY=0, startTransform = {x:0,y:0};
+      // read saved transform
+      const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
+      const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
+      currentX = savedX; currentY = savedY;
+      el.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+      function onDown(e){
+        if(window.innerWidth < 768) return; // no dragging on small screens
+        dragging = true;
+        el.style.cursor = 'grabbing';
+        const client = (e.touches && e.touches[0]) || e;
+        startX = client.clientX;
+        startY = client.clientY;
+        // compute starting offset (currentX/currentY)
+        startTransform.x = currentX;
+        startTransform.y = currentY;
+        e.preventDefault();
+      }
+      function onMove(e){
+        if(!dragging) return;
+        const client = (e.touches && e.touches[0]) || e;
+        const dx = client.clientX - startX;
+        const dy = client.clientY - startY;
+        let nx = startTransform.x + dx;
+        let ny = startTransform.y + dy;
+        // clamp within viewport
+        const rect = el.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width - 6;
+        const maxY = window.innerHeight - rect.height - 6;
+        nx = Math.max(-rect.left + 6, Math.min(nx, maxX - rect.left));
+        ny = Math.max(-rect.top + 6, Math.min(ny, maxY - rect.top));
+        currentX = nx; currentY = ny;
+        el.style.transform = `translate(${currentX}px, ${currentY}px)`;
+      }
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
+        el.style.cursor = 'grab';
+        // persist values
+        localStorage.setItem('playerListTransformX', String(currentX));
+        localStorage.setItem('playerListTransformY', String(currentY));
+      }
+      el.addEventListener('mousedown', onDown);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+      // touch support
+      el.addEventListener('touchstart', onDown, {passive:false});
+      window.addEventListener('touchmove', onMove, {passive:false});
+      window.addEventListener('touchend', onUp);
+    })();
+
+    // ---------- Helper: append called number locally when testing or fallback ----------
+    function appendCalledLocally(rolled){
+      if(!isValidCalledFormat(rolled)) return;
+      const [L,N] = rolled.split('-');
       calledNumbers.add(rolled);
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-      resultDiv.textContent = rolled;
-      highlightNumber(letter, num);
-      createBoard();
+      highlightNumber(L,N);
     }
-    function isNumberLikeString(s) {
-      return typeof s === 'string' && s.includes('-') && /^[A-Za-z]+-/.test(s);
-    }
-    (function init() {
-      setupLocalUIOnLoad();
-    })();
-    function isPlayerObject(val) {
-      return val && (val.handle || val.cardID);
-    }
-    window.addEventListener('resize', () => {
-      const canvas = document.getElementById('confetti-canvas');
-      if (canvas && canvas.style.display === 'block') {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      if (playerListEl) {
-        const maxX = window.innerWidth - playerListEl.offsetWidth;
-        const maxY = window.innerHeight - playerListEl.offsetHeight;
-        currentX = Math.min(currentX || playerListEl.offsetLeft, maxX);
-        currentY = Math.min(currentY || playerListEl.offsetTop, maxY);
-        playerListEl.style.left = `${currentX}px`;
-        playerListEl.style.top = `${currentY}px`;
-      }
-    });
+
+    // ---------- small helpers ----------
+    function isValidNumberString(s){ return isValidCalledFormat(s); }
+    function isPlayerObject(val){ return val && (val.handle || val.cardID); }
+
+    // Ensure auth state is tracked
+    firebase.auth().onAuthStateChanged(user => { /* can track if needed */ });
+
+    // Expose some debug helpers to console if needed
+    window._bingoState = () => ({ gameId, isHost, gameType, calledCount: calledNumbers.size });
+
   </script>
 </body>
 </html>
