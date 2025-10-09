@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!" />
   <title>$BINGO Roller - BingoXRPL Live Tool</title>
-  <!-- Firebase & gtag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -105,11 +104,15 @@
       box-shadow: 0 8px 16px rgba(0,255,0,0.6);
     }
     #result {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-size: clamp(1.6rem, 2.8vw, 2.2rem);
       color: #00FF00;
       margin: clamp(1rem, 2vw, 1.5rem) 0;
       text-shadow: 2px 2px 8px rgba(0,255,0,0.7);
       word-break: break-word;
+      min-height: 2.8rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
     #reset-button {
       background: #00B8D9;
@@ -228,13 +231,6 @@
       background: rgba(0,0,0,0.7);
       box-shadow: 0 0 15px rgba(0,255,0,0.5);
     }
-    .win-pattern-label {
-      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-      color: #00FF00;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      text-transform: capitalize;
-    }
     .win-pattern .cell {
       aspect-ratio: 1/1;
       background: #1A1F3A;
@@ -256,18 +252,55 @@
       right: 20px;
       top: clamp(6rem, 10vw, 8rem);
       width: clamp(200px, 20vw, 300px);
-      background: rgba(0,0,0,0.5);
-      padding: 1.5rem;
+      background: rgba(0,0,0,0.6);
+      padding: 0.6rem;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       z-index: 100;
       max-height: 70vh;
       overflow-y: auto;
+      cursor: move;
+      user-select: none;
     }
     #player-list h3 {
-      margin: 0 0 1rem;
+      margin: 0 0 0.6rem;
       color: #00FF00;
-      font-size: clamp(1.2rem, 2vw, 1.5rem);
+      font-size: clamp(1.0rem, 1.6vw, 1.2rem);
+    }
+    #player-widget {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:8px;
+      background: rgba(255,255,255,0.03);
+      border-radius:8px;
+      margin-bottom:8px;
+      font-weight:bold;
+      color:#00B8D9;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    #player-list-content {
+      padding: 6px 8px;
+      max-height: calc(70vh - 140px);
+      overflow-y: auto;
+      background: rgba(0,0,0,0.25);
+      border-radius: 8px;
+    }
+    .player-item {
+      padding: 6px 4px;
+      color: #fff;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .player-item .cardid {
+      color:#00FF00;
+      font-weight:700;
     }
     .host-main {
       width: 100%;
@@ -276,26 +309,7 @@
       flex-direction: column;
       align-items: center;
     }
-    #ad-box {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 200px;
-      height: 200px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      z-index: 100;
-      cursor: move;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      user-select: none;
-    }
-    #ad-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
+    #ad-box { display:none; }
     @media (max-width: 767px) {
       .container { max-width: 95%; }
       .bingo-board { grid-template-columns: repeat(10, minmax(30px, 1fr)); gap: 0.3rem; }
@@ -306,8 +320,9 @@
         width: 100%;
         max-width: 100%;
         margin: 1rem 0;
+        cursor: default;
       }
-      #ad-box { width: 150px; height: 150px; }
+      #player-widget { min-height:40px; }
       .win-pattern { max-width: 200px; gap: 0.4rem; padding: 1rem; }
     }
     @media (min-width: 768px) {
@@ -354,6 +369,7 @@
       <div id="player-list">
         <h3>Player List</h3>
         <button id="toggle-player-list">Collapse</button>
+        <div id="player-widget"><div id="player-widget-display">No players</div></div>
         <div id="player-list-content"></div>
       </div>
       <div class="host-main">
@@ -367,9 +383,7 @@
             <option value="fullCard">Full Card</option>
           </select>
         </div>
-        <div id="win-pattern" class="win-pattern">
-          <div class="win-pattern-label"></div>
-        </div>
+        <div id="win-pattern" class="win-pattern"></div>
         <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
         <div id="result" role="status"></div>
         <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
@@ -390,10 +404,6 @@
     <canvas id="confetti-canvas"></canvas>
     <div id="fireworks" class="fireworks"></div>
   </div>
-  <div id="ad-box"></div>
-  <div id="partner-modal">
-    <div class="modal-content"></div>
-  </div>
   <footer>
     <div class="container">
       <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
@@ -405,7 +415,6 @@
     </div>
   </footer>
   <script>
-    /* Firebase config */
     const firebaseConfig = {
       apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
       authDomain: "bingoxrpl.firebaseapp.com",
@@ -420,7 +429,6 @@
     const analytics = firebase.analytics();
     const database = firebase.database();
     const auth = firebase.auth();
-    /* Data & state */
     const letters = ['B', 'I', 'N', 'G', 'O'];
     const ranges = { B: [1, 15], I: [16, 30], N: [31, 45], G: [46, 60], O: [61, 75] };
     let calledNumbers = new Set();
@@ -437,7 +445,6 @@
     let calledInitialLoaded = false;
     let winnersInitialLoaded = false;
     let playersInitialLoaded = false;
-    /* Partners (updated URLs for reliability) */
     const partners = {
       xmeme: { name: "XMEME", logo: "https://bingoxrpl.firebasestorage.app/xmeme.jpg", links: [{ type: "X", url: "https://x.com/xmemecoinxrpl" }] },
       kedas: { name: "Kedas Brew", logo: "https://bingoxrpl.firebasestorage.app/kedas.jpg", links: [{ type: "Website", url: "https://KedasBrew.com" }] },
@@ -448,15 +455,13 @@
       freedom: { name: "Freedom Phoenix Token", logo: "https://bingoxrpl.firebasestorage.app/freedom.jpg", links: [{ type: "Website", url: "https://freedomphoenix.xyz" }] },
       banana: { name: "$BANANA", logo: "https://bingoxrpl.firebasestorage.app/banana.jpg", links: [{ type: "Website", url: "https://www.BananaXRP.com" }] }
     };
-    /* Game patterns */
     const gamePatterns = {
-      singleLine: [[0,0,0,0,0], [0,0,0,0,0], [1,1,1,1,1], [0,0,0,0,0], [0,0,0,0,0]],
-      perimeter: [[1,1,1,1,1], [1,0,0,0,1], [1,0,0,0,1], [1,0,0,0,1], [1,1,1,1,1]],
-      xShape: [[1,0,0,0,1], [0,1,0,1,0], [0,0,1,0,0], [0,1,0,1,0], [1,0,0,0,1]],
-      fourCorners: [[1,0,0,0,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [1,0,0,0,1]],
-      fullCard: [[1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]]
+      singleLine: [[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
+      perimeter: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+      xShape: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+      fourCorners: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
+      fullCard: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
     };
-    /* Utility */
     function getRandomNumber(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
@@ -532,9 +537,8 @@
     function displayWinPattern() {
       try {
         const winPatternDiv = document.getElementById('win-pattern');
-        const labelDiv = winPatternDiv.querySelector('.win-pattern-label');
-        winPatternDiv.innerHTML = '<div class="win-pattern-label">' + gameType.replace(/([A-Z])/g, ' $1').trim() + '</div>';
-        const pattern = gamePatterns[gameType];
+        winPatternDiv.innerHTML = '';
+        const pattern = gamePatterns[gameType] || gamePatterns.singleLine;
         for (let r = 0; r < 5; r++) {
           for (let c = 0; c < 5; c++) {
             const cell = document.createElement('div');
@@ -786,27 +790,61 @@
         console.error('Error appending winner:', e);
       }
     }
+    let playersArray = [];
+    let playerRotationIdx = 0;
+    let playerRotationIntervalId = null;
+    function startPlayerRotation() {
+      if (playerRotationIntervalId) return;
+      if (!playersArray.length) {
+        document.getElementById('player-widget-display').textContent = 'No players';
+        return;
+      }
+      document.getElementById('player-widget-display').textContent = playersArray[playerRotationIdx].handle;
+      playerRotationIntervalId = setInterval(() => {
+        playerRotationIdx = (playerRotationIdx + 1) % playersArray.length;
+        document.getElementById('player-widget-display').textContent = playersArray[playerRotationIdx].handle;
+      }, 3000);
+    }
+    function stopPlayerRotation() {
+      if (playerRotationIntervalId) {
+        clearInterval(playerRotationIntervalId);
+        playerRotationIntervalId = null;
+      }
+    }
     function updatePlayerListSnapshot(playersObj) {
       try {
         const playerListContent = document.getElementById('player-list-content');
         if (!playerListContent) return;
         playerListContent.innerHTML = '';
+        playersArray = [];
         if (!playersObj || Object.keys(playersObj).length === 0) {
-          playerListContent.innerHTML = '<p>No players yet.</p>';
+          playerListContent.innerHTML = '<p style="color:#AAA;margin:6px 0;">No players yet.</p>';
+          playersArray = [];
+          stopPlayerRotation();
+          document.getElementById('player-widget-display').textContent = 'No players';
           return;
         }
-        const ul = document.createElement('ul');
-        ul.style.padding = '0';
-        ul.style.listStyle = 'none';
-        for (const key in playersObj) {
-          const handle = playersObj[key].handle || `@${key}`;
-          const cardID = playersObj[key].cardID || 'N/A';
-          const li = document.createElement('li');
-          li.textContent = `${handle} - Card #${cardID}`;
-          ul.appendChild(li);
+        const keys = Object.keys(playersObj).sort();
+        keys.forEach(key => {
+          const p = playersObj[key];
+          const handle = p.handle || `@${key}`;
+          const cardID = p.cardID || 'N/A';
+          playersArray.push({ key, handle, cardID });
+          const div = document.createElement('div');
+          div.className = 'player-item';
+          const left = document.createElement('div');
+          left.textContent = handle;
+          const right = document.createElement('div');
+          right.className = 'cardid';
+          right.textContent = `#${cardID}`;
+          div.appendChild(left);
+          div.appendChild(right);
+          playerListContent.appendChild(div);
           displayedPlayers.add(key);
-        }
-        playerListContent.appendChild(ul);
+        });
+        playerRotationIdx = 0;
+        stopPlayerRotation();
+        startPlayerRotation();
       } catch (e) {
         console.error('Error updating player list snapshot:', e);
       }
@@ -816,17 +854,21 @@
         const playerListContent = document.getElementById('player-list-content');
         if (!playerListContent) return;
         if (playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
-        let ul = playerListContent.querySelector('ul');
-        if (!ul) {
-          ul = document.createElement('ul');
-          ul.style.padding = '0';
-          ul.style.listStyle = 'none';
-          playerListContent.appendChild(ul);
-        }
-        const li = document.createElement('li');
+        const ul = playerListContent;
         const handle = value.handle || `@${key}`;
-        li.textContent = `${handle} - Card #${value.cardID || 'N/A'}`;
-        ul.appendChild(li);
+        const cardID = value.cardID || 'N/A';
+        const div = document.createElement('div');
+        div.className = 'player-item';
+        const left = document.createElement('div');
+        left.textContent = handle;
+        const right = document.createElement('div');
+        right.className = 'cardid';
+        right.textContent = `#${cardID}`;
+        div.appendChild(left);
+        div.appendChild(right);
+        ul.appendChild(div);
+        playersArray.push({ key, handle, cardID });
+        if (!playerRotationIntervalId) startPlayerRotation();
       } catch (e) {
         console.error('Error appending player:', e);
       }
@@ -901,7 +943,7 @@
     function playRollSound() {
       try {
         const audio = new Audio('https://freesound.org/data/previews/571/571619_11835666-lq.mp3');
-        audio.play().catch(() => {/* ignore autoplay block */});
+        audio.play().catch(() => {});
       } catch (e) {
         console.error('Error playing roll sound:', e);
       }
@@ -920,7 +962,7 @@
     const copyGameIdBtn = document.getElementById('copy-game-id');
     const copyWinnersBtn = document.getElementById('copy-winners');
     const partnerModal = document.getElementById('partner-modal');
-    const modalContent = partnerModal.querySelector('.modal-content');
+    const modalContent = partnerModal ? partnerModal.querySelector('.modal-content') : null;
     const resultDiv = document.getElementById('result');
     function cleanupListeners() {
       try {
@@ -938,90 +980,74 @@
       }
     }
     hostModeBtn.addEventListener('click', () => {
-      try {
-        firebase.auth().signInAnonymously().then(() => {
-          isHost = true;
-          hostControls.style.display = 'flex';
-          playerControls.style.display = 'none';
-          calledNumbers.clear();
-          localStorage.removeItem('calledNumbers');
-          notifiedWinners.clear();
-          displayedPlayers.clear();
-          playerWins = {};
-          localStorage.setItem('playerWins', JSON.stringify(playerWins));
-          gameId = Math.random().toString(36).substring(2, 10);
-          localStorage.setItem('gameId', gameId);
-          gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
-          setupGame(gameId);
-          gameType = gameTypeSelect.value;
-          firebase.database().ref(`games/${gameId}/gameType`).set(gameType)
-            .catch(err => console.error('Error setting game type:', err));
-          displayWinPattern();
-          loadCalledNumbersFromStorage();
-          createBoard();
-          showToast('Host mode enabled. New game created.', 3000);
-        }).catch(err => {
-          console.error('Auth error for host:', err);
-          alert('Failed to authenticate for host mode: ' + err.message);
-        });
-      } catch (e) {
-        console.error('Host mode error:', e);
-        alert('Error starting host mode.');
-      }
-    });
-    playerModeBtn.addEventListener('click', () => {
-      try {
-        isHost = false;
-        hostControls.style.display = 'none';
-        playerControls.style.display = 'block';
+      firebase.auth().signInAnonymously().then(() => {
+        isHost = true;
+        hostControls.style.display = 'flex';
+        playerControls.style.display = 'none';
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
         notifiedWinners.clear();
+        displayedPlayers.clear();
+        playerWins = {};
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        gameId = Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('gameId', gameId);
+        gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
+        setupGame(gameId);
+        gameType = gameTypeSelect.value;
+        if (gameRef) firebase.database().ref(`games/${gameId}/gameType`).set(gameType).catch(err => console.error(err));
+        displayWinPattern();
         loadCalledNumbersFromStorage();
         createBoard();
-        showToast('Player mode: enter game ID and handle to join.', 2500);
-      } catch (e) {
-        console.error('Player mode error:', e);
-        alert('Error entering player mode.');
-      }
+        showToast('Host mode enabled. New game created.', 3000);
+      }).catch(err => {
+        console.error('Auth error for host:', err);
+        alert('Failed to authenticate for host mode: ' + err.message);
+      });
+    });
+    playerModeBtn.addEventListener('click', () => {
+      isHost = false;
+      hostControls.style.display = 'none';
+      playerControls.style.display = 'block';
+      calledNumbers.clear();
+      localStorage.removeItem('calledNumbers');
+      notifiedWinners.clear();
+      loadCalledNumbersFromStorage();
+      createBoard();
+      showToast('Player mode: enter game ID and handle to join.', 2500);
     });
     joinGameBtn.addEventListener('click', () => {
-      try {
-        const providedGameId = gameIdInput.value.trim();
-        const providedHandle = xHandleInput.value.trim();
-        if (!providedGameId) return alert('Enter a valid Game ID');
-        if (!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
-        firebase.auth().signInAnonymously().then(() => {
-          gameId = providedGameId;
-          xHandle = providedHandle;
-          localStorage.setItem('gameId', gameId);
-          localStorage.setItem('xHandle', xHandle);
-          playerCard = generatePlayerCard();
-          const cardID = computeCardID(playerCard);
-          playerWins = {};
-          localStorage.setItem('playerWins', JSON.stringify(playerWins));
-          notifiedWinners.clear();
-          displayPlayerCard();
-          const handleKey = xHandle.replace('@', '');
-          firebase.database().ref(`games/${gameId}/players/${handleKey}`).set({
-            handle: xHandle,
-            cardID: cardID
-          }).then(() => {
-            showToast(`Joined ${gameId} as ${xHandle}`, 3000);
-            setupGame(gameId);
-            createBoard();
-          }).catch(err => {
-            console.error('Error registering player:', err);
-            alert('Error registering player: ' + err.message);
-          });
+      const providedGameId = gameIdInput.value.trim();
+      const providedHandle = xHandleInput.value.trim();
+      if (!providedGameId) return alert('Enter a valid Game ID');
+      if (!providedHandle || !providedHandle.startsWith('@')) return alert('Enter a valid X Handle (e.g., @UserX)');
+      firebase.auth().signInAnonymously().then(() => {
+        gameId = providedGameId;
+        xHandle = providedHandle;
+        localStorage.setItem('gameId', gameId);
+        localStorage.setItem('xHandle', xHandle);
+        playerCard = generatePlayerCard();
+        const cardID = computeCardID(playerCard);
+        playerWins = {};
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        notifiedWinners.clear();
+        displayPlayerCard();
+        const handleKey = xHandle.replace('@', '');
+        firebase.database().ref(`games/${gameId}/players/${handleKey}`).set({
+          handle: xHandle,
+          cardID: cardID
+        }).then(() => {
+          showToast(`Joined ${gameId} as ${xHandle}`, 3000);
+          setupGame(gameId);
+          createBoard();
         }).catch(err => {
-          console.error('Auth error for player join:', err);
-          alert('Failed to authenticate: ' + err.message);
+          console.error('Error registering player:', err);
+          alert('Error registering player: ' + err.message);
         });
-      } catch (e) {
-        console.error('Join game error:', e);
-        alert('Error joining game.');
-      }
+      }).catch(err => {
+        console.error('Auth error for player join:', err);
+        alert('Failed to authenticate: ' + err.message);
+      });
     });
     copyGameIdBtn.addEventListener('click', () => {
       try {
@@ -1057,6 +1083,7 @@
         });
         gameRef.child('called').on('child_added', snap => {
           const rolled = snap.val();
+          if (!isValidCalledFormat(rolled)) return;
           const [letter, num] = rolled.split('-');
           calledNumbers.add(rolled);
           localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
@@ -1076,6 +1103,8 @@
             displayWinPattern();
             createBoard();
             checkForBingo();
+          } else {
+            displayWinPattern();
           }
         });
         gameRef.child('winners').once('value', snap => {
@@ -1110,6 +1139,10 @@
         console.error('Setup game error:', e);
         alert('Error setting up game.');
       }
+    }
+    function isValidCalledFormat(str) {
+      if (!str || typeof str !== 'string') return false;
+      return /^(?:B|I|N|G|O)-\d{1,2}$/.test(str);
     }
     function rollBingo() {
       if (calledNumbers.size >= 75) {
@@ -1225,7 +1258,7 @@
     const playerListContent = document.getElementById('player-list-content');
     if (togglePlayerListBtn && playerListContent) {
       togglePlayerListBtn.addEventListener('click', () => {
-        if (playerListContent.style.display === 'none') {
+        if (playerListContent.style.display === 'none' || playerListContent.style.display === '') {
           playerListContent.style.display = 'block';
           togglePlayerListBtn.textContent = 'Collapse';
         } else {
@@ -1234,43 +1267,26 @@
         }
       });
     }
-    const logos = Object.values(partners).map(p => p.logo).filter(Boolean);
-    let idx = 0;
-    const adBox = document.getElementById('ad-box');
-    function rotateAd() {
-      try {
-        if (logos.length === 0) {
-          adBox.innerHTML = '<p>No sponsor logos available</p>';
-          return;
-        }
-        const img = document.createElement('img');
-        img.src = logos[idx];
-        img.alt = 'Sponsor Logo';
-        img.onerror = () => {
-          console.error(`Failed to load logo: ${logos[idx]}`);
-          adBox.innerHTML = '<p>Logo failed to load</p>';
-        };
-        adBox.innerHTML = '';
-        adBox.appendChild(img);
-        idx = (idx + 1) % logos.length;
-      } catch (e) {
-        console.error('Error rotating ad:', e);
-        adBox.innerHTML = '<p>Ad loading failed</p>';
-      }
+    function isDesktop() {
+      return window.innerWidth >= 768;
     }
-    if (logos.length > 0) {
-      rotateAd();
-      setInterval(rotateAd, 15000);
-    } else {
-      adBox.innerHTML = '<p>No sponsor logos</p>';
-    }
+    const playerListEl = document.getElementById('player-list');
     let isDragging = false;
-    let currentX, currentY, initialX, initialY;
-    adBox.addEventListener('mousedown', (e) => {
-      initialX = e.clientX - currentX;
-      initialY = e.clientY - currentY;
+    let currentX = parseInt(localStorage.getItem('playerListX')) || null;
+    let currentY = parseInt(localStorage.getItem('playerListY')) || null;
+    let initialX = 0;
+    let initialY = 0;
+    if (currentX !== null && currentY !== null && isDesktop()) {
+      playerListEl.style.left = `${currentX}px`;
+      playerListEl.style.top = `${currentY}px`;
+      playerListEl.style.right = 'auto';
+    }
+    playerListEl.addEventListener('mousedown', (e) => {
+      if (!isDesktop()) return;
+      initialX = e.clientX - (currentX || playerListEl.offsetLeft);
+      initialY = e.clientY - (currentY || playerListEl.offsetTop);
       isDragging = true;
-      adBox.style.cursor = 'grabbing';
+      playerListEl.style.cursor = 'grabbing';
       e.preventDefault();
     });
     document.addEventListener('mousemove', (e) => {
@@ -1278,27 +1294,33 @@
       e.preventDefault();
       let x = e.clientX - initialX;
       let y = e.clientY - initialY;
-      const maxX = window.innerWidth - adBox.offsetWidth;
-      const maxY = window.innerHeight - adBox.offsetHeight;
+      const maxX = window.innerWidth - playerListEl.offsetWidth;
+      const maxY = window.innerHeight - playerListEl.offsetHeight;
       x = Math.max(0, Math.min(x, maxX));
       y = Math.max(0, Math.min(y, maxY));
       currentX = x;
       currentY = y;
-      adBox.style.left = `${x}px`;
-      adBox.style.top = `${y}px`;
-      adBox.style.right = 'auto';
-      adBox.style.bottom = 'auto';
+      playerListEl.style.left = `${x}px`;
+      playerListEl.style.top = `${y}px`;
+      playerListEl.style.right = 'auto';
+      playerListEl.style.bottom = 'auto';
     });
     document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
       isDragging = false;
-      adBox.style.cursor = 'move';
+      playerListEl.style.cursor = 'move';
+      if (currentX !== null && currentY !== null) {
+        localStorage.setItem('playerListX', currentX);
+        localStorage.setItem('playerListY', currentY);
+      }
     });
-    adBox.addEventListener('touchstart', (e) => {
+    playerListEl.addEventListener('touchstart', (e) => {
+      if (!isDesktop()) return;
       const touch = e.touches[0];
-      initialX = touch.clientX - currentX;
-      initialY = touch.clientY - currentY;
+      initialX = touch.clientX - (currentX || playerListEl.offsetLeft);
+      initialY = touch.clientY - (currentY || playerListEl.offsetTop);
       isDragging = true;
-      adBox.style.cursor = 'grabbing';
+      playerListEl.style.cursor = 'grabbing';
       e.preventDefault();
     });
     document.addEventListener('touchmove', (e) => {
@@ -1307,40 +1329,79 @@
       const touch = e.touches[0];
       let x = touch.clientX - initialX;
       let y = touch.clientY - initialY;
-      const maxX = window.innerWidth - adBox.offsetWidth;
-      const maxY = window.innerHeight - adBox.offsetHeight;
+      const maxX = window.innerWidth - playerListEl.offsetWidth;
+      const maxY = window.innerHeight - playerListEl.offsetHeight;
       x = Math.max(0, Math.min(x, maxX));
       y = Math.max(0, Math.min(y, maxY));
       currentX = x;
       currentY = y;
-      adBox.style.left = `${x}px`;
-      adBox.style.top = `${y}px`;
-      adBox.style.right = 'auto';
-      adBox.style.bottom = 'auto';
+      playerListEl.style.left = `${x}px`;
+      playerListEl.style.top = `${y}px`;
+      playerListEl.style.right = 'auto';
+      playerListEl.style.bottom = 'auto';
     });
     document.addEventListener('touchend', () => {
+      if (!isDragging) return;
       isDragging = false;
-      adBox.style.cursor = 'move';
+      playerListEl.style.cursor = 'move';
+      if (currentX !== null && currentY !== null) {
+        localStorage.setItem('playerListX', currentX);
+        localStorage.setItem('playerListY', currentY);
+      }
     });
-    (function init() {
+    function isValidGameTypeValue(val) {
+      return Object.keys(gamePatterns).includes(val);
+    }
+    gameTypeSelect.addEventListener('change', () => {
+      const val = gameTypeSelect.value;
+      if (!isValidGameTypeValue(val)) return;
+      gameType = val;
+      if (isHost && gameRef) {
+        firebase.database().ref(`games/${gameId}/gameType`).set(gameType).catch(err => console.error(err));
+      }
+      displayWinPattern();
+      createBoard();
+      checkForBingo();
+    });
+    function setupLocalUIOnLoad() {
       loadCalledNumbersFromStorage();
       createBoard();
       displayWinPattern();
+    }
+    function isValidNumberString(s) {
+      return isValidCalledFormat(s);
+    }
+    function appendCalledLocally(rolled) {
+      if (!isValidNumberString(rolled)) return;
+      const [letter, num] = rolled.split('-');
+      calledNumbers.add(rolled);
+      localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+      resultDiv.textContent = rolled;
+      highlightNumber(letter, num);
+      createBoard();
+    }
+    function isNumberLikeString(s) {
+      return typeof s === 'string' && s.includes('-') && /^[A-Za-z]+-/.test(s);
+    }
+    (function init() {
+      setupLocalUIOnLoad();
     })();
+    function isPlayerObject(val) {
+      return val && (val.handle || val.cardID);
+    }
     window.addEventListener('resize', () => {
       const canvas = document.getElementById('confetti-canvas');
       if (canvas && canvas.style.display === 'block') {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
       }
-      const adBox = document.getElementById('ad-box');
-      if (adBox) {
-        const maxX = window.innerWidth - adBox.offsetWidth;
-        const maxY = window.innerHeight - adBox.offsetHeight;
-        currentX = Math.min(currentX || adBox.offsetLeft, maxX);
-        currentY = Math.min(currentY || adBox.offsetTop, maxY);
-        adBox.style.left = `${currentX}px`;
-        adBox.style.top = `${currentY}px`;
+      if (playerListEl) {
+        const maxX = window.innerWidth - playerListEl.offsetWidth;
+        const maxY = window.innerHeight - playerListEl.offsetHeight;
+        currentX = Math.min(currentX || playerListEl.offsetLeft, maxX);
+        currentY = Math.min(currentY || playerListEl.offsetTop, maxY);
+        playerListEl.style.left = `${currentX}px`;
+        playerListEl.style.top = `${currentY}px`;
       }
     });
   </script>
