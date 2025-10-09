@@ -63,7 +63,7 @@
       max-width: 1200px;
       margin: clamp(1rem, 2vw, 2rem) auto;
       padding: 0 1rem;
-      text-align: center; /* Center title and tagline */
+      text-align: center;
     }
     .container h1 { color: var(--glow); font-size: clamp(2rem, 4vw, 3rem); margin-top: 1rem; }
     .container .tagline { color: var(--glow); font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0.5rem 0; }
@@ -278,7 +278,7 @@
     const letters = ['B','I','N','G','O'];
     const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
     const gamePatterns = {
-      singleLine:[[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
+      singleLine:[[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]], // Preview only; logic checks all lines
       perimeter:[[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
       xShape:[[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
       fourCorners:[[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
@@ -318,24 +318,20 @@
     function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
     function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
 
-    // Board creation - fixed to have two columns per letter with correct numbers
+    // Board creation
     function createBoard(){
       const board = document.getElementById('bingo-board');
       if(!board) return;
       board.innerHTML = '';
-      // Add headers
       letters.forEach(l=>{
         const header = document.createElement('div');
         header.textContent = l;
         header.className = 'header';
         board.appendChild(header);
       });
-
-      // For each row (up to 8 rows, since ceil(15/2)=8)
       const maxRows = 8;
       for(let row = 0; row < maxRows; row++){
         letters.forEach(letter=>{
-          // Left column: row < 8 ? min + row
           const [min] = ranges[letter];
           const leftNum = row < 8 ? min + row : null;
           const leftDiv = document.createElement('div');
@@ -348,8 +344,6 @@
             leftDiv.className = 'empty';
           }
           board.appendChild(leftDiv);
-
-          // Right column: row < 7 ? min + row + 8
           const rightNum = row < 7 ? min + row + 8 : null;
           const rightDiv = document.createElement('div');
           if (rightNum !== null) {
@@ -402,7 +396,7 @@
 
         // Check if cardID exists in Firebase
         const snapshot = await gameRef.child('players').orderByChild('cardID').equalTo(cardID).once('value');
-        if (!snapshot.exists()) break; // Unique card
+        if (!snapshot.exists()) break;
         attempts++;
       }
 
@@ -463,14 +457,15 @@
       }
     }
 
-    // Bingo check
+    // Bingo check - updated for singleLine to check all lines
     function checkForBingo() {
       if (!playerCard || !gamePatterns[gameType]) return false;
-      const pattern = gamePatterns[gameType];
-      let isWin = true;
-      for (let r = 0; r < 5; r++) {
-        for (let c = 0; c < 5; c++) {
-          if (pattern[r][c] === 1) {
+      
+      if (gameType === 'singleLine') {
+        // Check horizontal lines
+        for (let r = 0; r < 5; r++) {
+          let isWin = true;
+          for (let c = 0; c < 5; c++) {
             const letter = letters[c];
             const num = playerCard[letter][r];
             if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
@@ -478,10 +473,56 @@
               break;
             }
           }
+          if (isWin) return true;
         }
-        if (!isWin) break;
+        
+        // Check vertical lines
+        for (let c = 0; c < 5; c++) {
+          let isWin = true;
+          for (let r = 0; r < 5; r++) {
+            const letter = letters[c];
+            const num = playerCard[letter][r];
+            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+              isWin = false;
+              break;
+            }
+          }
+          if (isWin) return true;
+        }
+        
+        // Check diagonal lines
+        let diag1Win = true;
+        let diag2Win = true;
+        for (let i = 0; i < 5; i++) {
+          const letter1 = letters[i];
+          const letter2 = letters[4-i];
+          const num1 = playerCard[letter1][i];
+          const num2 = playerCard[letter2][i];
+          if (num1 !== 'FREE' && !calledNumbers.has(`${letter1}-${num1}`)) diag1Win = false;
+          if (num2 !== 'FREE' && !calledNumbers.has(`${letter2}-${num2}`)) diag2Win = false;
+        }
+        if (diag1Win || diag2Win) return true;
+        
+        return false;
+      } else {
+        // Other game modes use predefined patterns
+        const pattern = gamePatterns[gameType];
+        let isWin = true;
+        for (let r = 0; r < 5; r++) {
+          for (let c = 0; c < 5; c++) {
+            if (pattern[r][c] === 1) {
+              const letter = letters[c];
+              const num = playerCard[letter][r];
+              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+                isWin = false;
+                break;
+              }
+            }
+          }
+          if (!isWin) break;
+        }
+        return isWin;
       }
-      return isWin;
     }
 
     // Roll logic
@@ -506,12 +547,24 @@
       return rolled;
     }
 
-    // Toast utility
+    // Toast utility - centered for all toasts
     function showToast(msg, duration=2500, isWin=false){
       const t = document.createElement('div');
       t.className = 'toast';
       t.textContent = msg;
-      Object.assign(t.style, { position:'fixed', right:'20px', top:'20px', padding:'10px 14px', background: isWin ? '#FFD700' : 'var(--glow)', color:'#000', zIndex:99999, borderRadius:'8px', boxShadow:'0 8px 30px rgba(0,0,0,0.4)', fontWeight:800 });
+      Object.assign(t.style, { 
+        position: 'fixed', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)',
+        padding: '10px 14px', 
+        background: isWin ? '#FFD700' : 'var(--glow)', 
+        color: '#000', 
+        zIndex: 99999, 
+        borderRadius: '8px', 
+        boxShadow: '0 8px 30px rgba(0,0,0,0.4)', 
+        fontWeight: 800 
+      });
       document.body.appendChild(t);
       setTimeout(()=> t.style.opacity = '1', 20);
       setTimeout(()=> { t.style.opacity='0'; setTimeout(()=> t.remove(),300); }, duration);
