@@ -1,13 +1,15 @@
-// Firebase config - Replace with real keys
+import dotenv from 'dotenv';
+dotenv.config();
+
 const firebaseConfig = {
-  apiKey: 'your-api-key',
-  authDomain: 'your-project.firebaseapp.com',
-  databaseURL: 'https://your-project-default-rtdb.firebaseio.com',
-  projectId: 'your-project',
-  storageBucket: 'your-project.appspot.com',
-  messagingSenderId: 'your-sender-id',
-  appId: 'your-app-id',
-  measurementId: 'your-measurement-id'
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -143,7 +145,7 @@ function displayPlayerCard() {
   playerCardEl.innerHTML = '';
   if (!playerCard) return;
   for (let i = 0; i < 5; i++) {
-    for (let j = 0; j < 5; j++) {
+    for (j = 0; j < 5; j++) {
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.dataset.row = i;
