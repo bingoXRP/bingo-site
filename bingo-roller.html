@@ -59,6 +59,31 @@
     nav .nav-menu { display:flex; gap:1rem; list-style:none; margin:0; padding:0; align-items:center; }
     nav .nav-menu a { color:#000; font-weight:700; text-decoration:none; }
 
+    /* Hamburger menu styles */
+    .hamburger {
+      display: none;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      cursor: pointer;
+      color: #000;
+      padding: 0.5rem;
+    }
+    @media (max-width: 767px) {
+      .hamburger { display: block; }
+      nav .nav-menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--accent);
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+        z-index: 99;
+      }
+      nav .nav-menu.show { display: flex; }
+    }
+
     .container {
       max-width: 1200px;
       margin: clamp(1rem, 2vw, 2rem) auto;
@@ -179,8 +204,9 @@
   <header>
     <div class="header-inner">
       <h1>$BINGO</h1>
+      <div class="hamburger" id="hamburger">☰</div>
       <nav>
-        <ul class="nav-menu">
+        <ul class="nav-menu" id="nav-menu">
           <li><a href="https://bingoxrp.com/" aria-label="Go to Home">Home</a></li>
           <li><a href="https://bingoxrp.com/#buy">How to Trade</a></li>
           <li><a href="https://bingoxrp.com/#nft">NFT Collection</a></li>
@@ -266,7 +292,7 @@
       projectId: "bingoxrpl",
       storageBucket: "bingoxrpl.firebasestorage.app",
       messagingSenderId: "1032944729350",
-      appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
+      appId: "1:1032944729350:web:77c0c92c59dce214d3287",
       measurementId: "G-H99K0B4L10"
     };
     firebase.initializeApp(firebaseConfig);
@@ -278,7 +304,7 @@
     const letters = ['B','I','N','G','O'];
     const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
     const gamePatterns = {
-      singleLine:[[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]], // Preview only; logic checks all lines
+      singleLine:[[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
       perimeter:[[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
       xShape:[[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
       fourCorners:[[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
@@ -313,6 +339,8 @@
     const resultDiv = document.getElementById('result');
     const playerListEl = document.getElementById('player-list');
     const playerListContent = document.getElementById('player-list-content');
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
 
     // Utility helpers
     function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
@@ -449,7 +477,7 @@
         const id = `${letter}-${number}`;
         const boardCell = document.getElementById(id);
         if(boardCell) boardCell.classList.add('called');
-        const playerCell = document.getElementById(`player-${letter}-${number}`);
+        const playerCell = document.getElementById(`player-${letter}-${num}`);
         if(playerCell) playerCell.classList.add('called');
         resultDiv.textContent = `${letter}-${number}`;
       } catch(e){
@@ -721,6 +749,16 @@
       }
     }
 
+    // Hamburger menu toggle
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('show');
+    });
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('show');
+      });
+    });
+
     // Event handlers
     hostModeBtn.addEventListener('click', ()=>{
       auth.signInAnonymously().then(()=>{
@@ -754,7 +792,7 @@
       isHost = false;
       hostControls.style.display = 'none';
       playerControls.style.display = 'block';
-      playerListEl.style.display = 'none';
+      playerListEl.style.display = window.innerWidth <= 767 ? 'block' : 'none';
       const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
       calledNumbers = new Set(stored);
       createBoard();
