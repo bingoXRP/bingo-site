@@ -145,7 +145,7 @@ function displayPlayerCard() {
   playerCardEl.innerHTML = '';
   if (!playerCard) return;
   for (let i = 0; i < 5; i++) {
-    for (j = 0; j < 5; j++) {
+    for (let j = 0; j < 5; j++) {
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.dataset.row = i;
@@ -174,7 +174,11 @@ function checkForBingo() {
   if (won && !playerWins[gameType]) {
     playerWins[gameType] = true;
     localStorage.setItem('playerWins', JSON.stringify(playerWins));
-    gameRef.child('winners').push({ handle: xHandle, gameType });
+    gameRef.child('winners').push({ 
+      handle: xHandle, 
+      gameType,
+      timestamp: new Date().toISOString() // Added for rules
+    });
   }
 }
 
