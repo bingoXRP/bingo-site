@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!">
+  <title>$BINGO Roller - BingoXRPL Live Tool</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-H99K0B4L10');
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <link rel="stylesheet" href="css/roller.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>$BINGO</h1>
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" aria-label="Go to Home">Home</a></li>
+          <li><a href="index.html#buy">How to Trade</a></li>
+          <li><a href="index.html#nft">NFT Collection</a></li>
+          <li><a href="index.html#community">Community</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1>$BINGO Roller</h1>
+    <p class="tagline">Roll epic $BINGO numbers during your live streams!</p>
+    <div style="display: flex; justify-content: center; gap: 1rem;">
+      <button id="host-mode">Host a Game</button>
+      <button id="player-mode">Join as Player</button>
+    </div>
+    <div id="host-controls" style="display:none; margin-top:1.5rem;">
+      <div style="display:flex; gap:.8rem; align-items:center; justify-content:center; flex-wrap:wrap;">
+        <label for="game-type" style="font-weight:700;">Select Game Type:</label>
+        <select id="game-type" aria-label="Select Bingo Game Type">
+          <option value="singleLine">Single Line (Any Line)</option>
+          <option value="perimeter">Perimeter</option>
+          <option value="xShape">X-Shape</option>
+          <option value="fourCorners">Four Corners</option>
+          <option value="fullCard">Full Card</option>
+        </select>
+      </div>
+      <div id="win-pattern" class="win-pattern" aria-hidden="false"></div>
+      <div style="display:flex; gap:1.2rem; justify-content:center; margin-top:1.2rem; align-items:center; flex-wrap:wrap;">
+        <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
+        <div id="result" role="status" aria-live="polite" aria-atomic="true"></div>
+        <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
+      </div>
+      <div style="display:flex; gap:1rem; justify-content:center; margin-top:1rem; align-items:center; flex-wrap:wrap;">
+        <div id="game-id-display">Game ID: Loading...</div>
+        <button id="copy-game-id" aria-label="Copy Game ID">Copy</button>
+      </div>
+    </div>
+    <div id="player-controls" style="display:none; margin-top:1.5rem;">
+      <div style="display:flex; gap:.8rem; align-items:center; justify-content:center; flex-wrap:wrap;">
+        <label for="game-id-input" style="font-weight:700;">Game ID:</label>
+        <input type="text" id="game-id-input" placeholder="Enter Game ID">
+        <label for="xhandle-input" style="font-weight:700;">X Handle:</label>
+        <input type="text" id="xhandle-input" placeholder="@YourHandle">
+        <button id="join-game" aria-label="Join bingo game">Join</button>
+      </div>
+    </div>
+    <div id="bingo-board" class="bingo-board"></div>
+    <div id="player-card" class="player-card"></div>
+    <div id="win-pattern" class="win-pattern"></div>
+    <div id="player-list" style="display:none;">
+      <h3>Live Players</h3>
+      <div id="player-list-content"></div>
+    </div>
+    <div id="leaderboard"></div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 BingoXRPL Team. All rights reserved. Unauthorized use prohibited.</p>
+    </div>
+  </footer>
+
+  <script src="js/roller.js"></script>
+</body>
+</html>
