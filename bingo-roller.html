@@ -94,27 +94,58 @@
     .container .tagline { color: var(--glow); font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0.5rem 0; }
 
     /* Buttons & controls */
-    button { cursor:pointer; border: none; background: var(--accent); color:#000; padding: .75rem 1.25rem; border-radius: 10px; font-weight:700; }
+    button { cursor:pointer; border: none; background: var(--accent); color:#000; padding: .75rem 1.25rem; border-radius: 10px; font-weight:700; transition: all 0.2s ease; }
+    button:hover { opacity: 0.9; }
     button:active{ transform: translateY(1px); }
-    select, input { padding:.6rem .8rem; border-radius:8px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: #fff; }
-    #roll-button { background:#FF0000; color:#fff; padding: 1rem 2rem; border-radius: 999px; font-size: clamp(1.2rem, 3vw, 1.8rem); box-shadow: 0 6px 14px rgba(255,0,0,0.35); }
-    #roll-button:hover{ transform:scale(1.03); background: #00FF00; color:#000; }
+    select, input { padding:.6rem .8rem; border-radius:8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; }
+    #roll-button { 
+      background:#FF0000; 
+      color:#fff; 
+      padding: 1.2rem 2.5rem; 
+      border-radius: 999px; 
+      font-size: clamp(1.4rem, 3.5vw, 2rem); 
+      box-shadow: 0 6px 20px rgba(255,0,0,0.5);
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+    #roll-button:hover{ transform:scale(1.05); background: #00FF00; color:#000; box-shadow: 0 8px 25px rgba(0,255,0,0.6); }
 
-    /* Result preview */
+    /* ENHANCED Result Display - Large and Centered */
     #result {
-      font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+      font-size: clamp(3rem, 8vw, 6rem);
       color: var(--glow);
-      text-shadow: 0 2px 12px rgba(0,255,0,0.35);
-      margin: 1rem 0;
-      height: 3.2rem;
+      text-shadow: 0 0 20px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,0,0.4);
+      margin: 2rem 0;
+      min-height: 6rem;
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:hidden;
-      white-space:nowrap;
+      font-weight: 900;
+      letter-spacing: 3px;
+      animation: pulse 0.5s ease-in-out;
+      background: rgba(0,255,0,0.05);
+      border-radius: 20px;
+      padding: 1rem 2rem;
+      border: 3px solid var(--glow);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
-    /* Bingo Board */
+    /* Current game type display for players */
+    #current-game-type {
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      color: var(--glow);
+      font-weight: 800;
+      margin: 1rem 0;
+      padding: 0.8rem;
+      background: rgba(0,255,0,0.1);
+      border-radius: 10px;
+      border: 2px solid var(--glow);
+    }
+
+    /* Bingo Board - Always visible */
     .bingo-board {
       display: grid;
       grid-template-columns: repeat(10, minmax(40px, 1fr));
@@ -135,21 +166,49 @@
       color: var(--accent);
       font-size: clamp(.95rem, 1.4vw, 1.2rem);
       box-sizing: border-box;
-      transition: background .3s ease, color .3s ease, box-shadow .3s ease, transform .3s ease;
+      transition: all .3s ease;
+      font-weight: 600;
     }
     .bingo-board .cell.called {
       background: var(--glow);
       color: #000;
-      box-shadow: 0 0 12px rgba(0,255,0,0.25);
-      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0,255,0,0.4);
+      transform: scale(1.1);
+      font-weight: 900;
     }
     .bingo-board .empty { visibility: hidden; }
 
     /* Player card */
-    .player-card { display:grid; grid-template-columns:repeat(5,1fr); gap:.6rem; max-width: min(80vw,600px); margin: 1rem auto; padding: 1rem; border: 2px solid var(--glow); border-radius:10px; }
-    .player-card .cell { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:var(--card-bg); color:var(--accent); border-radius:8px; transition: background .3s ease, transform .3s ease; }
-    .player-card .cell.free { background:#FF0000; color:#FFF; font-weight:800; }
-    .player-card .cell.called { background: var(--glow); color: #000; transform: scale(1.05); }
+    .player-card { 
+      display:grid; 
+      grid-template-columns:repeat(5,1fr); 
+      gap:.6rem; 
+      max-width: min(80vw,600px); 
+      margin: 1.5rem auto; 
+      padding: 1rem; 
+      border: 3px solid var(--glow); 
+      border-radius:12px;
+      box-shadow: 0 4px 20px rgba(0,255,0,0.2);
+    }
+    .player-card .cell { 
+      aspect-ratio:1/1; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background:var(--card-bg); 
+      color:var(--accent); 
+      border-radius:8px; 
+      transition: all .3s ease;
+      font-weight: 700;
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+    }
+    .player-card .cell.free { background:#FF0000; color:#FFF; font-weight:900; }
+    .player-card .cell.called { 
+      background: var(--glow); 
+      color: #000; 
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    }
 
     /* Win pattern preview */
     .win-pattern {
@@ -157,13 +216,30 @@
       grid-template-columns: repeat(5, 1fr);
       gap: .8rem;
       max-width: 400px;
-      margin: 1.5rem auto;
-      padding: .8rem;
+      margin: 1rem auto;
+      padding: 1rem;
       border-radius: 12px;
-      background: rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(0,255,0,0.2);
     }
-    .win-pattern .cell { aspect-ratio:1/1; background:var(--card-bg); border-radius:8px; opacity:.3; transition: opacity .3s ease, box-shadow .3s ease; }
-    .win-pattern .cell.win { background: var(--glow); opacity:1; box-shadow: 0 0 8px rgba(0,255,0,0.15); }
+    .win-pattern .cell { 
+      aspect-ratio:1/1; 
+      background:var(--card-bg); 
+      border-radius:8px; 
+      opacity:.3; 
+      transition: all .3s ease;
+    }
+    .win-pattern .cell.win { 
+      background: var(--glow); 
+      opacity:1; 
+      box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    }
+    .win-pattern-label { 
+      color: var(--glow); 
+      font-weight: 700; 
+      margin-top: 0.5rem; 
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
 
     /* Draggable player list */
     #player-list {
@@ -171,31 +247,79 @@
       right: 20px;
       top: 80px;
       width: clamp(200px, 18vw, 320px);
-      background: rgba(0,0,0,0.6);
-      padding: 0.6rem;
-      border-radius: 10px;
+      background: rgba(0,0,0,0.9);
+      padding: 0.8rem;
+      border-radius: 12px;
       border: 2px solid var(--glow);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.7);
       z-index: 9999;
       cursor: grab;
       user-select: none;
       transform: translate(0,0);
       touch-action: none;
     }
-    #player-list h3 { margin:0 0 .4rem 0; color:var(--glow); font-size:1rem; }
+    #player-list h3 { margin:0 0 .6rem 0; color:var(--glow); font-size:1.1rem; }
     #player-list-content { max-height: 60vh; overflow-y:auto; padding-right:6px; }
-    .player-item { padding:6px 8px; display:flex; justify-content:space-between; align-items:center; gap:8px; border-bottom: 1px solid rgba(255,255,255,0.03); color:#fff; font-weight:600; }
+    #player-list-content::-webkit-scrollbar { width: 6px; }
+    #player-list-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+    #player-list-content::-webkit-scrollbar-thumb { background: var(--glow); border-radius: 10px; }
+    .player-item { 
+      padding:8px 10px; 
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center; 
+      gap:8px; 
+      border-bottom: 1px solid rgba(255,255,255,0.05); 
+      color:#fff; 
+      font-weight:600;
+      transition: background 0.2s ease;
+    }
+    .player-item:hover { background: rgba(0,255,0,0.05); }
     .player-item .cardid{ color:var(--glow); font-weight:800; }
 
     /* Host controls */
-    #host-controls { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    #host-controls { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+
+    /* Stats display */
+    .stats-display {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      background: rgba(0,255,0,0.05);
+      padding: 0.8rem 1.5rem;
+      border-radius: 10px;
+      border: 2px solid var(--glow);
+    }
+    .stat-label {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+    .stat-value {
+      color: var(--glow);
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
 
     /* Small screens */
     @media (max-width:767px) {
       .container { padding: 0 12px; }
-      #player-list { position: static; width: 100%; right:auto; top:auto; transform:none; margin: 1rem 0; cursor:default; }
+      #player-list { 
+        position: static; 
+        width: 100%; 
+        right:auto; 
+        top:auto; 
+        transform:none; 
+        margin: 1rem 0; 
+        cursor:default;
+      }
       .bingo-board { grid-template-columns: repeat(10, minmax(30px, 1fr)); gap: .3rem; }
       .win-pattern { max-width: 300px; gap: .6rem; }
+      #result { font-size: clamp(2.5rem, 6vw, 4rem); min-height: 4rem; }
     }
   </style>
 </head>
@@ -220,7 +344,7 @@
     <h1>$BINGO Roller</h1>
     <p class="tagline">Roll epic $BINGO numbers during your live streams!</p>
 
-    <div style="display: flex; justify-content: center; gap: 1rem;">
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
       <button id="host-mode">Host a Game</button>
       <button id="player-mode">Join as Player</button>
     </div>
@@ -228,51 +352,81 @@
     <!-- Host Controls -->
     <div id="host-controls" style="display:none; margin-top:1.5rem;">
       <div style="display:flex; gap:.8rem; align-items:center; justify-content:center; flex-wrap:wrap;">
-        <label for="game-type" style="font-weight:700;">Select Game Type:</label>
+        <label for="game-type" style="font-weight:700; color: var(--glow);">Select Game Type:</label>
         <select id="game-type" aria-label="Select Bingo Game Type">
           <option value="singleLine">Single Line (Any Line)</option>
-          <option value="perimeter">Perimeter</option>
-          <option value="xShape">X-Shape</option>
+          <option value="doubleLine">Double Line (Any 2 Lines)</option>
           <option value="fourCorners">Four Corners</option>
-          <option value="fullCard">Full Card</option>
+          <option value="tShape">T-Shape</option>
+          <option value="plusSign">Plus Sign (+)</option>
+          <option value="xShape">X-Shape</option>
+          <option value="letterH">Letter H</option>
+          <option value="letterL">Letter L</option>
+          <option value="letterU">Letter U</option>
+          <option value="pictureFrame">Picture Frame</option>
+          <option value="perimeter">Perimeter (Outside Edge)</option>
+          <option value="fullCard">Full Card (Blackout)</option>
         </select>
       </div>
 
       <div id="win-pattern" class="win-pattern" aria-hidden="false"></div>
+      <div class="win-pattern-label" id="win-pattern-label"></div>
 
-      <div style="display:flex; gap:1.2rem; justify-content:center; margin-top:1.2rem; align-items:center; flex-wrap:wrap;">
-        <button id="roll-button" aria-label="Roll a new bingo number">Roll!</button>
-        <div id="result" role="status" aria-live="polite" aria-atomic="true"></div>
-        <button id="reset-button" aria-label="Reset the bingo game">Reset Game</button>
+      <div style="display:flex; flex-direction: column; gap:1.5rem; align-items:center; margin-top:1.5rem;">
+        <button id="roll-button" aria-label="Roll a new bingo number">🎲 ROLL! 🎲</button>
+        <div id="result" role="status" aria-live="polite" aria-atomic="true">Ready to Roll!</div>
+      </div>
+
+      <div class="stats-display">
+        <div class="stat-item">
+          <div class="stat-label">Numbers Called</div>
+          <div class="stat-value" id="numbers-called">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Remaining</div>
+          <div class="stat-value" id="numbers-remaining">75</div>
+        </div>
       </div>
 
       <div style="display:flex; gap:1rem; justify-content:center; margin-top:1rem; align-items:center; flex-wrap:wrap;">
-        <div id="game-id-display">Game ID: Loading...</div>
+        <div id="game-id-display" style="font-size: 1.2rem; color: var(--glow); font-weight: 700;">Game ID: Loading...</div>
         <button id="copy-game-id">Copy Game ID</button>
+        <button id="reset-button" aria-label="Reset the bingo game" style="background: #FF6B6B; color: #fff;">Reset Game</button>
       </div>
 
-      <div id="leaderboard" style="margin-top:1.5rem; text-align:center;"></div>
+      <div id="leaderboard" style="margin-top:2rem; text-align:center;"></div>
     </div>
 
     <!-- Player Controls -->
     <div id="player-controls" style="display:none; margin-top:1.5rem; text-align:center;">
-      <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle" style="margin-bottom:1rem;" />
-      <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID" style="margin-bottom:1rem;" />
-      <button id="join-game-button">Join Game & Generate Card</button>
-      <div id="player-card" class="player-card" aria-hidden="true"></div>
+      <div style="max-width: 500px; margin: 0 auto;">
+        <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle" style="margin-bottom:1rem; width: 100%; box-sizing: border-box;" />
+        <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID" style="margin-bottom:1rem; width: 100%; box-sizing: border-box;" />
+        <button id="join-game-button" style="width: 100%; padding: 1rem;">Join Game & Generate Card</button>
+      </div>
+      
+      <div id="current-game-type" style="display:none; margin-top: 1.5rem;">
+        <strong>Current Game:</strong> <span id="game-type-name">Loading...</span>
+      </div>
+      
+      <div id="player-win-pattern" class="win-pattern" style="display:none;" aria-hidden="false"></div>
+      <div class="win-pattern-label" id="player-win-pattern-label" style="display:none;"></div>
+      
+      <div id="player-card" class="player-card" style="display:none;" aria-hidden="true"></div>
     </div>
 
-    <h2 style="margin-top:2.5rem; text-align:center;">Game Board (Called Numbers)</h2>
+    <!-- Game Board - ALWAYS VISIBLE -->
+    <h2 style="margin-top:2.5rem; text-align:center; color: var(--glow);">Game Board - Called Numbers</h2>
     <div id="bingo-board" class="bingo-board" aria-hidden="false"></div>
   </div>
 
   <!-- Floating Player List -->
   <div id="player-list" aria-hidden="true" style="display:none;">
-    <h3>Player List</h3>
+    <h3>👥 Player List</h3>
     <div id="player-list-content"></div>
   </div>
 
-  <footer style="padding:1.2rem; text-align:center; color:#AAA;">
+  <footer style="padding:1.2rem; text-align:center; color:#AAA; margin-top: 3rem;">
     <div class="container">
       <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
       <div style="margin-top:.5rem;">
@@ -303,12 +457,59 @@
     // Constants & state
     const letters = ['B','I','N','G','O'];
     const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
+    
+    // Enhanced game patterns with names
     const gamePatterns = {
-      singleLine:[[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
-      perimeter:[[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-      xShape:[[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
-      fourCorners:[[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
-      fullCard:[[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
+      singleLine: {
+        pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+        name: "Single Line (Any Line)",
+        checkFunction: 'checkSingleLine'
+      },
+      doubleLine: {
+        pattern: [[1,1,1,1,1],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+        name: "Double Line (Any 2 Lines)",
+        checkFunction: 'checkDoubleLine'
+      },
+      fourCorners: {
+        pattern: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
+        name: "Four Corners"
+      },
+      tShape: {
+        pattern: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
+        name: "T-Shape"
+      },
+      plusSign: {
+        pattern: [[0,0,1,0,0],[0,0,1,0,0],[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0]],
+        name: "Plus Sign (+)"
+      },
+      xShape: {
+        pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+        name: "X-Shape"
+      },
+      letterH: {
+        pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
+        name: "Letter H"
+      },
+      letterL: {
+        pattern: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
+        name: "Letter L"
+      },
+      letterU: {
+        pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+        name: "Letter U"
+      },
+      pictureFrame: {
+        pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+        name: "Picture Frame"
+      },
+      perimeter: {
+        pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+        name: "Perimeter (Outside Edge)"
+      },
+      fullCard: {
+        pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
+        name: "Full Card (Blackout)"
+      }
     };
 
     let calledNumbers = new Set();
@@ -318,7 +519,8 @@
     let xHandle = localStorage.getItem('xHandle') || null;
     let gameRef = null;
     let gameType = 'singleLine';
-    let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
+    let playerWins = {}; // Track wins by game type per session
+    let sessionWinnerKey = null; // Track if we've already won this game type in this session
     const notifiedWinners = new Set();
     const displayedPlayers = new Set();
     let playersArray = [];
@@ -341,26 +543,44 @@
     const playerListContent = document.getElementById('player-list-content');
     const hamburger = document.getElementById('hamburger');
     const navMenu = document.getElementById('nav-menu');
+    const currentGameTypeDiv = document.getElementById('current-game-type');
+    const gameTypeName = document.getElementById('game-type-name');
+    const playerWinPatternDiv = document.getElementById('player-win-pattern');
+    const playerWinPatternLabel = document.getElementById('player-win-pattern-label');
+    const numbersCalledEl = document.getElementById('numbers-called');
+    const numbersRemainingEl = document.getElementById('numbers-remaining');
 
     // Utility helpers
     function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
     function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
 
-    // Board creation
+    // Update stats
+    function updateStats() {
+      if (numbersCalledEl) numbersCalledEl.textContent = calledNumbers.size;
+      if (numbersRemainingEl) numbersRemainingEl.textContent = 75 - calledNumbers.size;
+    }
+
+    // Board creation - ALWAYS CREATE ON LOAD
     function createBoard(){
       const board = document.getElementById('bingo-board');
       if(!board) return;
       board.innerHTML = '';
+      
+      // Headers
       letters.forEach(l=>{
         const header = document.createElement('div');
         header.textContent = l;
         header.className = 'header';
         board.appendChild(header);
       });
+      
+      // Numbers
       const maxRows = 8;
       for(let row = 0; row < maxRows; row++){
         letters.forEach(letter=>{
           const [min] = ranges[letter];
+          
+          // Left column
           const leftNum = row < 8 ? min + row : null;
           const leftDiv = document.createElement('div');
           if (leftNum !== null) {
@@ -372,6 +592,8 @@
             leftDiv.className = 'empty';
           }
           board.appendChild(leftDiv);
+          
+          // Right column
           const rightNum = row < 7 ? min + row + 8 : null;
           const rightDiv = document.createElement('div');
           if (rightNum !== null) {
@@ -388,10 +610,16 @@
     }
 
     // Win pattern preview
-    function displayWinPattern(){
-      const winPatternDiv = document.getElementById('win-pattern');
+    function displayWinPattern(targetDiv = null, labelDiv = null){
+      const winPatternDiv = targetDiv || document.getElementById('win-pattern');
+      const winPatternLabelDiv = labelDiv || document.getElementById('win-pattern-label');
+      
+      if(!winPatternDiv) return;
+      
       winPatternDiv.innerHTML = '';
-      const pattern = gamePatterns[gameType] || gamePatterns.singleLine;
+      const patternData = gamePatterns[gameType] || gamePatterns.singleLine;
+      const pattern = patternData.pattern;
+      
       for(let r=0;r<5;r++){
         for(let c=0;c<5;c++){
           const cell = document.createElement('div');
@@ -399,6 +627,10 @@
           if(pattern[r][c]) cell.classList.add('win');
           winPatternDiv.appendChild(cell);
         }
+      }
+      
+      if(winPatternLabelDiv) {
+        winPatternLabelDiv.textContent = patternData.name;
       }
     }
 
@@ -423,8 +655,12 @@
         cardID = computeCardID(card);
 
         // Check if cardID exists in Firebase
-        const snapshot = await gameRef.child('players').orderByChild('cardID').equalTo(cardID).once('value');
-        if (!snapshot.exists()) break;
+        if(gameRef) {
+          const snapshot = await gameRef.child('players').orderByChild('cardID').equalTo(cardID).once('value');
+          if (!snapshot.exists()) break;
+        } else {
+          break;
+        }
         attempts++;
       }
 
@@ -450,13 +686,22 @@
     function displayPlayerCard(){
       const cardDiv = document.getElementById('player-card');
       if(!cardDiv || !playerCard) return;
+      
+      cardDiv.style.display = 'grid';
       cardDiv.innerHTML = '';
+      cardDiv.setAttribute('aria-hidden', 'false');
+      
       letters.forEach(l=>{
         const header = document.createElement('div');
         header.className = 'header';
         header.textContent = l;
+        header.style.gridColumn = '1';
+        header.style.aspectRatio = 'auto';
+        header.style.color = 'var(--glow)';
+        header.style.fontWeight = '900';
         cardDiv.appendChild(header);
       });
+      
       for(let r=0;r<5;r++){
         letters.forEach(letter=>{
           const num = playerCard[letter][r];
@@ -465,7 +710,7 @@
           el.textContent = num;
           el.id = `player-${letter}-${num}`;
           if(num === 'FREE') el.classList.add('free', 'called');
-          if(calledNumbers.has(`${letter}-${num}`)) el.classList.add('called');
+          else if(calledNumbers.has(`${letter}-${num}`)) el.classList.add('called');
           cardDiv.appendChild(el);
         });
       }
@@ -476,106 +721,208 @@
       try {
         const id = `${letter}-${number}`;
         const boardCell = document.getElementById(id);
-        if(boardCell) boardCell.classList.add('called');
-        const playerCell = document.getElementById(`player-${letter}-${num}`);
-        if(playerCell) playerCell.classList.add('called');
-        resultDiv.textContent = `${letter}-${number}`;
+        if(boardCell && !boardCell.classList.contains('called')) {
+          boardCell.classList.add('called');
+        }
+        
+        if(playerCard) {
+          const playerCell = document.getElementById(`player-${letter}-${number}`);
+          if(playerCell && !playerCell.classList.contains('called')) {
+            playerCell.classList.add('called');
+          }
+        }
+        
+        updateStats();
       } catch(e){
         console.error('Highlight error', e);
       }
     }
 
-    // Bingo check - updated for singleLine to check all lines
+    // Check for single line win (any horizontal, vertical, or diagonal)
+    function checkSingleLine() {
+      if (!playerCard) return false;
+      
+      // Check horizontal lines
+      for (let r = 0; r < 5; r++) {
+        let isWin = true;
+        for (let c = 0; c < 5; c++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) return true;
+      }
+      
+      // Check vertical lines
+      for (let c = 0; c < 5; c++) {
+        let isWin = true;
+        for (let r = 0; r < 5; r++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) return true;
+      }
+      
+      // Check diagonal (top-left to bottom-right)
+      let diag1Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag1Win = false;
+          break;
+        }
+      }
+      if (diag1Win) return true;
+      
+      // Check diagonal (top-right to bottom-left)
+      let diag2Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[4-i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag2Win = false;
+          break;
+        }
+      }
+      if (diag2Win) return true;
+      
+      return false;
+    }
+
+    // Check for double line win (any 2 lines)
+    function checkDoubleLine() {
+      if (!playerCard) return false;
+      let linesCompleted = 0;
+      
+      // Check horizontal lines
+      for (let r = 0; r < 5; r++) {
+        let isWin = true;
+        for (let c = 0; c < 5; c++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) linesCompleted++;
+      }
+      
+      // Check vertical lines
+      for (let c = 0; c < 5; c++) {
+        let isWin = true;
+        for (let r = 0; r < 5; r++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) linesCompleted++;
+      }
+      
+      // Check diagonals
+      let diag1Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag1Win = false;
+          break;
+        }
+      }
+      if (diag1Win) linesCompleted++;
+      
+      let diag2Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[4-i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag2Win = false;
+          break;
+        }
+      }
+      if (diag2Win) linesCompleted++;
+      
+      return linesCompleted >= 2;
+    }
+
+    // Generic bingo check using pattern
     function checkForBingo() {
       if (!playerCard || !gamePatterns[gameType]) return false;
       
-      if (gameType === 'singleLine') {
-        // Check horizontal lines
-        for (let r = 0; r < 5; r++) {
-          let isWin = true;
-          for (let c = 0; c < 5; c++) {
-            const letter = letters[c];
-            const num = playerCard[letter][r];
-            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-              isWin = false;
-              break;
-            }
-          }
-          if (isWin) return true;
-        }
-        
-        // Check vertical lines
-        for (let c = 0; c < 5; c++) {
-          let isWin = true;
-          for (let r = 0; r < 5; r++) {
-            const letter = letters[c];
-            const num = playerCard[letter][r];
-            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-              isWin = false;
-              break;
-            }
-          }
-          if (isWin) return true;
-        }
-        
-        // Check diagonal lines
-        let diag1Win = true;
-        let diag2Win = true;
-        for (let i = 0; i < 5; i++) {
-          const letter1 = letters[i];
-          const letter2 = letters[4-i];
-          const num1 = playerCard[letter1][i];
-          const num2 = playerCard[letter2][i];
-          if (num1 !== 'FREE' && !calledNumbers.has(`${letter1}-${num1}`)) diag1Win = false;
-          if (num2 !== 'FREE' && !calledNumbers.has(`${letter2}-${num2}`)) diag2Win = false;
-        }
-        if (diag1Win || diag2Win) return true;
-        
-        return false;
-      } else {
-        // Other game modes use predefined patterns
-        const pattern = gamePatterns[gameType];
-        let isWin = true;
-        for (let r = 0; r < 5; r++) {
-          for (let c = 0; c < 5; c++) {
-            if (pattern[r][c] === 1) {
-              const letter = letters[c];
-              const num = playerCard[letter][r];
-              if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-                isWin = false;
-                break;
-              }
-            }
-          }
-          if (!isWin) break;
-        }
-        return isWin;
+      const patternData = gamePatterns[gameType];
+      
+      // Use custom check function if available
+      if (patternData.checkFunction === 'checkSingleLine') {
+        return checkSingleLine();
+      } else if (patternData.checkFunction === 'checkDoubleLine') {
+        return checkDoubleLine();
       }
+      
+      // Use pattern matching for other game types
+      const pattern = patternData.pattern;
+      let isWin = true;
+      
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          if (pattern[r][c] === 1) {
+            const letter = letters[c];
+            const num = playerCard[letter][r];
+            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+              isWin = false;
+              break;
+            }
+          }
+        }
+        if (!isWin) break;
+      }
+      
+      return isWin;
     }
 
     // Roll logic
     function rollBingo(){
-      if(calledNumbers.size >= 75){ showToast('All numbers called',3000); return null; }
-      let letter,number,attempts=0;
+      if(calledNumbers.size >= 75){ 
+        showToast('All 75 numbers have been called!',3000); 
+        return null; 
+      }
+      
+      let letter, number, attempts=0;
       do {
         letter = letters[Math.floor(Math.random()*letters.length)];
         const [min,max] = ranges[letter];
         number = getRandomNumber(min,max);
         attempts++;
-        if(attempts>200){ showToast('Unable to find new number',4000); return null; }
+        if(attempts>200){ 
+          showToast('Unable to find new number',4000); 
+          return null; 
+        }
       } while(calledNumbers.has(`${letter}-${number}`));
+      
       const rolled = `${letter}-${number}`;
       calledNumbers.add(rolled);
+      
       if(gameRef && isHost){
         gameRef.child('called').push(rolled).catch(err=>console.error('DB push error',err));
       } else {
         localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
         highlightNumber(letter, number);
       }
+      
       return rolled;
     }
 
-    // Toast utility - centered for all toasts
+    // Toast utility
     function showToast(msg, duration=2500, isWin=false){
       const t = document.createElement('div');
       t.className = 'toast';
@@ -585,38 +932,73 @@
         top: '50%', 
         left: '50%', 
         transform: 'translate(-50%, -50%)',
-        padding: '10px 14px', 
+        padding: isWin ? '20px 30px' : '12px 18px', 
         background: isWin ? '#FFD700' : 'var(--glow)', 
         color: '#000', 
         zIndex: 99999, 
-        borderRadius: '8px', 
-        boxShadow: '0 8px 30px rgba(0,0,0,0.4)', 
-        fontWeight: 800 
+        borderRadius: '12px', 
+        boxShadow: '0 8px 30px rgba(0,0,0,0.5)', 
+        fontWeight: 900,
+        fontSize: isWin ? '1.5rem' : '1.1rem',
+        opacity: 0,
+        transition: 'opacity 0.3s ease'
       });
       document.body.appendChild(t);
       setTimeout(()=> t.style.opacity = '1', 20);
-      setTimeout(()=> { t.style.opacity='0'; setTimeout(()=> t.remove(),300); }, duration);
+      setTimeout(()=> { 
+        t.style.opacity='0'; 
+        setTimeout(()=> t.remove(),300); 
+      }, duration);
     }
 
     // Leaderboard
     function updateLeaderboardSnapshot(winnersObj){
       const lb = document.getElementById('leaderboard');
-      lb.innerHTML = '<h3 style="color:var(--glow)">Winners</h3>';
-      if(!winnersObj || Object.keys(winnersObj).length===0){ lb.innerHTML += '<p style="color:#AAA">No winners yet.</p>'; return; }
+      if(!lb) return;
+      lb.innerHTML = '<h3 style="color:var(--glow); margin-bottom: 1rem;">🏆 Winners 🏆</h3>';
+      if(!winnersObj || Object.keys(winnersObj).length===0){ 
+        lb.innerHTML += '<p style="color:#AAA">No winners yet. Keep playing!</p>'; 
+        return; 
+      }
       const ul = document.createElement('ul');
-      ul.style.listStyle='none'; ul.style.padding='0';
+      ul.style.listStyle='none'; 
+      ul.style.padding='0';
+      ul.style.maxWidth='600px';
+      ul.style.margin='0 auto';
+      
       Object.keys(winnersObj).forEach(k=>{
         const v = winnersObj[k];
-        const li = document.createElement('li'); li.textContent = `${v.handle} at ${new Date(parseInt(v.timestamp)).toLocaleString()} (${v.gameType})`;
+        const li = document.createElement('li'); 
+        li.style.padding='10px';
+        li.style.margin='5px 0';
+        li.style.background='rgba(0,255,0,0.05)';
+        li.style.borderRadius='8px';
+        li.style.border='1px solid rgba(0,255,0,0.2)';
+        li.textContent = `${v.handle} - ${v.gameType} at ${new Date(parseInt(v.timestamp)).toLocaleTimeString()}`;
         ul.appendChild(li);
       });
       lb.appendChild(ul);
     }
+    
     function appendWinnerToLeaderboard(key, value){
       const lb = document.getElementById('leaderboard');
-      if(!lb.querySelector('ul')){ const ul = document.createElement('ul'); ul.style.listStyle='none'; ul.style.padding='0'; lb.appendChild(ul); }
+      if(!lb) return;
+      if(!lb.querySelector('ul')){ 
+        const ul = document.createElement('ul'); 
+        ul.style.listStyle='none'; 
+        ul.style.padding='0';
+        ul.style.maxWidth='600px';
+        ul.style.margin='0 auto';
+        lb.appendChild(ul); 
+      }
       const ul = lb.querySelector('ul');
-      const li = document.createElement('li'); li.textContent = `${value.handle} at ${new Date(parseInt(value.timestamp)).toLocaleString()} (${value.gameType})`;
+      const li = document.createElement('li'); 
+      li.style.padding='10px';
+      li.style.margin='5px 0';
+      li.style.background='rgba(0,255,0,0.05)';
+      li.style.borderRadius='8px';
+      li.style.border='1px solid rgba(0,255,0,0.2)';
+      li.textContent = `${value.handle} - ${value.gameType} at ${new Date(parseInt(value.timestamp)).toLocaleTimeString()}`;
       ul.appendChild(li);
     }
 
@@ -625,42 +1007,60 @@
       playerListContent.innerHTML = '';
       playersArray = [];
       displayedPlayers.clear();
+      
       if(!playersObj || Object.keys(playersObj).length===0){
-        playerListContent.innerHTML = '<p style="color:#AAA;margin:6px 0;">No players yet.</p>';
+        playerListContent.innerHTML = '<p style="color:#AAA;margin:6px 0;text-align:center;">No players yet.</p>';
         return;
       }
+      
       const keys = Object.keys(playersObj).sort();
       keys.forEach(k=>{
         const p = playersObj[k];
         const handle = p.handle || ('@'+k);
         const cardID = p.cardID || 'N/A';
         if (playersArray.some(player => player.key === k)) return;
+        
         playersArray.push({key:k,handle,cardID});
         displayedPlayers.add(k);
-        const div = document.createElement('div'); div.className = 'player-item';
-        const left = document.createElement('div'); left.textContent = handle;
-        const right = document.createElement('div'); right.className = 'cardid'; right.textContent = `#${cardID}`;
-        div.appendChild(left); div.appendChild(right);
+        
+        const div = document.createElement('div'); 
+        div.className = 'player-item';
+        const left = document.createElement('div'); 
+        left.textContent = handle;
+        const right = document.createElement('div'); 
+        right.className = 'cardid'; 
+        right.textContent = `#${cardID}`;
+        div.appendChild(left); 
+        div.appendChild(right);
         playerListContent.appendChild(div);
       });
     }
+    
     function appendPlayerToList(key, value){
       if(!playerListContent || displayedPlayers.has(key) || playersArray.some(p => p.key === key)) return;
       if(playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
+      
       const handle = value.handle || ('@'+key);
       const cardID = value.cardID || 'N/A';
-      const div = document.createElement('div'); div.className = 'player-item';
-      const left = document.createElement('div'); left.textContent = handle;
-      const right = document.createElement('div'); right.className='cardid'; right.textContent = `#${cardID}`;
-      div.appendChild(left); div.appendChild(right);
+      
+      const div = document.createElement('div'); 
+      div.className = 'player-item';
+      const left = document.createElement('div'); 
+      left.textContent = handle;
+      const right = document.createElement('div'); 
+      right.className='cardid'; 
+      right.textContent = `#${cardID}`;
+      div.appendChild(left); 
+      div.appendChild(right);
       playerListContent.appendChild(div);
+      
       playersArray.push({key,handle,cardID});
       displayedPlayers.add(key);
-      if(isHost) showToast(`${handle} joined`,2500);
+      
+      if(isHost) showToast(`${handle} joined the game! 🎉`,2500);
     }
 
     // Setup / cleanup firebase listeners
-    let gameListeners = { called: false, gameType: false, winners:false, players:false };
     function cleanupListeners(){
       if(gameRef){
         try {
@@ -670,76 +1070,109 @@
           gameRef.child('players').off();
         } catch(e){ console.error('Listener cleanup error', e); }
       }
-      gameListeners = { called:false, gameType:false, winners:false, players:false };
     }
 
     function setupGame(id){
       try {
         cleanupListeners();
         gameRef = database.ref(`games/${id}`);
-        // Called numbers
+        
+        // Called numbers - load existing first
         gameRef.child('called').once('value', snap=>{
           calledNumbers.clear();
           const obj = snap.val();
-          if(obj){ Object.values(obj).forEach(v=> { if(isValidCalledFormat(v)) calledNumbers.add(v); }); }
+          if(obj){ 
+            Object.values(obj).forEach(v=> { 
+              if(isValidCalledFormat(v)) calledNumbers.add(v); 
+            }); 
+          }
           localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
           createBoard();
-          if (!isHost) displayPlayerCard();
+          updateStats();
+          if (!isHost && playerCard) displayPlayerCard();
         });
+        
+        // Listen for new called numbers
         gameRef.child('called').on('child_added', snap=>{
           const rolled = snap.val();
           if(!isValidCalledFormat(rolled)) return;
+          
           const [letter, num] = rolled.split('-');
-          calledNumbers.add(rolled);
-          localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-          highlightNumber(letter, num);
-          if (!isHost) {
-            displayPlayerCard();
-            if (checkForBingo() && !playerWins[gameType]) {
-              playerWins[gameType] = true;
-              localStorage.setItem('playerWins', JSON.stringify(playerWins));
-              gameRef.child('winners').push({
-                handle: xHandle,
-                timestamp: Date.now().toString(),
-                gameType: gameType
-              }).catch(err => console.error('Win push error', err));
-              showToast('BINGO! You won!', 5000, true);
+          if(!calledNumbers.has(rolled)) {
+            calledNumbers.add(rolled);
+            localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+            highlightNumber(letter, parseInt(num));
+            
+            // Update result display for all users
+            if(resultDiv) resultDiv.textContent = rolled;
+            
+            if (!isHost && playerCard) {
+              displayPlayerCard();
+              
+              // Check for win - only if we haven't won this game type yet
+              const winKey = `${gameId}-${gameType}`;
+              if (!playerWins[winKey] && checkForBingo()) {
+                playerWins[winKey] = true;
+                localStorage.setItem('playerWins', JSON.stringify(playerWins));
+                
+                // Submit win to Firebase
+                gameRef.child('winners').push({
+                  handle: xHandle,
+                  timestamp: Date.now().toString(),
+                  gameType: gameType
+                }).catch(err => console.error('Win push error', err));
+                
+                showToast(`🎉 BINGO! You won ${gamePatterns[gameType].name}! 🎉`, 5000, true);
+              }
             }
           }
         });
 
-        // Game type
+        // Game type changes
         gameRef.child('gameType').on('value', snap=>{
           const newGameType = snap.val() || 'singleLine';
           gameType = newGameType;
-          if(isHost) gameTypeSelect.value = gameType;
-          displayWinPattern();
-          if (!isHost) checkForBingo();
+          
+          if(isHost) {
+            gameTypeSelect.value = gameType;
+            displayWinPattern();
+          } else {
+            // Update player UI
+            if(currentGameTypeDiv && gameTypeName) {
+              currentGameTypeDiv.style.display = 'block';
+              gameTypeName.textContent = gamePatterns[gameType].name;
+              playerWinPatternDiv.style.display = 'grid';
+              playerWinPatternLabel.style.display = 'block';
+              displayWinPattern(playerWinPatternDiv, playerWinPatternLabel);
+            }
+          }
         });
 
         // Winners
         gameRef.child('winners').once('value', snap=>{
           const obj = snap.val() || {};
+          Object.keys(obj).forEach(k => notifiedWinners.add(k));
           updateLeaderboardSnapshot(obj);
         });
+        
         gameRef.child('winners').on('child_added', snap=>{
           const key = snap.key, val = snap.val();
           if(!notifiedWinners.has(key)){
             notifiedWinners.add(key);
             appendWinnerToLeaderboard(key, val);
-            if(isHost) showToast(`BINGO! ${val.handle} won (${val.gameType})!`, 4000);
-            if(!isHost && val.handle === xHandle) showToast('BINGO! You won!', 5000, true);
+            if(isHost) {
+              showToast(`🎉 BINGO! ${val.handle} won ${val.gameType}! 🎉`, 4000, true);
+            }
           }
         });
 
         // Players
         gameRef.child('players').once('value', snap=>{
-          console.log('Players snapshot:', snap.val());
           updatePlayerListSnapshot(snap.val());
         });
+        
         gameRef.child('players').on('child_added', snap=>{
           const key = snap.key, val = snap.val();
-          console.log('Player added:', key, val);
           appendPlayerToList(key, val);
         });
 
@@ -763,9 +1196,10 @@
     hostModeBtn.addEventListener('click', ()=>{
       auth.signInAnonymously().then(()=>{
         isHost = true;
-        hostControls.style.display = 'block';
+        hostControls.style.display = 'flex';
         playerControls.style.display = 'none';
         playerListEl.style.display = 'block';
+        
         calledNumbers.clear();
         localStorage.removeItem('calledNumbers');
         notifiedWinners.clear();
@@ -773,15 +1207,22 @@
         playersArray = [];
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        
         gameId = Math.random().toString(36).substring(2,10);
         localStorage.setItem('gameId', gameId);
-        gameIdDisplay.textContent = `Game ID: ${gameId} (Share this!)`;
+        gameIdDisplay.textContent = `Game ID: ${gameId}`;
+        
         setupGame(gameId);
+        
         gameType = gameTypeSelect.value;
         if(gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
+        
         displayWinPattern();
         createBoard();
-        showToast('Host mode enabled. New game created.',3000);
+        updateStats();
+        
+        resultDiv.textContent = 'Ready to Roll!';
+        showToast('🎮 Host mode enabled. Share your Game ID with players!',3500);
       }).catch(err=>{
         console.error('Auth error for host:', err);
         showToast('Failed to authenticate for host mode', 3000);
@@ -793,62 +1234,86 @@
       hostControls.style.display = 'none';
       playerControls.style.display = 'block';
       playerListEl.style.display = window.innerWidth <= 767 ? 'block' : 'none';
+      
       const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
       calledNumbers = new Set(stored);
       createBoard();
+      updateStats();
       displayWinPattern();
-      showToast('Player mode: enter game ID and handle to join.',2500);
+      
+      if(xHandle) xHandleInput.value = xHandle;
+      
+      showToast('👤 Player mode: Enter Game ID and X handle to join',3000);
     });
 
     joinGameBtn.addEventListener('click', async ()=>{
       const providedGameId = gameIdInput.value.trim();
       const providedHandle = xHandleInput.value.trim();
-      if(!providedGameId) return showToast('Enter a valid Game ID', 3000);
-      if(!providedHandle || !providedHandle.startsWith('@')) return showToast('Enter a valid X Handle (e.g., @UserX)', 3000);
+      
+      if(!providedGameId) return showToast('⚠️ Enter a valid Game ID', 3000);
+      if(!providedHandle || !providedHandle.startsWith('@')) return showToast('⚠️ Enter a valid X Handle (e.g., @UserX)', 3000);
+      
       try {
         await auth.signInAnonymously();
+        
         gameId = providedGameId;
         xHandle = providedHandle;
         localStorage.setItem('gameId', gameId);
         localStorage.setItem('xHandle', xHandle);
+        
         gameRef = database.ref(`games/${gameId}`);
+        
+        // Generate unique card
         const { card, cardID } = await generatePlayerCard();
         playerCard = card;
+        
+        // Reset wins for new session
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        
         displayPlayerCard();
+        
         const handleKey = xHandle.replace('@','');
         await gameRef.child('players').child(handleKey).set({
           handle: xHandle,
           cardID: cardID,
           card: playerCard
         });
-        showToast(`Joined ${gameId} as ${xHandle}`,3000);
+        
+        showToast(`✅ Joined ${gameId} as ${xHandle}`,3000);
         setupGame(gameId);
+        
       } catch(err){
         console.error('Error joining game:', err);
-        showToast('Error joining game: ' + (err.message || 'Unknown error'), 3000);
+        showToast('❌ Error joining game: ' + (err.message || 'Unknown error'), 3500);
       }
     });
 
     copyGameIdBtn.addEventListener('click', ()=>{
       if(!gameId) return showToast('No Game ID to copy',2000);
-      navigator.clipboard.writeText(gameId).then(()=> showToast('Game ID copied!',2000)).catch(e => showToast('Error copying',2000));
+      navigator.clipboard.writeText(gameId)
+        .then(()=> showToast('✅ Game ID copied to clipboard!',2000))
+        .catch(e => showToast('Error copying',2000));
     });
 
     rollButton.addEventListener('click', ()=>{
       if(!isHost || !gameRef) return showToast('Host a game first', 3000);
+      
       const rolled = rollBingo();
       if(rolled){
         const [L,N] = rolled.split('-');
-        highlightNumber(L,N);
+        resultDiv.textContent = rolled;
+        highlightNumber(L, parseInt(N));
       }
     });
 
     resetButton.addEventListener('click', ()=>{
+      if(!confirm('Are you sure you want to reset the game? This will clear all data.')) return;
+      
       if(gameRef && isHost){
         gameRef.remove().catch(err=>console.warn('Failed to remove game:', err));
       }
+      
       cleanupListeners();
       calledNumbers.clear();
       localStorage.removeItem('calledNumbers');
@@ -860,26 +1325,35 @@
       displayedPlayers.clear();
       playersArray = [];
       resultDiv.textContent = '';
+      
       createBoard();
+      updateStats();
       playerListContent.innerHTML = '';
       document.getElementById('leaderboard').innerHTML = '';
+      
       hostControls.style.display='none';
       playerControls.style.display='none';
+      playerListEl.style.display='none';
+      
       gameId = null;
       localStorage.removeItem('gameId');
       localStorage.removeItem('xHandle');
       xHandle = null;
       gameRef = null;
-      showToast('Game reset complete',2000);
+      isHost = false;
+      
+      showToast('🔄 Game reset complete. Start a new game!',2500);
     });
 
     gameTypeSelect.addEventListener('change', ()=>{
       const val = gameTypeSelect.value;
       if(!Object.keys(gamePatterns).includes(val)) return;
+      
       gameType = val;
-      if(isHost && gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
+      if(isHost && gameRef) {
+        gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
+      }
       displayWinPattern();
-      if (!isHost) checkForBingo();
     });
 
     // Auto-join via URL
@@ -891,22 +1365,24 @@
         localStorage.setItem('gameId', gameId);
         playerModeBtn.click();
         gameIdInput.value = gameId;
-        showToast('Auto-join game ID detected',2000);
+        showToast('🔗 Auto-join game ID detected from URL',2500);
       }
     })();
 
-    // Init
+    // Init - Always show board on page load
     (function init(){
       const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
       calledNumbers = new Set(stored);
-      createBoard();
+      createBoard(); // ALWAYS CREATE BOARD ON LOAD
+      updateStats();
       displayWinPattern();
+      
       const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
       const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
       playerListEl.style.transform = `translate(${savedX}px, ${savedY}px)`;
     })();
 
-    // Dragging logic
+    // Dragging logic for player list
     (function makePlayerListDraggable(){
       const el = playerListEl;
       let dragging = false, startX=0, startY=0, currentX=0, currentY=0, startTransform = {x:0,y:0};
@@ -926,6 +1402,7 @@
         startTransform.y = currentY;
         e.preventDefault();
       }
+      
       function onMove(e){
         if(!dragging) return;
         const client = (e.touches && e.touches[0]) || e;
@@ -941,6 +1418,7 @@
         currentX = nx; currentY = ny;
         el.style.transform = `translate(${currentX}px, ${currentY}px)`;
       }
+      
       function onUp(){
         if(!dragging) return;
         dragging = false;
@@ -948,6 +1426,7 @@
         localStorage.setItem('playerListTransformX', String(currentX));
         localStorage.setItem('playerListTransformY', String(currentY));
       }
+      
       el.addEventListener('mousedown', onDown);
       window.addEventListener('mousemove', onMove);
       window.addEventListener('mouseup', onUp);
@@ -956,8 +1435,23 @@
       window.addEventListener('touchend', onUp);
     })();
 
-    firebase.auth().onAuthStateChanged(user => { console.log('Auth state changed:', user); });
-    window._bingoState = () => ({ gameId, isHost, gameType, calledCount: calledNumbers.size });
+    // Debug helper
+    firebase.auth().onAuthStateChanged(user => { 
+      console.log('Auth state changed:', user ? 'Authenticated' : 'Not authenticated'); 
+    });
+    
+    window._bingoDebug = () => ({ 
+      gameId, 
+      isHost, 
+      gameType, 
+      calledCount: calledNumbers.size,
+      playerCard,
+      playerWins,
+      xHandle
+    });
+    
+    console.log('%c$BINGO Roller v2.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+    console.log('Debug info: window._bingoDebug()');
   </script>
 </body>
 </html>
