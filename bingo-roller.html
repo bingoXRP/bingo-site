@@ -145,7 +145,7 @@
       border: 2px solid var(--glow);
     }
 
-    /* Bingo Board - Always visible */
+    /* Bingo Board */
     .bingo-board {
       display: grid;
       grid-template-columns: repeat(10, minmax(40px, 1fr));
@@ -178,10 +178,11 @@
     }
     .bingo-board .empty { visibility: hidden; }
 
-    /* Player card */
+    /* Player card - FIXED 5x5 grid with headers on top */
     .player-card { 
       display:grid; 
       grid-template-columns:repeat(5,1fr); 
+      grid-template-rows: auto repeat(5, 1fr);
       gap:.6rem; 
       max-width: min(80vw,600px); 
       margin: 1.5rem auto; 
@@ -189,6 +190,15 @@
       border: 3px solid var(--glow); 
       border-radius:12px;
       box-shadow: 0 4px 20px rgba(0,255,0,0.2);
+    }
+    .player-card .header {
+      color: var(--glow);
+      font-weight: 900;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
     }
     .player-card .cell { 
       aspect-ratio:1/1; 
@@ -519,11 +529,11 @@
     let xHandle = localStorage.getItem('xHandle') || null;
     let gameRef = null;
     let gameType = 'singleLine';
-    let playerWins = {}; // Track wins by game type per session
-    let sessionWinnerKey = null; // Track if we've already won this game type in this session
+    let playerWins = {}; // Track wins by "gameId-gameType" to prevent duplicates
     const notifiedWinners = new Set();
     const displayedPlayers = new Set();
     let playersArray = [];
+    let initialLoadComplete = false; // Track if initial game load is complete
 
     // DOM refs
     const hostModeBtn = document.getElementById('host-mode');
@@ -609,7 +619,7 @@
       }
     }
 
-    // Win pattern preview
+    // Win pattern preview - FIXED to show pattern immediately
     function displayWinPattern(targetDiv = null, labelDiv = null){
       const winPatternDiv = targetDiv || document.getElementById('win-pattern');
       const winPatternLabelDiv = labelDiv || document.getElementById('win-pattern-label');
@@ -617,6 +627,8 @@
       if(!winPatternDiv) return;
       
       winPatternDiv.innerHTML = '';
+      winPatternDiv.style.display = 'grid'; // Ensure it's visible
+      
       const patternData = gamePatterns[gameType] || gamePatterns.singleLine;
       const pattern = patternData.pattern;
       
@@ -631,6 +643,7 @@
       
       if(winPatternLabelDiv) {
         winPatternLabelDiv.textContent = patternData.name;
+        winPatternLabelDiv.style.display = 'block';
       }
     }
 
@@ -683,6 +696,7 @@
       return combined.toString().padStart(3,'0');
     }
 
+    // FIXED: Player card display with proper 5x5 grid and headers on top
     function displayPlayerCard(){
       const cardDiv = document.getElementById('player-card');
       if(!cardDiv || !playerCard) return;
@@ -691,17 +705,15 @@
       cardDiv.innerHTML = '';
       cardDiv.setAttribute('aria-hidden', 'false');
       
+      // Add headers in first row
       letters.forEach(l=>{
         const header = document.createElement('div');
-        header.className = 'header';
         header.textContent = l;
-        header.style.gridColumn = '1';
-        header.style.aspectRatio = 'auto';
-        header.style.color = 'var(--glow)';
-        header.style.fontWeight = '900';
+        header.className = 'header';
         cardDiv.appendChild(header);
       });
       
+      // Add cells in rows 2-6 (5 rows of numbers)
       for(let r=0;r<5;r++){
         letters.forEach(letter=>{
           const num = playerCard[letter][r];
@@ -856,9 +868,9 @@
       return linesCompleted >= 2;
     }
 
-    // Generic bingo check using pattern
+    // Generic bingo check using pattern - FIXED to only check after initial load
     function checkForBingo() {
-      if (!playerCard || !gamePatterns[gameType]) return false;
+      if (!playerCard || !gamePatterns[gameType] || !initialLoadComplete) return false;
       
       const patternData = gamePatterns[gameType];
       
@@ -1075,6 +1087,7 @@
     function setupGame(id){
       try {
         cleanupListeners();
+        initialLoadComplete = false; // Reset flag
         gameRef = database.ref(`games/${id}`);
         
         // Called numbers - load existing first
@@ -1090,12 +1103,20 @@
           createBoard();
           updateStats();
           if (!isHost && playerCard) displayPlayerCard();
+          
+          // Mark initial load as complete after a brief delay
+          setTimeout(() => {
+            initialLoadComplete = true;
+          }, 1000);
         });
         
         // Listen for new called numbers
         gameRef.child('called').on('child_added', snap=>{
           const rolled = snap.val();
           if(!isValidCalledFormat(rolled)) return;
+          
+          // Skip if this number was part of initial load
+          if(!initialLoadComplete) return;
           
           const [letter, num] = rolled.split('-');
           if(!calledNumbers.has(rolled)) {
@@ -1109,7 +1130,7 @@
             if (!isHost && playerCard) {
               displayPlayerCard();
               
-              // Check for win - only if we haven't won this game type yet
+              // Check for win - only if we haven't won this specific game+type combo yet
               const winKey = `${gameId}-${gameType}`;
               if (!playerWins[winKey] && checkForBingo()) {
                 playerWins[winKey] = true;
@@ -1207,6 +1228,7 @@
         playersArray = [];
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        initialLoadComplete = true; // Host starts with complete state
         
         gameId = Math.random().toString(36).substring(2,10);
         localStorage.setItem('gameId', gameId);
@@ -1217,7 +1239,7 @@
         gameType = gameTypeSelect.value;
         if(gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
         
-        displayWinPattern();
+        displayWinPattern(); // Show pattern immediately for host
         createBoard();
         updateStats();
         
@@ -1267,7 +1289,7 @@
         const { card, cardID } = await generatePlayerCard();
         playerCard = card;
         
-        // Reset wins for new session
+        // Reset wins for new session/game
         playerWins = {};
         localStorage.setItem('playerWins', JSON.stringify(playerWins));
         
@@ -1324,6 +1346,7 @@
       notifiedWinners.clear();
       displayedPlayers.clear();
       playersArray = [];
+      initialLoadComplete = false;
       resultDiv.textContent = '';
       
       createBoard();
@@ -1353,7 +1376,7 @@
       if(isHost && gameRef) {
         gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
       }
-      displayWinPattern();
+      displayWinPattern(); // Update pattern preview immediately
     });
 
     // Auto-join via URL
@@ -1447,10 +1470,11 @@
       calledCount: calledNumbers.size,
       playerCard,
       playerWins,
-      xHandle
+      xHandle,
+      initialLoadComplete
     });
     
-    console.log('%c$BINGO Roller v2.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+    console.log('%c$BINGO Roller v2.1 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
     console.log('Debug info: window._bingoDebug()');
   </script>
 </body>
