@@ -1,11 +1,11 @@
-let gameId = localStorage.getItem('gameId') || null;
-let xHandle = localStorage.getItem('xHandle') || null;
+let gameId = null;
+let xHandle = null;
 let isHost = false;
 let gameRef = null;
 let gameType = 'fullCard';
-let calledNumbers = new Set(JSON.parse(localStorage.getItem('calledNumbers') || '[]'));
-let playerCard = JSON.parse(localStorage.getItem('playerCard')) || null;
-let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
+let calledNumbers = new Set();
+let playerCard = null;
+let playerWins = {};
 let notifiedWinners = new Set();
 let displayedPlayers = new Set();
 let playersArray = [];
@@ -130,7 +130,6 @@ function rollBingo() {
 
   const rolled = available[Math.floor(Math.random() * available.length)];
   calledNumbers.add(rolled);
-  localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
 
   if (gameRef && isHost) {
     gameRef.child('calledNumbers').set([...calledNumbers]);
@@ -269,7 +268,6 @@ function setupGame(gid) {
       const newCalled = new Set(serverCalled);
       const added = [...newCalled].filter(x => !calledNumbers.has(x));
       calledNumbers = newCalled;
-      localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
       createBoard();
       updateStats();
       displayPlayerCard();
@@ -284,7 +282,6 @@ function setupGame(gid) {
           const winKey = `${gameType}`;
           if (!playerWins[winKey]) {
             playerWins[winKey] = true;
-            localStorage.setItem('playerWins', JSON.stringify(playerWins));
             showToast(`🎉 BINGO! You won ${gameType}!`, 5000);
             
             if (xHandle && gameRef) {
@@ -408,15 +405,16 @@ function updateLeaderboard() {
 }
 
 hostModeBtn.addEventListener('click', async () => {
-  auth.signInAnonymously().then(() => {
+  try {
+    await auth.signInAnonymously();
+    
     isHost = true;
     gameId = generateGameId();
-    localStorage.setItem('gameId', gameId);
     gameRef = database.ref(`games/${gameId}`);
     
     gameRef.set({
       gameType: gameType,
-      calledNumbers: [...calledNumbers],
+      calledNumbers: [],
       createdAt: Date.now()
     });
 
@@ -425,17 +423,19 @@ hostModeBtn.addEventListener('click', async () => {
     document.getElementById('mode-selection').style.display = 'none';
     playerListEl.style.display = window.innerWidth > 767 ? 'block' : 'none';
     
+    calledNumbers.clear();
+    resultDiv.textContent = '';
+    
     displayWinPattern();
     createBoard();
     updateStats();
     
-    resultDiv.textContent = 'Ready to Roll!';
     showToast(`🎮 Host mode enabled. Game ID: ${gameId}`, 3500);
     setupGame(gameId);
-  }).catch(err => {
+  } catch (err) {
     console.error('Auth error for host:', err);
     showToast('Failed to authenticate for host mode', 3000);
-  });
+  }
 });
 
 playerModeBtn.addEventListener('click', () => {
@@ -445,13 +445,14 @@ playerModeBtn.addEventListener('click', () => {
   document.getElementById('mode-selection').style.display = 'none';
   playerListEl.style.display = 'none';
   
-  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
-  calledNumbers = new Set(stored);
+  calledNumbers.clear();
+  resultDiv.textContent = '';
+  statsDiv.textContent = '';
+  currentGameTypeDiv.textContent = '';
+  
   createBoard();
   updateStats();
   displayWinPattern();
-  
-  if (xHandle) xHandleInput.value = xHandle;
   
   showToast('👤 Player mode: Enter Game ID and X handle to join', 3000);
 });
@@ -470,17 +471,13 @@ joinGameBtn.addEventListener('click', async () => {
     
     gameId = providedGameId;
     xHandle = providedHandle;
-    localStorage.setItem('gameId', gameId);
-    localStorage.setItem('xHandle', xHandle);
     
     gameRef = database.ref(`games/${gameId}`);
     
     const { card, cardID } = await generatePlayerCard();
     playerCard = card;
-    localStorage.setItem('playerCard', JSON.stringify(playerCard));
     
     playerWins = {};
-    localStorage.setItem('playerWins', JSON.stringify(playerWins));
     
     displayPlayerCard();
     
@@ -527,9 +524,6 @@ resetButton.addEventListener('click', () => {
   
   cleanupListeners();
   calledNumbers.clear();
-  localStorage.removeItem('calledNumbers');
-  localStorage.removeItem('playerCard');
-  localStorage.removeItem('playerWins');
   playerCard = null;
   playerWins = {};
   notifiedWinners.clear();
@@ -537,6 +531,8 @@ resetButton.addEventListener('click', () => {
   playersArray = [];
   initialLoadComplete = false;
   resultDiv.textContent = '';
+  statsDiv.textContent = '';
+  currentGameTypeDiv.textContent = '';
   
   createBoard();
   updateStats();
@@ -552,8 +548,6 @@ resetButton.addEventListener('click', () => {
   document.getElementById('mode-selection').style.display = 'block';
   
   gameId = null;
-  localStorage.removeItem('gameId');
-  localStorage.removeItem('xHandle');
   xHandle = null;
   gameRef = null;
   isHost = false;
@@ -577,7 +571,6 @@ gameTypeSelect.addEventListener('change', () => {
   const urlGameId = urlParams.get('gameId');
   if (urlGameId) {
     gameId = urlGameId;
-    localStorage.setItem('gameId', gameId);
     playerModeBtn.click();
     gameIdInput.value = gameId;
     showToast('🔗 Auto-join game ID detected from URL', 2500);
@@ -585,25 +578,21 @@ gameTypeSelect.addEventListener('change', () => {
 })();
 
 (function init() {
-  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
-  calledNumbers = new Set(stored);
-  createBoard();
-  updateStats();
-  displayWinPattern();
+  hostControls.style.display = 'none';
+  playerControls.style.display = 'none';
+  playerListEl.style.display = 'none';
+  document.getElementById('mode-selection').style.display = 'block';
   
-  const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
-  const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
-  playerListEl.style.transform = `translate(${savedX}px, ${savedY}px)`;
+  resultDiv.textContent = '';
+  statsDiv.textContent = '';
+  currentGameTypeDiv.textContent = '';
+  
+  createBoard();
 })();
 
 (function makePlayerListDraggable() {
   const el = playerListEl;
   let dragging = false, startX = 0, startY = 0, currentX = 0, currentY = 0, startTransform = {x:0, y:0};
-  const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
-  const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
-  currentX = savedX;
-  currentY = savedY;
-  el.style.transform = `translate(${currentX}px, ${currentY}px)`;
 
   function onDown(e) {
     if (window.innerWidth < 768) return;
@@ -638,8 +627,6 @@ gameTypeSelect.addEventListener('change', () => {
     if (!dragging) return;
     dragging = false;
     el.style.cursor = 'grab';
-    localStorage.setItem('playerListTransformX', String(currentX));
-    localStorage.setItem('playerListTransformY', String(currentY));
   }
   
   el.addEventListener('mousedown', onDown);
