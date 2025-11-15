@@ -1,616 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) --> <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-HBCFY2880X'); </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HBCFY2880X');
+  </script>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="$BINGO entertainment coin on XRP Ledger. Inspired by 'Bingo was his name-o' – fun, fast, and farm-fresh crypto!">
   <meta name="keywords" content="BingoXRPL, $BINGO, memecoin, XRP Ledger, NFT, cryptocurrency">
   <meta name="author" content="BingoXRPL Team">
   <meta name="robots" content="index, follow">
+  
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bingoxrp.com/">
+  <meta property="og:title" content="BingoXRPL | $BINGO Memecoin on XRP Ledger">
+  <meta property="og:description" content="$BINGO entertainment coin on XRP Ledger. Fun, fast, and farm-fresh crypto!">
+  <meta property="og:image" content="https://bingoxrp.com/logo.png">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@BingoXRPL">
+  
   <title>BingoXRPL | $BINGO Memecoin on XRP Ledger</title>
-  <link rel="icon" href="logo.png" type="image/png">
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(to bottom, #0A0F2A, #1A1F3A);
-      color: #FFFFFF;
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    header {
-      background-color: #00B8D9;
-      padding: 15px 0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .hamburger {
-      display: none;
-      font-size: 1.5em;
-      background: none;
-      border: none;
-      color: #00FF00;
-      cursor: pointer;
-      padding: 10px;
-    }
-
-    .nav-menu {
-      list-style: none;
-      display: flex;
-      margin: 0;
-      padding: 0;
-      gap: 15px; /* Improved spacing for single-line */
-    }
-
-    .nav-menu li a {
-      color: #1A1F3A;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 1em; /* Slightly smaller for fit */
-      transition: color 0.3s, transform 0.3s;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Better contrast */
-    }
-
-    .nav-menu li a:hover {
-      color: #FFFFFF;
-      transform: scale(1.05);
-    }
-
-    .logo {
-      max-width: 300px;
-      height: auto;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 100px 0 150px; /* Adjusted spacing for better flow */
-      background: linear-gradient(135deg, #1A1F3A, #0A0F2A);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(0, 184, 217, 0.3), transparent);
-      animation: pulse 5s infinite;
-      opacity: 0.8;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.6; }
-      50% { opacity: 0.9; }
-      100% { opacity: 0.6; }
-    }
-
-    .hero h2 {
-      font-size: 3.5em;
-      color: #00B8D9;
-      text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
-      margin-bottom: 15px; /* Reduced margin for spacing */
-    }
-
-    .typewriter {
-      font-size: 1.6em; /* Slightly smaller for mobile fit */
-      overflow: hidden;
-      border-right: 0.15em solid #FF0000;
-      white-space: nowrap;
-      margin: 0 auto;
-      letter-spacing: 0.15em;
-      animation: typing 4s steps(50, end), blink-caret 0.75s step-end infinite;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6); /* Improved contrast */
-    }
-
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-
-    @keyframes blink-caret {
-      from, to { border-color: transparent; }
-      50% { border-color: #FF0000; }
-    }
-
-    .cta-button {
-      background-color: #FF0000;
-      color: #FFFFFF;
-      border: none;
-      padding: 15px 30px; /* Adjusted padding for better fit */
-      font-size: 1.4em; /* Slightly smaller for mobile */
-      cursor: pointer;
-      border-radius: 50px;
-      transition: background-color 0.3s, transform 0.3s;
-      box-shadow: 0 6px 12px rgba(255, 0, 0, 0.6);
-      margin-top: 15px;
-      text-decoration: none;
-      display: inline-block;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Better contrast */
-    }
-
-    .cta-button:hover {
-      background-color: #00FF00;
-      transform: scale(1.1);
-    }
-
-    #confetti-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      display: none;
-    }
-
-    .section {
-      padding: 60px 0; /* Reduced padding for tighter spacing */
-      text-align: center;
-      position: relative;
-    }
-
-    .section h2 {
-      color: #00B8D9;
-      font-size: 2.8em; /* Slightly smaller for balance */
-      margin-bottom: 20px; /* Reduced margin */
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px; /* Reduced gap for tighter fit */
-    }
-
-    .feature {
-      background-color: #1A1F3A;
-      padding: 25px; /* Adjusted padding */
-      border-radius: 15px;
-      transition: transform 0.3s, box-shadow 0.3s;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .feature:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 8px 20px rgba(0, 184, 217, 0.6);
-    }
-
-    .feature h3 {
-      color: #FF0000;
-      font-size: 1.6em; /* Slightly smaller */
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
-    }
-
-    /* Added CSS for NFT images to ensure consistent size */
-    .features-grid .feature img {
-      width: 200px; /* Fixed width for consistency */
-      height: 200px; /* Fixed height for consistency */
-      object-fit: contain; /* Maintains aspect ratio */
-      display: block;
-      margin: 0 auto; /* Center images */
-      border-radius: 5px;
-    }
-
-    ol, ul {
-      list-style-position: inside;
-      text-align: left;
-      max-width: 800px;
-      margin: 0 auto;
-      padding-left: 0;
-    }
-
-    .community-links li {
-      display: inline-block;
-      margin: 0 20px;
-    }
-
-    .community-links a {
-      color: #00FF00;
-      text-decoration: none;
-      font-size: 1.2em;
-      transition: color 0.3s;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
-    }
-
-    .community-links a:hover {
-      color: #FF0000;
-    }
-
-    footer {
-      background-color: #00B8D9;
-      padding: 30px 0;
-      text-align: center;
-      font-size: 1em;
-    }
-
-    footer a {
-      color: #1A1F3A;
-      margin: 0 15px;
-      text-decoration: none;
-      transition: color 0.3s;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Contrast boost */
-    }
-
-    footer a:hover {
-      color: #FF0000;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 480px) {
-      header {
-        flex-direction: column;
-        padding: 10px 0;
-      }
-      .hamburger {
-        display: block;
-      }
-      .nav-menu {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        background-color: #00B8D9;
-        padding: 10px 0;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      }
-      .nav-menu.active {
-        display: flex;
-      }
-      .nav-menu li {
-        margin: 8px 0; /* Reduced spacing */
-        text-align: center;
-        width: 100%;
-      }
-      .nav-menu li a {
-        padding: 8px; /* Reduced padding */
-        display: block;
-        font-size: 0.9em; /* Smaller font for mobile */
-      }
-      .logo {
-        max-width: 200px;
-      }
-      h1 {
-        font-size: 1.6em; /* Smaller for fit */
-        text-align: center;
-        margin: 8px 0; /* Reduced margin */
-      }
-      nav {
-        width: 100%;
-      }
-      .hero {
-        padding: 60px 0; /* Reduced for mobile */
-      }
-      .hero h2 {
-        font-size: 2.2em; /* Smaller for mobile */
-      }
-      .typewriter {
-        font-size: 1.1em; /* Smaller for mobile */
-      }
-      .cta-button {
-        padding: 12px 24px; /* Reduced padding */
-        font-size: 1.2em;
-      }
-      .section {
-        padding: 30px 0; /* Reduced padding */
-      }
-      .section h2 {
-        font-size: 1.8em; /* Smaller for mobile */
-        margin-bottom: 15px; /* Reduced margin */
-      }
-      .features-grid {
-        gap: 15px; /* Reduced spacing */
-      }
-      .feature {
-        padding: 20px; /* Reduced padding */
-      }
-      .feature h3 {
-        font-size: 1.4em; /* Smaller for mobile */
-      }
-      .features-grid .feature img {
-        width: 150px; /* Smaller size for mobile */
-        height: 150px;
-      }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      header {
-        padding: 12px 0;
-      }
-      .logo {
-        max-width: 250px;
-      }
-      h1 {
-        font-size: 2em;
-      }
-      nav li {
-        margin-left: 15px;
-      }
-      .hero {
-        padding: 80px 0;
-      }
-      .hero h2 {
-        font-size: 3em;
-      }
-      .typewriter {
-        font-size: 1.5em;
-      }
-      .section {
-        padding: 50px 0;
-      }
-      .section h2 {
-        font-size: 2.5em;
-      }
-      .features-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .features-grid .feature img {
-        width: 180px; /* Slightly smaller for tablet */
-        height: 180px;
-      }
-    }
-
-    @media (min-width: 769px) {
-      .logo {
-        max-width: 300px;
-      }
-      .hamburger {
-        display: none;
-      }
-      .nav-menu {
-        display: flex;
-      }
-    }
-  </style>
+  <link rel="icon" href="assets/images/logo.png" type="image/png">
+  <link rel="canonical" href="https://bingoxrp.com/">
+  
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/index.css">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <noscript>
-    <p style="text-align:center; color:#FF0000; padding: 20px;">
-      JavaScript is disabled. Enable it for smooth scrolling and confetti. The trade button will still work.
-    </p>
+    <div style="text-align:center; color: var(--color-secondary); padding: var(--spacing-lg); background: var(--color-bg-medium);">
+      JavaScript is disabled. Enable it for the best experience.
+    </div>
   </noscript>
-  <header>
+
+  <header role="banner">
     <div class="container header-inner">
       <h1>$BINGO</h1>
-      <button class="hamburger">&#9776;</button>
-      <nav>
+      <button class="hamburger" 
+              aria-label="Toggle navigation menu" 
+              aria-expanded="false"
+              aria-controls="main-navigation">
+        ☰
+      </button>
+      <nav id="main-navigation" role="navigation" aria-label="Main navigation">
         <ul class="nav-menu">
           <li><a href="#about" class="smooth-scroll">About</a></li>
           <li><a href="#tokenomics" class="smooth-scroll">Tokenomics</a></li>
-          <li><a href="#buy" class="smooth-scroll">How to Trade</a></li>
-          <li><a href="#nft" class="smooth-scroll">NFT Collection</a></li>
-          <li><a href="#community" class="smooth-scroll">Community</a></li>
-          <li><a href="#roadmap" class="smooth-scroll">Roadmap</a></li>
-          <li><a href="bingo-roller.html" target="_blank">Bingo Roller</a></li>
+          <li><a href="#nft" class="smooth-scroll">Bingo NFTs</a></li>
+          <li><a href="#roadmap" class="smooth-scroll">Road Map</a></li>
+          <li><a href="bingo-roller.html">Play Bingo</a></li>
+          <li><a href="#sponsors" class="smooth-scroll">Sponsors</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <section id="hero" class="hero">
-    <div class="container">
-      <h2>Welcome to BingoXRPL!</h2>
-      <img src="logo.png" alt="Bingo the dog memecoin logo" class="logo" id="logo">
-      <p class="typewriter">There was a farmer had a dog, and Bingo was his name-o... memecoin on XRP Ledger!</p>
-      <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" target="_blank" id="buy-button" class="cta-button">Trade $BINGO Now!</a>
-      <canvas id="confetti-canvas"></canvas>
-    </div>
-  </section>
+  <main id="main-content">
+    <section id="hero" class="hero" role="banner">
+      <div class="container hero-content">
+        <img src="assets/images/logo.png" 
+             alt="Bingo the dog - BingoXRPL mascot" 
+             class="logo"
+             loading="eager"
+             width="300"
+             height="300">
+        <h2 class="hero-title">$Bingo on XRPL</h2>
+        <p class="hero-subtitle">There was a farmer had a dog, and Bingo was his name-o... memecoin on XRP Ledger!</p>
+        
+        <div class="btn-group">
+          <a href="https://x.com/BingoXRPL" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-primary"
+             aria-label="Follow $BINGO on X">
+            Follow On X
+          </a>
+          <a href="https://t.co/0Gw6NfQqPR" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-primary"
+             aria-label="Join $BINGO Telegram group">
+            Join Telegram
+          </a>
+          <a href="https://discord.com/invite/Aqx83bYQqm" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-primary"
+             aria-label="Join $BINGO Discord server">
+            Join Discord
+          </a>
+          <a href="https://xmagnetic.org/tokens/%24BINGO%2Brf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet&currency=%24BINGO&issuer=rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-primary"
+             aria-label="Set trustline for $BINGO">
+            Set Trustline
+          </a>
+        </div>
 
-  <section id="about" class="section">
-    <div class="container">
-      <h2>About $BINGO</h2>
-      <p>
-        $BINGO combines the appeal of meme coins with the cultural resonance and lore of ”Bingo was his name-O”, 
-        “Ol’ MacDonald”, and the symbolic power of Gematria (396). By integrating micro-tipping, NFT utility, 
-        and gamified community engagement, $BINGO is aiming for the XRP community’s enthusiasm and adoption 
-        on platforms like X (#BINGO, #EIEIO, @bingoxrpl). Inspired by other XRPL meme tokens, $BINGO introduces 
-        unique tokenomics to provide long-term value and community loyalty.
-      </p>
-    </div>
-  </section>
-
-  <section id="tokenomics" class="section">
-    <div class="container">
-      <h2>Tokenomics</h2>
-      <p>Total Supply: 396,000,000,000 (396B) $BINGO, reflecting Gematria’s symbolic significance.</p>
-      <h3>Distribution</h3>
-      <div class="features-grid">
-        <div class="feature">
-          <h3>50% (198B) Community</h3>
-          <p>10% (39.6B) Airdrops: Vested over 12 months (up to 3.3B/month). Tasks: hold at least 10 XRP worth of $BINGO, tweet #BINGO, participate in Discord activities.</p>
-          <p>25% (99B) Initial DEX Offering (IDO): launched on the XRPL Native DEX.</p>
-          <p>10% (39.6B) Gamified Community Pool: Locked in XRPL escrow, released via “$BINGO” challenges.</p>
-          <p>5% (19.8B) NFT Staking: Locked to 3,960 NFT holders (5,000 $BINGO/month each, 12 months, 2% APY).</p>
-        </div>
-        <div class="feature">
-          <h3>15% (59.4B) Team</h3>
-          <p>Locked in XRPL escrow for 12 months.</p>
-        </div>
-        <div class="feature">
-          <h3>15% (59.4B) Liquidity</h3>
-          <p>Allocated to $BINGO/XRP AMM pool.</p>
-        </div>
-        <div class="feature">
-          <h3>20% (79.2B) Marketing/Charity</h3>
-          <p>10% (39.6B) for the “Barn burning” mechanism.</p>
-          <p>5% (19.8B) for NFT art, partnerships, X campaigns.</p>
-          <p>5% (19.8B) for farm-related charity.</p>
+        <div class="buy-dropdown">
+          <button class="btn buy-dropdown-btn" aria-label="Buy $BINGO - Show DEX options">
+            Buy $BINGO
+          </button>
+          <div class="buy-dropdown-menu" role="menu">
+            <a href="https://xmagnetic.org/dex/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN_XRP+XRP?network=mainnet" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               role="menuitem">X Magnetic</a>
+            <a href="https://firstledger.net/token/rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN/2442494E474F0000000000000000000000000000" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               role="menuitem">First Ledger</a>
+            <a href="https://xpmarket.com/dex/%24BINGO-rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN/XRP?trade=market" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               role="menuitem">XPMarket</a>
+            <a href="https://horizonxrpl.com/token/2442494E474F0000000000000000000000000000:rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               role="menuitem">Horizon</a>
+          </div>
         </div>
       </div>
-      <h3>Scarcity Mechanisms</h3>
-      <ul>
-        <li>“Barn Burning”: Burn 0.1% of each transaction.</li>
-        <li>Fixed “Barn Burns”: Burn 2.3B/month, totaling up to 3.3B/month.</li>
-        <li>Trust line: .2 XRP reserve per wallet.</li>
-        <li>NFT Staking: Locks 19.8B tokens.</li>
-        <li>NFT burning mechanism: Merge and burn NFTs to create 1 of 1 NFT.</li>
-        <li>Blackholing: No additional issuance.</li>
-      </ul>
-    </div>
-  </section>
+    </section>
 
-  <section id="buy" class="section">
-    <div class="container">
-      <h2>How to Trade $BINGO</h2>
-      <p>Contract Address: rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN</p>
-      <ol>
-        <li>Set up an XRP Ledger wallet (e.g., Xumm or Trust Wallet).</li>
-        <li>Fund your wallet with XRP.</li>
-        <li>Visit a DEX like xMagnetic: <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" target="_blank" style="color: #00FF00;">Trade $BINGO</a>.</li>
-        <li>Search for $BINGO and swap your XRP – Easy as clapping hands!</li>
-      </ol>
-    </div>
-  </section>
+    <section id="about" class="section">
+      <div class="container">
+        <h2>About $BINGO</h2>
+        <p>
+          $BINGO combines the appeal of meme coins with the cultural resonance and lore of "Bingo was his name-O", 
+          "Ol' MacDonald", and the symbolic power of Gematria (396). By integrating micro-tipping, NFT utility, 
+          and gamified community engagement, $BINGO is aiming for the XRP community's enthusiasm and adoption 
+          on platforms like X (#BINGO, #EIEIO, @bingoxrpl). Inspired by other XRPL meme tokens, $BINGO introduces 
+          unique tokenomics to provide long-term value and community loyalty.
+        </p>
+      </div>
+    </section>
 
-  <section id="nft" class="section">
-    <div class="container">
-      <h2>NFT Collection</h2>
-      <div class="features-grid">
-        <div class="feature">
-          <a href="https://xrp.cafe/collection/bingomup" target="_blank">
-            <img src="bingo_monthly_utility_pass.png" alt="$Bingo Monthly Utility Passes">
-          </a>
-          <p>$Bingo Monthly Utility Passes</p>
+    <section id="tokenomics" class="section">
+      <div class="container">
+        <h2>Tokenomics</h2>
+        <p><strong>Total Supply:</strong> 396,000,000,000 (396B) $BINGO, reflecting Gematria's symbolic significance.</p>
+        <h3>Distribution</h3>
+        
+        <div class="tokenomics-accordion">
+          <div class="accordion-item">
+            <button class="accordion-header">
+              50% (198B) Community
+            </button>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <p><strong>10% (39.6B) Airdrops:</strong> Vested over 12 months (up to 3.3B/month). Tasks: hold at least 10 XRP worth of $BINGO, tweet #BINGO, participate in Discord activities.</p>
+                <p><strong>25% (99B) Initial DEX Offering (IDO):</strong> launched on the XRPL Native DEX.</p>
+                <p><strong>10% (39.6B) Gamified Community Pool:</strong> Locked in XRPL escrow, released via "$BINGO" challenges.</p>
+                <p><strong>5% (19.8B) NFT Staking:</strong> Locked to 3,960 NFT holders (5,000 $BINGO/month each, 12 months, 2% APY).</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header">
+              15% (59.4B) Team
+            </button>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <p>Locked in XRPL escrow for 12 months.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header">
+              15% (59.4B) Liquidity
+            </button>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <p>Allocated to $BINGO/XRP AMM pool.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header">
+              20% (79.2B) Marketing/Charity
+            </button>
+            <div class="accordion-content">
+              <div class="accordion-body">
+                <p><strong>10% (39.6B)</strong> for the "Barn burning" mechanism.</p>
+                <p><strong>5% (19.8B)</strong> for NFT art, partnerships, X campaigns.</p>
+                <p><strong>5% (19.8B)</strong> for farm-related charity.</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="feature">
-          <a href="https://xrp.cafe/collection/vip-bingo-mup" target="_blank">
-            <img src="vip_bingo_monthly_utility_pass.png" alt="VIP $Bingo Monthly Utility Passes">
-          </a>
-          <p>VIP $Bingo Monthly Utility Passes</p>
+
+        <h3>Burn Mechanisms</h3>
+        <ul>
+          <li><strong>"Barn Burning":</strong> Burn 0.1% of each transaction.</li>
+          <li><strong>Fixed "Barn Burns":</strong> Burn 2.3B/month, totaling up to 3.3B/month.</li>
+          <li><strong>NFT Staking:</strong> Locks 19.8B tokens.</li>
+          <li><strong>NFT burning mechanism:</strong> Merge and burn NFTs to create 1 of 1 NFT.</li>
+          <li><strong>Blackholing:</strong> No additional issuance.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="nft" class="section">
+      <div class="container">
+        <h2>Bingo NFT Collection</h2>
+        <div class="features-grid">
+          <article class="feature">
+            <a href="https://xrp.cafe/collection/bingomup" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               aria-label="View $Bingo Monthly Utility Passes collection on XRP Cafe">
+              <img src="assets/images/bingo_monthly_utility_pass.png" 
+                   alt="$Bingo Monthly Utility Pass NFT" 
+                   loading="lazy"
+                   width="200"
+                   height="200">
+            </a>
+            <p>$Bingo Monthly Utility Passes</p>
+          </article>
+          <article class="feature">
+            <a href="https://xrp.cafe/collection/vip-bingo-mup" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               aria-label="View VIP $Bingo Monthly Utility Passes collection on XRP Cafe">
+              <img src="assets/images/vip_bingo_monthly_utility_pass.png" 
+                   alt="VIP $Bingo Monthly Utility Pass NFT" 
+                   loading="lazy"
+                   width="200"
+                   height="200">
+            </a>
+            <p>VIP $Bingo Monthly Utility Passes</p>
+          </article>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="community" class="section">
-    <div class="container">
-      <h2>Community Engagement</h2>
-      <p>Join the $BINGO farm community for fun and rewards!</p>
-      <h3>X Campaigns</h3>
-      <p>Participate in X campaigns to earn $BINGO. Top 10 users with most engagement get extra airdrops.</p>
-      <h3>Discord</h3>
-      <p>Features: Tipping bot, NFT roles, leaderboard. Top 10% users posting #BINGO daily earn 39.6M/month.</p>
-      <h3>Charity</h3>
-      <p>5% (19.8B $BINGO) for sustainable agriculture initiatives, announced via X (#BINGOCharity).</p>
-    </div>
-  </section>
+    <section id="join-the-pack" class="section">
+      <div class="container">
+        <h2>Join The Pack</h2>
+        
+        <h3>How To Buy $BINGO</h3>
+        <div class="how-to-buy-carousel">
+          <div class="carousel-content">
+            <div class="carousel-track">
+              <div class="carousel-slide">
+                <h4>Step 1</h4>
+                <p>Download Joey or Xaman App to your device.</p>
+              </div>
+              <div class="carousel-slide">
+                <h4>Step 2</h4>
+                <p>Create a new wallet.</p>
+              </div>
+              <div class="carousel-slide">
+                <h4>Step 3</h4>
+                <p>Activate and fund your wallet with XRP.</p>
+              </div>
+              <div class="carousel-slide">
+                <h4>Step 4</h4>
+                <p>Get $BINGO: Navigate to the Swap page in the bottom menu and select $BINGO as the token.</p>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn carousel-prev" aria-label="Previous step">‹</button>
+            <button class="carousel-btn carousel-next" aria-label="Next step">›</button>
+          </div>
+          <div class="carousel-indicators">
+            <button class="carousel-indicator active" aria-label="Go to step 1"></button>
+            <button class="carousel-indicator" aria-label="Go to step 2"></button>
+            <button class="carousel-indicator" aria-label="Go to step 3"></button>
+            <button class="carousel-indicator" aria-label="Go to step 4"></button>
+          </div>
+        </div>
 
-  <section id="roadmap" class="section">
-    <div class="container">
-      <h2>Roadmap</h2>
-      <ul>
-        <li><strong>Q3 2025:</strong> Blackhole issuer, finalize NFT designs, grow community, monetize account.</li>
-        <li><strong>Q4 2025:</strong> Mint NFTs, launch rewards, start Barn burning.</li>
-        <li><strong>Q1 2026:</strong> Implement staking and challenges, announce charity.</li>
-        <li><strong>Q2 2026:</strong> Expand campaigns, target 10,000+ holders, evaluate CEX.</li>
-        <li><strong>2027:</strong> Reach ~356B token cap after burning.</li>
-      </ul>
-    </div>
-  </section>
+        <div class="btn-group">
+          <a href="https://x.com/BingoXRPL" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-secondary">
+            Follow On X
+          </a>
+          <a href="https://t.co/0Gw6NfQqPR" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-secondary">
+            Join Telegram
+          </a>
+          <a href="https://dexscreener.com/xrpl/42414e414e410000000000000000000000000000.rpopnahpwzxiwapipm5ehq6kslehvgilqp_xrp" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-secondary">
+            Dex Screener
+          </a>
+          <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="btn btn-secondary">
+            X Magnetic
+          </a>
+        </div>
+      </div>
+    </section>
 
-  <footer>
+    <section id="roadmap" class="section">
+      <div class="container">
+        <h2>Road Map</h2>
+        <ul>
+          <li><strong>Q3 2025:</strong> Blackhole issuer, finalize NFT designs, grow community, monetize account.</li>
+          <li><strong>Q4 2025:</strong> Mint NFTs, launch rewards, start Barn burning.</li>
+          <li><strong>Q1 2026:</strong> Implement staking and challenges, announce charity.</li>
+          <li><strong>Q2 2026:</strong> Expand campaigns, target 10,000+ holders, evaluate CEX.</li>
+          <li><strong>2027:</strong> Reach ~356B token cap after burning.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="container">
+        <h2>FAQ</h2>
+        <div class="faq-list">
+          <article class="faq-item">
+            <h3 class="faq-question">What is $BINGO?</h3>
+            <p class="faq-answer">$BINGO is a memecoin on the XRP Ledger inspired by the classic "Bingo was his name-o" song. It combines community engagement, NFT utility, and gamification to create a fun and rewarding ecosystem for holders.</p>
+          </article>
+          
+          <article class="faq-item">
+            <h3 class="faq-question">How do I buy $BINGO?</h3>
+            <p class="faq-answer">You can purchase $BINGO on XRPL DEXs like xMagnetic, First Ledger, XPMarket, and Horizon. First, you'll need an XRPL wallet (Xaman or Joey), fund it with XRP, set a trustline for $BINGO, then swap XRP for $BINGO on your chosen DEX.</p>
+          </article>
+          
+          <article class="faq-item">
+            <h3 class="faq-question">What are the NFT utility passes?</h3>
+            <p class="faq-answer">$BINGO offers Monthly Utility Passes and VIP passes as NFTs. These passes provide holders with exclusive benefits, staking rewards, and access to community events. Holders can earn 5,000 $BINGO per month through NFT staking.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="sponsors" class="section">
+      <div class="container">
+        <h2>Sponsors</h2>
+        <p>Coming soon! This section will showcase our amazing community sponsors and partners.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
     <div class="container">
       <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
-      <div>
-        <a href="https://x.com/BingoXRPL" target="_blank">X</a>
-        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank">Discord</a>
-        <a href="https://t.me/bingoonxrp" target="_blank">Telegram</a>
+      <div class="social-links">
+        <a href="https://x.com/BingoXRPL" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           aria-label="Follow BingoXRPL on X">X</a>
+        <a href="https://discord.com/invite/Aqx83bYQqm" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           aria-label="Join BingoXRPL Discord server">Discord</a>
+        <a href="https://t.co/0Gw6NfQqPR" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           aria-label="Join BingoXRPL Telegram group">Telegram</a>
       </div>
     </div>
   </footer>
 
-  <script>
-    // Smooth scrolling for navigation
-    document.querySelectorAll('.smooth-scroll').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href').substring(1);
-        const target = document.getElementById(targetId);
-        target.scrollIntoView({ behavior: 'smooth' });
-        if (window.innerWidth <= 480) {
-          document.querySelector('.nav-menu').classList.remove('active'); // Collapse menu on click
-        }
-      });
-    });
-
-    // Toggle hamburger menu on mobile
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
-    });
-
-    // Confetti on trade button click with guaranteed link
-    const tradeButton = document.getElementById('buy-button');
-    const confettiCanvas = document.getElementById('confetti-canvas');
-    const ctx = confettiCanvas.getContext('2d');
-
-    if (tradeButton) {
-      tradeButton.addEventListener('click', () => {
-        confettiCanvas.style.display = 'block';
-        confettiCanvas.width = window.innerWidth;
-        confettiCanvas.height = window.innerHeight;
-
-        const confettiCount = 400;
-        const confetti = [];
-
-        for (let i = 0; i < confettiCount; i++) {
-          confetti.push({
-            x: Math.random() * confettiCanvas.width,
-            y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-            r: Math.random() * 6 + 1,
-            d: Math.random() * confettiCount,
-            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-            tilt: Math.random() * 10 - 10,
-            tiltAngle: Math.random() * Math.PI
-          });
-        }
-
-        function draw() {
-          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-          confetti.forEach((p, i) => {
-            ctx.beginPath();
-            ctx.lineWidth = p.r;
-            ctx.strokeStyle = p.color;
-            ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
-            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
-            ctx.stroke();
-            p.tiltAngle += 0.1;
-            p.tilt = Math.sin(p.tiltAngle) * 15;
-            p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
-            if (p.y > confettiCanvas.height) confetti.splice(i, 1);
-          });
-          if (confetti.length > 0) requestAnimationFrame(draw);
-          else confettiCanvas.style.display = 'none';
-        }
-
-        draw();
-      });
-    }
-  </script>
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/index.js"></script>
 </body>
 </html>
