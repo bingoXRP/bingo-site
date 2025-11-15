@@ -132,21 +132,24 @@ input:focus {
 
 .bingo-board {
   display: grid;
-  grid-template-columns: repeat(10, minmax(35px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: auto repeat(15, 1fr);
   gap: clamp(0.4rem, 1vw, 0.8rem);
   justify-items: center;
-  max-width: min(98vw, 1000px);
+  max-width: min(98vw, 900px);
   margin: 1.5rem auto;
   padding: 0.5rem;
 }
 
 .bingo-board .header {
-  grid-column: span 2;
   color: var(--color-accent);
   font-weight: 800;
   font-size: clamp(0.9rem, 1.8vw, 1.4rem);
   text-align: center;
   padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bingo-board .cell {
@@ -399,7 +402,7 @@ input:focus {
 
 @media (max-width: 767px) {
   .bingo-board {
-    grid-template-columns: repeat(10, minmax(28px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 0.3rem;
   }
 
@@ -431,6 +434,6 @@ input:focus {
 
 @media (min-width: 768px) and (max-width: 1024px) {
   .bingo-board {
-    grid-template-columns: repeat(10, minmax(32px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
   }
 }
