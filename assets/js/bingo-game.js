@@ -48,7 +48,7 @@ function showToast(msg, duration = 3000) {
 }
 
 function generateGameId() {
-  return 'GAME-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+  return Math.random().toString(36).substr(2, 8).toUpperCase();
 }
 
 function createBoard() {
@@ -132,7 +132,7 @@ function rollBingo() {
   calledNumbers.add(rolled);
 
   if (gameRef && isHost) {
-    gameRef.child('calledNumbers').set([...calledNumbers]);
+    gameRef.child('called').set([...calledNumbers]);
   }
 
   updateStats();
@@ -174,7 +174,7 @@ function generatePlayerCard() {
       card.push(colNumbers);
     }
 
-    const cardID = Date.now().toString(36) + Math.random().toString(36).substr(2);
+    const cardID = String(Math.floor(Math.random() * 900) + 100);
     resolve({ card, cardID });
   });
 }
@@ -262,7 +262,7 @@ function setupGame(gid) {
   gameRef = database.ref(`games/${gid}`);
   cleanupListeners();
 
-  const calledListener = gameRef.child('calledNumbers').on('value', (snapshot) => {
+  const calledListener = gameRef.child('called').on('value', (snapshot) => {
     const serverCalled = snapshot.val();
     if (serverCalled) {
       const newCalled = new Set(serverCalled);
@@ -297,7 +297,7 @@ function setupGame(gid) {
       }
     }
   });
-  listeners.push({ ref: gameRef.child('calledNumbers'), event: 'value', callback: calledListener });
+  listeners.push({ ref: gameRef.child('called'), event: 'value', callback: calledListener });
 
   const gameTypeListener = gameRef.child('gameType').on('value', (snapshot) => {
     const serverType = snapshot.val();
@@ -414,7 +414,8 @@ hostModeBtn.addEventListener('click', async () => {
     
     gameRef.set({
       gameType: gameType,
-      calledNumbers: [],
+      called: [],
+      creator: 'host',
       createdAt: Date.now()
     });
 
