@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -11,24 +12,36 @@
   
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="$BINGO entertainment coin on XRP Ledger. Inspired by 'Bingo was his name-o' – fun, fast, and farm-fresh crypto!">
-  <meta name="keywords" content="BingoXRPL, $BINGO, memecoin, XRP Ledger, NFT, cryptocurrency, bingo game, XRPL gaming">
+  <meta name="description" content="$BINGO - Live bingo gaming on XRP Ledger. Play for real prizes, NFT utility, and join the global crypto community. Built on XRPL.">
+  <meta name="keywords" content="BingoXRPL, $BINGO, memecoin, XRP Ledger, NFT, cryptocurrency, bingo game, XRPL gaming, crypto bingo, play to earn">
   <meta name="author" content="BingoXRPL Team">
   <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#00c6c9">
   
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bingoxrp.com/">
-  <meta property="og:title" content="BingoXRPL | $BINGO Memecoin on XRP Ledger">
-  <meta property="og:description" content="$BINGO entertainment coin on XRP Ledger. Fun, fast, and farm-fresh crypto!">
+  <meta property="og:title" content="BingoXRPL | Live Bingo Gaming on XRP Ledger">
+  <meta property="og:description" content="$BINGO - Play live bingo on XRPL. Real prizes, NFT utility, global community. Join the game!">
   <meta property="og:image" content="https://bingoxrp.com/assets/images/logo.png">
   
+  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@BingoXRPL">
+  <meta name="twitter:title" content="BingoXRPL | Live Bingo Gaming on XRP Ledger">
+  <meta name="twitter:description" content="$BINGO - Play live bingo on XRPL. Real prizes, NFT utility, global community.">
+  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/logo.png">
   
-  <title>BingoXRPL | $BINGO Memecoin on XRP Ledger</title>
+  <title>BingoXRPL | $BINGO on XRP Ledger</title>
   <link rel="icon" href="assets/images/logo.png" type="image/png">
   <link rel="canonical" href="https://bingoxrp.com/">
   
+  <!-- Preload Critical Assets -->
+  <link rel="preload" href="assets/css/variables.css" as="style">
+  <link rel="preload" href="assets/css/global.css" as="style">
+  <link rel="preload" href="assets/images/logo.png" as="image">
+  
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/animations.css">
@@ -43,12 +56,12 @@
     </div>
   </noscript>
 
-  <!-- Enhanced Header with Sticky Nav -->
+  <!-- Header -->
   <header class="site-header" role="banner">
     <div class="header-container">
       <div class="header-brand">
-        <a href="index.html" aria-label="BingoXRPL Home">
-          <h1 class="logo-text">$BINGO</h1>
+        <a href="/" aria-label="BingoXRPL Home">
+          <img src="assets/images/logo.png" alt="$BINGO" class="logo-image" width="120" height="40">
         </a>
       </div>
       
@@ -63,16 +76,16 @@
       
       <nav id="main-navigation" class="header-nav" role="navigation" aria-label="Main navigation">
         <ul class="nav-menu">
-          <li><a href="#about" class="nav-link">About</a></li>
-          <li><a href="#tokenomics" class="nav-link">Tokenomics</a></li>
-          <li><a href="#nft" class="nav-link">NFTs</a></li>
-          <li><a href="#roadmap" class="nav-link">Roadmap</a></li>
-          <li><a href="#sponsors" class="nav-link">Sponsors</a></li>
+          <li><a href="#about" class="nav-link smooth-scroll">About</a></li>
+          <li><a href="#tokenomics" class="nav-link smooth-scroll">Tokenomics</a></li>
+          <li><a href="#nft" class="nav-link smooth-scroll">NFTs</a></li>
+          <li><a href="#roadmap" class="nav-link smooth-scroll">Roadmap</a></li>
+          <li><a href="#sponsors" class="nav-link smooth-scroll">Sponsors</a></li>
         </ul>
       </nav>
       
       <div class="header-cta">
-        <a href="bingo-roller.html" class="btn btn-play-nav">
+        <a href="bingo-roller.html" class="btn btn-play-nav" aria-label="Play Bingo Game">
           Play Bingo <span class="arrow">→</span>
         </a>
       </div>
@@ -81,34 +94,35 @@
 
   <main id="main-content">
     
-    <!-- HERO SECTION - Option A: The Welcome Mat -->
-    <section class="hero" role="banner">
-      <div class="hero-background-gradient"></div>
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="hero-background-gradient" aria-hidden="true"></div>
       <div class="particle-container" aria-hidden="true"></div>
       
       <div class="hero-container">
         
-        <!-- Mascot (Centered, Large) -->
+        <!-- Mascot -->
         <div class="hero-mascot">
-          <img src="assets/images/mascot-hero.png" 
-               alt="Bingo the dog - BingoXRPL mascot" 
+          <img src="assets/images/logo.png" 
+               alt="Bingo mascot" 
                class="mascot-image"
-               loading="eager"
                width="400"
-               height="400">
+               height="400"
+               loading="eager">
         </div>
         
-        <!-- Title with Letter Reveal Animation -->
-        <h2 class="hero-title">
-          <span class="letter" style="animation-delay: 0.1s">B</span><span class="letter" style="animation-delay: 0.2s">I</span><span class="letter" style="animation-delay: 0.3s">N</span><span class="letter" style="animation-delay: 0.4s">G</span><span class="letter" style="animation-delay: 0.5s">O</span>
-        </h2>
-        
-        <!-- Subtitle (small tagline) -->
-        <p class="hero-subtitle-small">Memecoin. Game. Community.</p>
+        <!-- Animated Subtitle Lines -->
+        <div class="hero-animated-text">
+          <p class="hero-subtitle-line animated-line">
+            <span class="word" style="animation-delay: 0.1s">Entertainment.</span>
+            <span class="word" style="animation-delay: 0.3s">Game.</span>
+            <span class="word" style="animation-delay: 0.5s">Community.</span>
+          </p>
+        </div>
         
         <!-- Approved Tagline -->
         <p class="hero-tagline">
-          There was a farmer had a dog, and Bingo was his name-o... memecoin on XRP Ledger!
+          There was a farmer had a dog, and $Bingo was his name-o.... on the XRP Ledger!
         </p>
         
         <!-- Feature Pills -->
@@ -120,14 +134,15 @@
         
         <!-- Primary CTAs -->
         <div class="hero-ctas">
-          <a href="bingo-roller.html" class="btn btn-primary btn-large">
+          <a href="bingo-roller.html" class="btn btn-primary btn-large" aria-label="Play Bingo Game Now">
             Play Bingo
           </a>
           
           <div class="buy-dropdown">
             <button class="btn btn-secondary btn-large buy-dropdown-btn" 
-                    aria-label="Buy $BINGO - Show DEX options"
-                    aria-expanded="false">
+                    aria-label="Buy $BINGO token - Show options"
+                    aria-expanded="false"
+                    aria-haspopup="true">
               Buy $BINGO <span class="dropdown-arrow">▼</span>
             </button>
             <div class="buy-dropdown-menu" role="menu">
@@ -136,66 +151,66 @@
                  rel="noopener noreferrer"
                  role="menuitem"
                  class="dropdown-item">
-                <span class="dex-name">X Magnetic</span>
+                X Magnetic
               </a>
               <a href="https://firstledger.net/token/rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN/2442494E474F0000000000000000000000000000" 
                  target="_blank" 
                  rel="noopener noreferrer"
                  role="menuitem"
                  class="dropdown-item">
-                <span class="dex-name">First Ledger</span>
+                First Ledger
               </a>
               <a href="https://xpmarket.com/dex/%24BINGO-rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN/XRP?trade=market" 
                  target="_blank" 
                  rel="noopener noreferrer"
                  role="menuitem"
                  class="dropdown-item">
-                <span class="dex-name">XPMarket</span>
+                XPMarket
               </a>
               <a href="https://horizonxrpl.com/token/2442494E474F0000000000000000000000000000:rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN" 
                  target="_blank" 
                  rel="noopener noreferrer"
                  role="menuitem"
                  class="dropdown-item">
-                <span class="dex-name">Horizon</span>
+                Horizon
               </a>
             </div>
           </div>
           
-          <button class="btn btn-outline btn-large" id="connect-wallet-btn">
+          <button class="btn btn-outline btn-large" id="connect-wallet-btn" aria-label="Connect XRPL Wallet">
             Connect Wallet
           </button>
         </div>
         
-        <!-- Secondary Social CTAs -->
+        <!-- Social Links -->
         <div class="hero-social">
           <a href="https://x.com/BingoXRPL" 
              target="_blank" 
              rel="noopener noreferrer"
              class="social-link"
-             aria-label="Follow $BINGO on X">
-            <span class="social-icon">𝕏</span> Follow on X
+             aria-label="Follow BingoXRPL on X">
+            <span class="social-icon" aria-hidden="true">𝕏</span> Follow on X
           </a>
           <a href="https://t.co/0Gw6NfQqPR" 
              target="_blank" 
              rel="noopener noreferrer"
              class="social-link"
-             aria-label="Join $BINGO Telegram">
-            <span class="social-icon">📱</span> Telegram
+             aria-label="Join BingoXRPL Telegram">
+            <span class="social-icon" aria-hidden="true">📱</span> Telegram
           </a>
           <a href="https://discord.com/invite/Aqx83bYQqm" 
              target="_blank" 
              rel="noopener noreferrer"
              class="social-link"
-             aria-label="Join $BINGO Discord">
-            <span class="social-icon">💬</span> Discord
+             aria-label="Join BingoXRPL Discord">
+            <span class="social-icon" aria-hidden="true">💬</span> Discord
           </a>
           <a href="https://xmagnetic.org/tokens/%24BINGO%2Brf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet&currency=%24BINGO&issuer=rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN" 
              target="_blank" 
              rel="noopener noreferrer"
              class="social-link"
-             aria-label="Set trustline for $BINGO">
-            <span class="social-icon">🔗</span> Trustline
+             aria-label="Set $BINGO trustline">
+            <span class="social-icon" aria-hidden="true">🔗</span> Set Trustline
           </a>
         </div>
         
@@ -205,9 +220,10 @@
     <!-- ABOUT SECTION -->
     <section id="about" class="section about-section">
       <div class="container">
+        <h2 class="section-title">About $BINGO</h2>
+        
         <div class="section-content">
           <div class="about-text">
-            <h2 class="section-title">About $BINGO</h2>
             <p class="section-description">
               $BINGO combines the appeal of meme coins with the cultural resonance and lore of "Bingo was his name-O", 
               "Ol' MacDonald", and the symbolic power of Gematria (396). By integrating micro-tipping, NFT utility, 
@@ -219,24 +235,24 @@
           
           <div class="about-features">
             <div class="feature-icon-card">
-              <div class="feature-icon">🎮</div>
+              <div class="feature-icon" aria-hidden="true">🎮</div>
               <h3>Gaming</h3>
-              <p>Live bingo gameplay</p>
+              <p>Live bingo gameplay with real prizes</p>
             </div>
             <div class="feature-icon-card">
-              <div class="feature-icon">💎</div>
-              <h3>XRPL</h3>
-              <p>Built on XRP Ledger</p>
+              <div class="feature-icon" aria-hidden="true">💎</div>
+              <h3>XRPL Native</h3>
+              <p>Built on XRP Ledger blockchain</p>
             </div>
             <div class="feature-icon-card">
-              <div class="feature-icon">🏆</div>
+              <div class="feature-icon" aria-hidden="true">🏆</div>
               <h3>Rewards</h3>
-              <p>Real token prizes</p>
+              <p>Real token prizes and NFT utility</p>
             </div>
             <div class="feature-icon-card">
-              <div class="feature-icon">🌍</div>
+              <div class="feature-icon" aria-hidden="true">🌍</div>
               <h3>Global</h3>
-              <p>Worldwide community</p>
+              <p>Worldwide community of players</p>
             </div>
           </div>
         </div>
@@ -247,38 +263,49 @@
     <section id="tokenomics" class="section tokenomics-section">
       <div class="container">
         <h2 class="section-title">Tokenomics</h2>
-        <p class="tokenomics-supply"><strong>Total Supply:</strong> 396,000,000,000 (396B) $BINGO, reflecting Gematria's symbolic significance.</p>
+        <p class="tokenomics-supply">
+          <strong>Total Supply:</strong> 396,000,000,000 (396B) $BINGO, reflecting Gematria's symbolic significance.
+        </p>
         
         <!-- Visual Pie Chart -->
         <div class="tokenomics-visual">
           <div class="pie-chart-container">
-            <svg viewBox="0 0 200 200" class="pie-chart">
+            <svg viewBox="0 0 200 200" class="pie-chart" role="img" aria-label="Token distribution pie chart">
+              <title>Token Distribution</title>
               <circle cx="100" cy="100" r="80" fill="transparent" stroke="#00FF00" stroke-width="60" 
-                      stroke-dasharray="251 503" transform="rotate(-90 100 100)" class="chart-segment segment-community"/>
+                      stroke-dasharray="251 503" transform="rotate(-90 100 100)" class="chart-segment segment-community">
+                <title>50% Community</title>
+              </circle>
               <circle cx="100" cy="100" r="80" fill="transparent" stroke="#00B8D9" stroke-width="60" 
-                      stroke-dasharray="100 503" stroke-dashoffset="-251" transform="rotate(-90 100 100)" class="chart-segment segment-marketing"/>
+                      stroke-dasharray="100 503" stroke-dashoffset="-251" transform="rotate(-90 100 100)" class="chart-segment segment-marketing">
+                <title>20% Marketing</title>
+              </circle>
               <circle cx="100" cy="100" r="80" fill="transparent" stroke="#FFD700" stroke-width="60" 
-                      stroke-dasharray="75 503" stroke-dashoffset="-351" transform="rotate(-90 100 100)" class="chart-segment segment-team"/>
+                      stroke-dasharray="75 503" stroke-dashoffset="-351" transform="rotate(-90 100 100)" class="chart-segment segment-team">
+                <title>15% Team</title>
+              </circle>
               <circle cx="100" cy="100" r="80" fill="transparent" stroke="#FF6B6B" stroke-width="60" 
-                      stroke-dasharray="75 503" stroke-dashoffset="-426" transform="rotate(-90 100 100)" class="chart-segment segment-liquidity"/>
+                      stroke-dasharray="75 503" stroke-dashoffset="-426" transform="rotate(-90 100 100)" class="chart-segment segment-liquidity">
+                <title>15% Liquidity</title>
+              </circle>
             </svg>
           </div>
           
           <div class="chart-legend">
-            <div class="legend-item">
-              <span class="legend-color" style="background: #00FF00;"></span>
+            <div class="legend-item" role="button" tabindex="0">
+              <span class="legend-color" style="background: #00FF00;" aria-hidden="true"></span>
               <span class="legend-label">50% Community (198B)</span>
             </div>
-            <div class="legend-item">
-              <span class="legend-color" style="background: #00B8D9;"></span>
+            <div class="legend-item" role="button" tabindex="0">
+              <span class="legend-color" style="background: #00B8D9;" aria-hidden="true"></span>
               <span class="legend-label">20% Marketing (79.2B)</span>
             </div>
-            <div class="legend-item">
-              <span class="legend-color" style="background: #FFD700;"></span>
+            <div class="legend-item" role="button" tabindex="0">
+              <span class="legend-color" style="background: #FFD700;" aria-hidden="true"></span>
               <span class="legend-label">15% Team (59.4B)</span>
             </div>
-            <div class="legend-item">
-              <span class="legend-color" style="background: #FF6B6B;"></span>
+            <div class="legend-item" role="button" tabindex="0">
+              <span class="legend-color" style="background: #FF6B6B;" aria-hidden="true"></span>
               <span class="legend-label">15% Liquidity (59.4B)</span>
             </div>
           </div>
@@ -289,11 +316,11 @@
         <div class="tokenomics-accordion">
           
           <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false">
+            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-1">
               <span class="accordion-title">50% (198B) Community</span>
-              <span class="accordion-icon">+</span>
+              <span class="accordion-icon" aria-hidden="true">+</span>
             </button>
-            <div class="accordion-content">
+            <div class="accordion-content" id="accordion-1">
               <div class="accordion-body">
                 <p><strong>10% (39.6B) Airdrops:</strong> Vested over 12 months (up to 3.3B/month). Tasks: hold at least 10 XRP worth of $BINGO, tweet #BINGO, participate in Discord activities.</p>
                 <p><strong>25% (99B) Initial DEX Offering (IDO):</strong> launched on the XRPL Native DEX.</p>
@@ -304,11 +331,11 @@
           </div>
 
           <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false">
+            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-2">
               <span class="accordion-title">15% (59.4B) Team</span>
-              <span class="accordion-icon">+</span>
+              <span class="accordion-icon" aria-hidden="true">+</span>
             </button>
-            <div class="accordion-content">
+            <div class="accordion-content" id="accordion-2">
               <div class="accordion-body">
                 <p>Locked in XRPL escrow for 12 months.</p>
               </div>
@@ -316,11 +343,11 @@
           </div>
 
           <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false">
+            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-3">
               <span class="accordion-title">15% (59.4B) Liquidity</span>
-              <span class="accordion-icon">+</span>
+              <span class="accordion-icon" aria-hidden="true">+</span>
             </button>
-            <div class="accordion-content">
+            <div class="accordion-content" id="accordion-3">
               <div class="accordion-body">
                 <p>Allocated to $BINGO/XRP AMM pool.</p>
               </div>
@@ -328,11 +355,11 @@
           </div>
 
           <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false">
+            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-4">
               <span class="accordion-title">20% (79.2B) Marketing/Charity</span>
-              <span class="accordion-icon">+</span>
+              <span class="accordion-icon" aria-hidden="true">+</span>
             </button>
-            <div class="accordion-content">
+            <div class="accordion-content" id="accordion-4">
               <div class="accordion-body">
                 <p><strong>10% (39.6B)</strong> for the "Barn burning" mechanism.</p>
                 <p><strong>5% (19.8B)</strong> for NFT art, partnerships, X campaigns.</p>
@@ -347,27 +374,27 @@
         <h3 class="subsection-title">Burn Mechanisms</h3>
         <div class="burn-mechanisms">
           <div class="burn-card">
-            <div class="burn-icon">🔥</div>
+            <div class="burn-icon" aria-hidden="true">🔥</div>
             <h4>"Barn Burning"</h4>
             <p>Burn 0.1% of each transaction.</p>
           </div>
           <div class="burn-card">
-            <div class="burn-icon">📅</div>
+            <div class="burn-icon" aria-hidden="true">📅</div>
             <h4>Fixed "Barn Burns"</h4>
             <p>Burn 2.3B/month, totaling up to 3.3B/month.</p>
           </div>
           <div class="burn-card">
-            <div class="burn-icon">🔒</div>
+            <div class="burn-icon" aria-hidden="true">🔒</div>
             <h4>NFT Staking</h4>
             <p>Locks 19.8B tokens.</p>
           </div>
           <div class="burn-card">
-            <div class="burn-icon">🎨</div>
+            <div class="burn-icon" aria-hidden="true">🎨</div>
             <h4>NFT Burning</h4>
             <p>Merge and burn NFTs to create 1 of 1 NFT.</p>
           </div>
           <div class="burn-card">
-            <div class="burn-icon">⚫</div>
+            <div class="burn-icon" aria-hidden="true">⚫</div>
             <h4>Blackholing</h4>
             <p>No additional issuance.</p>
           </div>
@@ -388,11 +415,10 @@
             <a href="https://xrp.cafe/collection/bingomup" 
                target="_blank" 
                rel="noopener noreferrer"
-               class="nft-link"
-               aria-label="View $Bingo Monthly Utility Passes collection on XRP Cafe">
+               class="nft-link">
               <div class="nft-image-container">
                 <img src="assets/images/bingo_monthly_utility_pass.png" 
-                     alt="$Bingo Monthly Utility Pass NFT" 
+                     alt="Bingo Monthly Utility Pass NFT" 
                      class="nft-image"
                      loading="lazy"
                      width="300"
@@ -401,9 +427,9 @@
               <div class="nft-info">
                 <h3 class="nft-title">$Bingo Monthly Utility Passes</h3>
                 <div class="nft-benefits">
-                  <span class="benefit-badge">✅ 5000 $BINGO/month</span>
                   <span class="benefit-badge">✅ Multi-card gameplay</span>
                   <span class="benefit-badge">✅ Custom card designs</span>
+                  <span class="benefit-badge">✅ Exclusive benefits</span>
                 </div>
                 <span class="nft-cta">View Collection →</span>
               </div>
@@ -414,11 +440,10 @@
             <a href="https://xrp.cafe/collection/vip-bingo-mup" 
                target="_blank" 
                rel="noopener noreferrer"
-               class="nft-link"
-               aria-label="View VIP $Bingo Monthly Utility Passes collection on XRP Cafe">
+               class="nft-link">
               <div class="nft-image-container">
                 <img src="assets/images/vip_bingo_monthly_utility_pass.png" 
-                     alt="VIP $Bingo Monthly Utility Pass NFT" 
+                     alt="VIP Bingo Monthly Utility Pass NFT" 
                      class="nft-image"
                      loading="lazy"
                      width="300"
@@ -427,9 +452,9 @@
               <div class="nft-info">
                 <h3 class="nft-title">VIP $Bingo Monthly Utility Passes</h3>
                 <div class="nft-benefits">
-                  <span class="benefit-badge">✅ 5000 $BINGO/month</span>
                   <span class="benefit-badge">✅ VIP-only tournaments</span>
                   <span class="benefit-badge">✅ Priority game entry</span>
+                  <span class="benefit-badge">✅ Enhanced rewards</span>
                 </div>
                 <span class="nft-cta">View Collection →</span>
               </div>
@@ -448,7 +473,7 @@
         <div class="how-to-buy-steps">
           
           <div class="step-card">
-            <div class="step-number">1</div>
+            <div class="step-number" aria-hidden="true">1</div>
             <div class="step-content">
               <h3>Download Wallet</h3>
               <p>Download Xaman or Joey Wallet app to your device.</p>
@@ -456,7 +481,7 @@
           </div>
           
           <div class="step-card">
-            <div class="step-number">2</div>
+            <div class="step-number" aria-hidden="true">2</div>
             <div class="step-content">
               <h3>Create Wallet</h3>
               <p>Create a new wallet and securely store your recovery phrase.</p>
@@ -464,7 +489,7 @@
           </div>
           
           <div class="step-card">
-            <div class="step-number">3</div>
+            <div class="step-number" aria-hidden="true">3</div>
             <div class="step-content">
               <h3>Fund with XRP</h3>
               <p>Activate and fund your wallet with XRP.</p>
@@ -472,7 +497,7 @@
           </div>
           
           <div class="step-card">
-            <div class="step-number">4</div>
+            <div class="step-number" aria-hidden="true">4</div>
             <div class="step-content">
               <h3>Swap for $BINGO</h3>
               <p>Navigate to the Swap page in the bottom menu and select $BINGO as the token.</p>
@@ -519,8 +544,8 @@
           
           <div class="timeline-item completed">
             <div class="timeline-marker">
-              <div class="timeline-dot">✓</div>
-              <div class="timeline-line"></div>
+              <div class="timeline-dot" aria-label="Completed">✓</div>
+              <div class="timeline-line" aria-hidden="true"></div>
             </div>
             <div class="timeline-content">
               <div class="timeline-date">Q3 2025</div>
@@ -537,8 +562,8 @@
           
           <div class="timeline-item in-progress">
             <div class="timeline-marker">
-              <div class="timeline-dot">⚡</div>
-              <div class="timeline-line"></div>
+              <div class="timeline-dot" aria-label="In Progress">⚡</div>
+              <div class="timeline-line" aria-hidden="true"></div>
             </div>
             <div class="timeline-content">
               <div class="timeline-date">Q4 2025</div>
@@ -554,8 +579,8 @@
           
           <div class="timeline-item upcoming">
             <div class="timeline-marker">
-              <div class="timeline-dot">○</div>
-              <div class="timeline-line"></div>
+              <div class="timeline-dot" aria-label="Upcoming">○</div>
+              <div class="timeline-line" aria-hidden="true"></div>
             </div>
             <div class="timeline-content">
               <div class="timeline-date">Q1 2026</div>
@@ -570,8 +595,8 @@
           
           <div class="timeline-item upcoming">
             <div class="timeline-marker">
-              <div class="timeline-dot">○</div>
-              <div class="timeline-line"></div>
+              <div class="timeline-dot" aria-label="Upcoming">○</div>
+              <div class="timeline-line" aria-hidden="true"></div>
             </div>
             <div class="timeline-content">
               <div class="timeline-date">Q2 2026</div>
@@ -587,7 +612,7 @@
           
           <div class="timeline-item upcoming">
             <div class="timeline-marker">
-              <div class="timeline-dot">○</div>
+              <div class="timeline-dot" aria-label="Upcoming">○</div>
             </div>
             <div class="timeline-content">
               <div class="timeline-date">2027</div>
@@ -611,31 +636,31 @@
         <div class="faq-list">
           
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
               <span class="faq-text">What is $BINGO?</span>
-              <span class="faq-icon">+</span>
+              <span class="faq-icon" aria-hidden="true">+</span>
             </button>
-            <div class="faq-answer">
+            <div class="faq-answer" id="faq-1">
               <p>$BINGO is a memecoin on the XRP Ledger inspired by the classic "Bingo was his name-o" song. It combines community engagement, NFT utility, and gamification to create a fun and rewarding ecosystem for holders.</p>
             </div>
           </div>
           
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
               <span class="faq-text">How do I buy $BINGO?</span>
-              <span class="faq-icon">+</span>
+              <span class="faq-icon" aria-hidden="true">+</span>
             </button>
-            <div class="faq-answer">
+            <div class="faq-answer" id="faq-2">
               <p>You can purchase $BINGO on XRPL DEXs like xMagnetic, First Ledger, XPMarket, and Horizon. First, you'll need an XRPL wallet (Xaman or Joey), fund it with XRP, set a trustline for $BINGO, then swap XRP for $BINGO on your chosen DEX.</p>
             </div>
           </div>
           
           <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
               <span class="faq-text">What are the NFT utility passes?</span>
-              <span class="faq-icon">+</span>
+              <span class="faq-icon" aria-hidden="true">+</span>
             </button>
-            <div class="faq-answer">
+            <div class="faq-answer" id="faq-3">
               <p>$BINGO offers Monthly Utility Passes and VIP passes as NFTs. These passes provide holders with exclusive benefits, staking rewards, and access to community events. Holders can earn 5,000 $BINGO per month through NFT staking.</p>
             </div>
           </div>
@@ -677,17 +702,18 @@
           <a href="https://discord.com/invite/Aqx83bYQqm" 
              target="_blank" 
              rel="noopener noreferrer"
-             aria-label="Join BingoXRPL Discord server">Discord</a>
+             aria-label="Join BingoXRPL Discord">Discord</a>
           <a href="https://t.co/0Gw6NfQqPR" 
              target="_blank" 
              rel="noopener noreferrer"
-             aria-label="Join BingoXRPL Telegram group">Telegram</a>
+             aria-label="Join BingoXRPL Telegram">Telegram</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="assets/js/navigation.js"></script>
-  <script src="assets/js/index.js"></script>
+  <!-- Scripts -->
+  <script src="assets/js/navigation.js" defer></script>
+  <script src="assets/js/index.js" defer></script>
 </body>
 </html>
