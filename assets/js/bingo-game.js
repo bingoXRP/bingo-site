@@ -2,507 +2,619 @@ const letters = ['B','I','N','G','O'];
 const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 
 const gamePatterns = {
-  fullCard: {
-    pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
-    name: "Full Card"
-  },
-  horizontal: {
+  line: {
     pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-    name: "Horizontal Line"
+    name: "Single Line",
+    checkFunction: 'checkLine'
   },
-  vertical: {
-    pattern: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],
-    name: "Vertical Line"
+  twoLines: {
+    pattern: [[1,1,1,1,1],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+    name: "Two Lines",
+    checkFunction: 'checkTwoLines'
   },
-  diagonal: {
-    pattern: [[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1]],
-    name: "Diagonal"
+  fullHouse: {
+    pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,0,1,1],[1,1,1,1,1],[1,1,1,1,1]],
+    name: "Full House",
+    checkFunction: 'checkFullHouse'
   },
-  fourCorners: {
+  corners: {
     pattern: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
     name: "Four Corners"
   },
-  xPattern: {
-    pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+  diagonal: {
+    pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,0,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+    name: "Diagonal"
+  },
+  X: {
+    pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,0,0,0],[0,1,0,1,0],[1,0,0,0,1]],
     name: "X Pattern"
+  },
+  outerFrame: {
+    pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+    name: "Outer Frame"
+  },
+  innerSquare: {
+    pattern: [[0,0,0,0,0],[0,1,1,1,0],[0,1,0,1,0],[0,1,1,1,0],[0,0,0,0,0]],
+    name: "Inner Square"
   }
 };
 
-let gameId = null;
-let xHandle = null;
-let isHost = false;
-let gameRef = null;
-let gameType = 'fullCard';
 let calledNumbers = new Set();
+let isHost = false;
+let gameId = null;
 let playerCard = null;
-let playerWins = {};
-let notifiedWinners = new Set();
-let displayedPlayers = new Set();
+let xHandle = localStorage.getItem('xHandle') || null;
+let gameRef = null;
+let gameType = 'line';
+let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
+const notifiedWinners = new Set();
+const displayedPlayers = new Set();
 let playersArray = [];
 let initialLoadComplete = false;
+let numbersListener = null;
+let playersListener = null;
+let gameTypeListener = null;
 
 const hostModeBtn = document.getElementById('host-mode-btn');
 const playerModeBtn = document.getElementById('player-mode-btn');
 const hostControls = document.getElementById('host-controls');
 const playerControls = document.getElementById('player-controls');
-const rollButton = document.getElementById('roll-button');
-const resetButton = document.getElementById('reset-button');
-const gameTypeSelect = document.getElementById('game-type-select');
+const displayGameId = document.getElementById('display-game-id');
 const gameIdInput = document.getElementById('game-id-input');
 const xHandleInput = document.getElementById('x-handle-input');
 const joinGameBtn = document.getElementById('join-game-btn');
+const rollButton = document.getElementById('roll-button');
+const resetButton = document.getElementById('reset-button');
+const gameTypeSelect = document.getElementById('game-type-select');
 const copyGameIdBtn = document.getElementById('copy-game-id-btn');
 const resultDiv = document.getElementById('result');
-const statsDiv = document.getElementById('stats');
-const boardDiv = document.getElementById('bingo-board');
-const patternDiv = document.getElementById('win-pattern');
-const currentGameTypeDiv = document.getElementById('current-game-type');
 const playerListEl = document.getElementById('player-list');
 const playerListContent = document.getElementById('player-list-content');
-const toastEl = document.getElementById('toast');
+const currentGameTypeDiv = document.getElementById('current-game-type');
+const modeSelection = document.getElementById('mode-selection');
 
-function showToast(msg, duration = 3000) {
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  setTimeout(() => toastEl.classList.remove('show'), duration);
-}
-
-function isValidCalledFormat(str) {
-  if (typeof str !== 'string') return false;
-  const match = str.match(/^([BINGO])-(\d+)$/);
-  if (!match) return false;
-  const [, letter, numStr] = match;
-  const num = parseInt(numStr);
-  const [min, max] = ranges[letter];
-  return num >= min && num <= max;
-}
-
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function createBoard() {
-  boardDiv.innerHTML = '';
-  
-  letters.forEach(letter => {
-    const header = document.createElement('div');
-    header.className = 'header';
-    header.textContent = letter;
-    header.setAttribute('role', 'columnheader');
-    boardDiv.appendChild(header);
-    boardDiv.appendChild(document.createElement('div')).className = 'empty';
-  });
-
-  for(let col = 0; col < 5; col++) {
-    const letter = letters[col];
-    const [min, max] = ranges[letter];
-    for(let num = min; num <= max; num++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.textContent = num;
-      cell.id = `cell-${letter}-${num}`;
-      cell.setAttribute('role', 'gridcell');
-      cell.setAttribute('aria-label', `${letter} ${num}`);
-      if (calledNumbers.has(`${letter}-${num}`)) {
-        cell.classList.add('called');
-        cell.setAttribute('aria-current', 'true');
-      }
-      boardDiv.appendChild(cell);
-    }
-  }
-}
+function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
 
 function updateStats() {
-  statsDiv.textContent = `Called: ${calledNumbers.size}/75`;
-}
-
-function highlightNumber(letter, number) {
-  const cell = document.getElementById(`cell-${letter}-${number}`);
-  if (cell) {
-    cell.classList.add('called');
-    cell.setAttribute('aria-current', 'true');
+  const statsDiv = document.getElementById('stats');
+  if (statsDiv) {
+    statsDiv.textContent = `Called: ${calledNumbers.size}/75 | Remaining: ${75 - calledNumbers.size}`;
   }
 }
 
-function displayWinPattern() {
-  patternDiv.innerHTML = '';
-  const patternData = gamePatterns[gameType];
-  if (!patternData) return;
-
-  const pattern = patternData.pattern;
-  for(let row = 0; row < 5; row++) {
-    for(let col = 0; col < 5; col++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      if (pattern[row][col] === 1) {
-        cell.classList.add('win');
+function createBoard(){
+  const board = document.getElementById('bingo-board');
+  if(!board) return;
+  board.innerHTML = '';
+  
+  letters.forEach(l=>{
+    const header = document.createElement('div');
+    header.textContent = l;
+    header.className = 'header';
+    board.appendChild(header);
+  });
+  
+  const maxRows = 8;
+  for(let row = 0; row < maxRows; row++){
+    letters.forEach(letter=>{
+      const [min] = ranges[letter];
+      
+      const leftNum = row < 8 ? min + row : null;
+      const leftDiv = document.createElement('div');
+      if (leftNum !== null) {
+        leftDiv.textContent = leftNum;
+        leftDiv.className = 'cell';
+        leftDiv.id = `${letter}-${leftNum}`;
+        if(calledNumbers.has(`${letter}-${leftNum}`)) leftDiv.classList.add('called');
+      } else {
+        leftDiv.className = 'empty';
       }
-      patternDiv.appendChild(cell);
-    }
+      board.appendChild(leftDiv);
+      
+      const rightNum = row < 7 ? min + row + 8 : null;
+      const rightDiv = document.createElement('div');
+      if (rightNum !== null) {
+        rightDiv.textContent = rightNum;
+        rightDiv.className = 'cell';
+        rightDiv.id = `${letter}-${rightNum}`;
+        if(calledNumbers.has(`${letter}-${rightNum}`)) rightDiv.classList.add('called');
+      } else {
+        rightDiv.className = 'empty';
+      }
+      board.appendChild(rightDiv);
+    });
   }
+}
 
-  const gameTypeName = gamePatterns[gameType].name;
-  currentGameTypeDiv.textContent = `Current Game: ${gameTypeName}`;
+function highlightNumber(L,N){
+  const id = `${L}-${N}`;
+  const cell = document.getElementById(id);
+  if(cell) cell.classList.add('called');
+  
+  if (playerCard) {
+    const cardContainer = document.getElementById('player-card-container');
+    if(!cardContainer) return;
+    const cardEl = cardContainer.querySelector('.player-card');
+    if(!cardEl) return;
+    
+    const allCells = cardEl.querySelectorAll('.cell:not(.header)');
+    allCells.forEach(c => {
+      const val = c.textContent.trim();
+      if(val && val !== 'FREE' && val === N.toString() && c.dataset.letter === L){
+        c.classList.add('called');
+      }
+    });
+  }
+}
+
+function rollBingo(){
+  const available = [];
+  letters.forEach(letter => {
+    const [min,max] = ranges[letter];
+    for(let i=min; i<=max; i++){
+      const num = `${letter}-${i}`;
+      if(!calledNumbers.has(num)) available.push({letter,i});
+    }
+  });
+  
+  if(available.length === 0){
+    showToast('All numbers have been called!', 3000);
+    return null;
+  }
+  
+  const chosen = available[getRandomNumber(0, available.length-1)];
+  const rolled = `${chosen.letter}-${chosen.i}`;
+  calledNumbers.add(rolled);
+  localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+  
+  if(gameRef){
+    gameRef.child('calledNumbers').push(rolled).catch(err => console.error('Error pushing to Firebase:', err));
+  }
+  
+  updateStats();
+  return rolled;
+}
+
+function displayWinPattern(){
+  const patternDiv = document.getElementById('win-pattern');
+  if(!patternDiv) return;
+  
+  patternDiv.innerHTML = '';
+  const pattern = gamePatterns[gameType]?.pattern || [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+  
+  pattern.forEach((row, rowIndex) => {
+    row.forEach((val, colIndex) => {
+      const cellDiv = document.createElement('div');
+      cellDiv.className = 'cell';
+      if (rowIndex === 2 && colIndex === 2) {
+        cellDiv.classList.add('win');
+      } else if (val === 1) {
+        cellDiv.classList.add('win');
+      }
+      patternDiv.appendChild(cellDiv);
+    });
+  });
+  
+  const patternLabel = document.getElementById('win-pattern-label');
+  if (patternLabel) {
+    patternLabel.textContent = gamePatterns[gameType]?.name || 'Unknown Pattern';
+  }
+  
+  if (currentGameTypeDiv) {
+    currentGameTypeDiv.textContent = `Current Game: ${gamePatterns[gameType]?.name || 'Unknown'}`;
+  }
 }
 
 function generatePlayerCard() {
   return new Promise((resolve) => {
-    const card = { B:[], I:[], N:[], G:[], O:[] };
+    const card = {};
+    const cardID = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     
     letters.forEach(letter => {
       const [min, max] = ranges[letter];
+      const nums = [];
       const available = [];
-      for(let n = min; n <= max; n++) {
-        available.push(n);
+      for (let i = min; i <= max; i++) available.push(i);
+      
+      while (nums.length < 5) {
+        const idx = getRandomNumber(0, available.length - 1);
+        nums.push(available.splice(idx, 1)[0]);
       }
       
-      for(let i = 0; i < 5; i++) {
-        if (letter === 'N' && i === 2) {
-          card[letter].push('FREE');
-        } else {
-          const idx = Math.floor(Math.random() * available.length);
-          card[letter].push(available.splice(idx, 1)[0]);
-        }
-      }
+      card[letter] = nums.sort((a,b) => a - b);
     });
-
-    const cardID = String(Math.floor(Math.random() * 900) + 100);
+    
     resolve({ card, cardID });
   });
 }
 
-function displayPlayerCard() {
+function displayPlayerCard(){
   const container = document.getElementById('player-card-container');
-  if (!playerCard) {
-    container.innerHTML = '';
-    return;
-  }
-
+  if(!container) return;
   container.innerHTML = '';
+  
+  if (!playerCard) return;
+  
   const cardEl = document.createElement('div');
   cardEl.className = 'player-card';
-  cardEl.setAttribute('role', 'grid');
-  cardEl.setAttribute('aria-label', 'Your bingo card');
-
-  letters.forEach(letter => {
-    const header = document.createElement('div');
-    header.className = 'header';
-    header.textContent = letter;
-    header.setAttribute('role', 'columnheader');
-    cardEl.appendChild(header);
+  
+  letters.forEach(L => {
+    const h = document.createElement('div');
+    h.className = 'header';
+    h.textContent = L;
+    cardEl.appendChild(h);
   });
-
-  for(let row = 0; row < 5; row++) {
-    letters.forEach(letter => {
-      const value = playerCard[letter][row];
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.setAttribute('role', 'gridcell');
+  
+  for(let row = 0; row < 5; row++){
+    letters.forEach((L, colIdx) => {
+      const cellDiv = document.createElement('div');
+      cellDiv.className = 'cell';
       
-      if (value === 'FREE') {
-        cell.classList.add('free');
-        cell.textContent = 'FREE';
-        cell.setAttribute('aria-label', 'Free space');
+      if(row === 2 && colIdx === 2){
+        cellDiv.textContent = 'FREE';
+        cellDiv.classList.add('free', 'called');
       } else {
-        cell.textContent = value;
-        const key = `${letter}-${value}`;
-        cell.setAttribute('aria-label', `${letter} ${value}`);
+        const num = playerCard[L][row];
+        cellDiv.textContent = num;
+        cellDiv.dataset.letter = L;
         
-        if (calledNumbers.has(key)) {
-          cell.classList.add('called');
-          cell.setAttribute('aria-current', 'true');
+        if(calledNumbers.has(`${L}-${num}`)){
+          cellDiv.classList.add('called');
         }
       }
       
-      cardEl.appendChild(cell);
+      cardEl.appendChild(cellDiv);
     });
   }
-
+  
   container.appendChild(cardEl);
 }
 
-function checkForBingo() {
-  if (!playerCard) return false;
-  const patternData = gamePatterns[gameType];
-  if (!patternData) return false;
-  
-  const pattern = patternData.pattern;
-  let isWin = true;
-  
-  for (let r = 0; r < 5; r++) {
-    for (let c = 0; c < 5; c++) {
-      if (pattern[r][c] === 1) {
-        const letter = letters[c];
-        const num = playerCard[letter][r];
-        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
-          isWin = false;
-          break;
-        }
+function checkLine(card, called) {
+  for (let row = 0; row < 5; row++) {
+    let rowComplete = true;
+    for (let col = 0; col < 5; col++) {
+      if (row === 2 && col === 2) continue;
+      const L = letters[col];
+      const num = card[L][row];
+      if (!called.has(`${L}-${num}`)) {
+        rowComplete = false;
+        break;
       }
     }
-    if (!isWin) break;
+    if (rowComplete) return true;
   }
   
-  return isWin;
-}
-
-function rollBingo() {
-  if(calledNumbers.size >= 75){ 
-    showToast('All 75 numbers have been called!', 3000); 
-    return null; 
-  }
-  
-  let letter, number, attempts = 0;
-  do {
-    letter = letters[Math.floor(Math.random() * letters.length)];
-    const [min, max] = ranges[letter];
-    number = getRandomNumber(min, max);
-    attempts++;
-    if(attempts > 200){ 
-      showToast('Unable to find new number', 4000); 
-      return null; 
+  for (let col = 0; col < 5; col++) {
+    let colComplete = true;
+    for (let row = 0; row < 5; row++) {
+      if (row === 2 && col === 2) continue;
+      const L = letters[col];
+      const num = card[L][row];
+      if (!called.has(`${L}-${num}`)) {
+        colComplete = false;
+        break;
+      }
     }
-  } while(calledNumbers.has(`${letter}-${number}`));
-  
-  const rolled = `${letter}-${number}`;
-  calledNumbers.add(rolled);
-  
-  if(gameRef && isHost){
-    gameRef.child('called').push(rolled).catch(err => console.error('DB push error', err));
+    if (colComplete) return true;
   }
   
-  return rolled;
+  return false;
 }
 
-function cleanupListeners() {
-  if (gameRef) {
-    gameRef.off();
+function checkTwoLines(card, called) {
+  let linesComplete = 0;
+  
+  for (let row = 0; row < 5; row++) {
+    let rowComplete = true;
+    for (let col = 0; col < 5; col++) {
+      if (row === 2 && col === 2) continue;
+      const L = letters[col];
+      const num = card[L][row];
+      if (!called.has(`${L}-${num}`)) {
+        rowComplete = false;
+        break;
+      }
+    }
+    if (rowComplete) linesComplete++;
   }
+  
+  for (let col = 0; col < 5; col++) {
+    let colComplete = true;
+    for (let row = 0; row < 5; row++) {
+      if (row === 2 && col === 2) continue;
+      const L = letters[col];
+      const num = card[L][row];
+      if (!called.has(`${L}-${num}`)) {
+        colComplete = false;
+        break;
+      }
+    }
+    if (colComplete) linesComplete++;
+  }
+  
+  return linesComplete >= 2;
 }
 
-function updatePlayerListSnapshot(playersObj) {
+function checkFullHouse(card, called) {
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 5; col++) {
+      if (row === 2 && col === 2) continue;
+      const L = letters[col];
+      const num = card[L][row];
+      if (!called.has(`${L}-${num}`)) return false;
+    }
+  }
+  return true;
+}
+
+function checkWinPattern(card, called, pattern){
+  for(let row = 0; row < 5; row++){
+    for(let col = 0; col < 5; col++){
+      if(row === 2 && col === 2) continue;
+      if(pattern[row][col] === 1){
+        const L = letters[col];
+        const num = card[L][row];
+        if(!called.has(`${L}-${num}`)) return false;
+      }
+    }
+  }
+  return true;
+}
+
+function checkPlayerWin(){
+  if (!playerCard || !gameRef) return false;
+  
+  const patternConfig = gamePatterns[gameType];
+  if(!patternConfig) return false;
+  
+  let hasWon = false;
+  
+  if (patternConfig.checkFunction === 'checkLine') {
+    hasWon = checkLine(playerCard, calledNumbers);
+  } else if (patternConfig.checkFunction === 'checkTwoLines') {
+    hasWon = checkTwoLines(playerCard, calledNumbers);
+  } else if (patternConfig.checkFunction === 'checkFullHouse') {
+    hasWon = checkFullHouse(playerCard, calledNumbers);
+  } else if (patternConfig.pattern) {
+    hasWon = checkWinPattern(playerCard, calledNumbers, patternConfig.pattern);
+  }
+  
+  if(hasWon){
+    const winKey = `${gameId}-${gameType}`;
+    if(!playerWins[winKey]){
+      playerWins[winKey] = true;
+      localStorage.setItem('playerWins', JSON.stringify(playerWins));
+      
+      showToast(`🎉 BINGO! You won ${gamePatterns[gameType]?.name || 'this game'}!`, 5000);
+      
+      if(xHandle){
+        const handleKey = xHandle.replace('@','');
+        gameRef.child('players').child(handleKey).child('wins').child(gameType).set(true)
+          .catch(err => console.error('Error recording win:', err));
+      }
+      
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+function showToast(message, duration = 3000){
+  const toast = document.getElementById('toast');
+  if(!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+function setupGame(gid){
+  cleanupListeners();
+  
+  gameRef = database.ref(`games/${gid}`);
+  
+  numbersListener = gameRef.child('calledNumbers').on('child_added', (snapshot) => {
+    const num = snapshot.val();
+    if(!isValidCalledFormat(num)) return;
+    
+    const wasNew = !calledNumbers.has(num);
+    if(wasNew){
+      calledNumbers.add(num);
+      localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+      
+      const [L,N] = num.split('-');
+      if(!isHost) resultDiv.textContent = num;
+      
+      highlightNumber(L, parseInt(N));
+      updateStats();
+      createBoard();
+      
+      if(playerCard && !isHost){
+        checkPlayerWin();
+      }
+    }
+  });
+  
+  gameTypeListener = gameRef.child('gameType').on('value', (snapshot) => {
+    const newType = snapshot.val();
+    if(newType && gamePatterns[newType]){
+      gameType = newType;
+      displayWinPattern();
+      
+      if(!isHost && currentGameTypeDiv){
+        currentGameTypeDiv.textContent = `Current Game: ${gamePatterns[gameType]?.name || 'Unknown'}`;
+      }
+    }
+  });
+  
+  playersListener = gameRef.child('players').on('value', (snapshot) => {
+    playersArray = [];
+    displayedPlayers.clear();
+    
+    snapshot.forEach(childSnap => {
+      const pData = childSnap.val();
+      if(pData && pData.handle){
+        const wins = pData.wins || {};
+        const hasWon = wins[gameType] === true;
+        playersArray.push({ handle: pData.handle, cardID: pData.cardID, hasWon, card: pData.card });
+      }
+    });
+    
+    renderPlayerList();
+    
+    if(isHost && initialLoadComplete){
+      updateLeaderboard();
+    }
+  });
+  
+  initialLoadComplete = true;
+}
+
+function renderPlayerList(){
+  if(!playerListContent) return;
   playerListContent.innerHTML = '';
-  displayedPlayers.clear();
-  playersArray = [];
   
-  if(playersObj) {
-    Object.keys(playersObj).forEach(key => {
-      const player = playersObj[key];
-      playersArray.push(player);
-      appendPlayerToList(key, player);
-    });
+  if(playersArray.length === 0){
+    playerListContent.innerHTML = '<div style="color:rgba(255,255,255,0.5);">No players yet</div>';
+    return;
   }
-}
-
-function appendPlayerToList(key, player) {
-  if (!player || !player.handle) return;
-  if (displayedPlayers.has(key)) return;
   
-  displayedPlayers.add(key);
-  const item = document.createElement('div');
-  item.className = 'player-item';
-  item.textContent = player.handle;
-  item.dataset.key = key;
-  playerListContent.appendChild(item);
-}
-
-function updateLeaderboard() {
-  const leaderboardContent = document.getElementById('leaderboard-content');
-  if (!leaderboardContent || !gameRef) return;
-  
-  gameRef.child('winners').once('value', snap => {
-    const winnersObj = snap.val();
-    leaderboardContent.innerHTML = '';
+  playersArray.forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'player-item';
+    if(p.hasWon) item.classList.add('winner');
     
-    if(!winnersObj || Object.keys(winnersObj).length === 0) {
-      leaderboardContent.innerHTML = '<p style="opacity:0.6;">No winners yet...</p>';
-      return;
+    const handleSpan = document.createElement('span');
+    handleSpan.textContent = p.handle;
+    item.appendChild(handleSpan);
+    
+    const cardSpan = document.createElement('span');
+    cardSpan.className = 'cardid';
+    cardSpan.textContent = p.cardID || '';
+    item.appendChild(cardSpan);
+    
+    if(p.hasWon){
+      const winBadge = document.createElement('span');
+      winBadge.textContent = '🎉 WIN';
+      winBadge.style.color = '#00FF00';
+      winBadge.style.fontWeight = '900';
+      item.appendChild(winBadge);
     }
     
-    Object.keys(winnersObj).forEach(k => {
-      const v = winnersObj[k];
-      const entry = document.createElement('div');
-      entry.className = 'leaderboard-entry';
-      entry.innerHTML = `<span>${v.handle}</span><span>${v.gameType || 'Unknown'}</span>`;
-      leaderboardContent.appendChild(entry);
-    });
+    playerListContent.appendChild(item);
   });
 }
 
-function setupGame(id) {
-  try {
-    cleanupListeners();
-    initialLoadComplete = false;
-    gameRef = database.ref(`games/${id}`);
-    
-    gameRef.child('called').once('value', snap => {
-      calledNumbers.clear();
-      const obj = snap.val();
-      if(obj) {
-        Object.values(obj).forEach(v => {
-          if(isValidCalledFormat(v)) calledNumbers.add(v);
-        });
-      }
-      createBoard();
-      updateStats();
-      if (!isHost && playerCard) displayPlayerCard();
-      
-      setTimeout(() => {
-        initialLoadComplete = true;
-      }, 1000);
-    });
-    
-    gameRef.child('called').on('child_added', snap => {
-      const rolled = snap.val();
-      if(!isValidCalledFormat(rolled)) return;
-      if(!initialLoadComplete) return;
-      
-      const [letter, num] = rolled.split('-');
-      if(!calledNumbers.has(rolled)) {
-        calledNumbers.add(rolled);
-        highlightNumber(letter, parseInt(num));
-        
-        if(resultDiv) resultDiv.textContent = rolled;
-        
-        if (!isHost && playerCard) {
-          displayPlayerCard();
-          
-          const winKey = `${gameId}-${gameType}`;
-          if (!playerWins[winKey] && checkForBingo()) {
-            playerWins[winKey] = true;
-            
-            gameRef.child('winners').push({
-              handle: xHandle,
-              timestamp: Date.now().toString(),
-              gameType: gameType
-            }).catch(err => console.error('Win push error', err));
-            
-            showToast(`🎉 BINGO! You won ${gamePatterns[gameType].name}! 🎉`, 5000);
-          }
-        }
-      }
-    });
+function updateLeaderboard(){
+  const leaderboard = document.getElementById('leaderboard');
+  if(!leaderboard) return;
+  
+  const winners = playersArray.filter(p => p.hasWon);
+  
+  if(winners.length === 0){
+    leaderboard.innerHTML = '';
+    return;
+  }
+  
+  leaderboard.innerHTML = '<h3>🏆 Winners</h3>';
+  winners.forEach(w => {
+    const entry = document.createElement('div');
+    entry.className = 'leaderboard-entry';
+    entry.innerHTML = `
+      <span>${w.handle}</span>
+      <span>Won: ${gamePatterns[gameType]?.name || gameType}</span>
+    `;
+    leaderboard.appendChild(entry);
+  });
+}
 
-    gameRef.child('gameType').on('value', snap => {
-      const newGameType = snap.val() || 'fullCard';
-      gameType = newGameType;
-      
-      if(isHost) {
-        gameTypeSelect.value = gameType;
-        displayWinPattern();
-      } else {
-        currentGameTypeDiv.style.display = 'block';
-        displayWinPattern();
-      }
-    });
-
-    gameRef.child('winners').once('value', snap => {
-      const obj = snap.val() || {};
-      Object.keys(obj).forEach(k => notifiedWinners.add(k));
-      updateLeaderboard();
-    });
-    
-    gameRef.child('winners').on('child_added', snap => {
-      const key = snap.key, val = snap.val();
-      if(!notifiedWinners.has(key)) {
-        notifiedWinners.add(key);
-        updateLeaderboard();
-        if(isHost && val) {
-          showToast(`🎉 BINGO! ${val.handle} won ${val.gameType}! 🎉`, 4000);
-        }
-      }
-    });
-
-    gameRef.child('players').once('value', snap => {
-      updatePlayerListSnapshot(snap.val());
-    });
-    
-    gameRef.child('players').on('child_added', snap => {
-      const key = snap.key, val = snap.val();
-      appendPlayerToList(key, val);
-    });
-
-  } catch(e) {
-    console.error('Setup game error:', e);
-    showToast('Error setting up game', 3000);
+function cleanupListeners(){
+  if(numbersListener && gameRef){
+    gameRef.child('calledNumbers').off('child_added', numbersListener);
+    numbersListener = null;
+  }
+  if(gameTypeListener && gameRef){
+    gameRef.child('gameType').off('value', gameTypeListener);
+    gameTypeListener = null;
+  }
+  if(playersListener && gameRef){
+    gameRef.child('players').off('value', playersListener);
+    playersListener = null;
   }
 }
 
-hostModeBtn.addEventListener('click', () => {
-  auth.signInAnonymously().then(() => {
+hostModeBtn.addEventListener('click', async ()=>{
+  auth.signInAnonymously().then(()=>{
     isHost = true;
-    gameId = Math.random().toString(36).substring(2, 10);
+    gameId = 'GAME-' + Date.now().toString(36);
+    localStorage.setItem('gameId', gameId);
     
+    modeSelection.style.display = 'none';
     hostControls.style.display = 'block';
     playerControls.style.display = 'none';
-    document.getElementById('mode-selection').style.display = 'none';
-    playerListEl.style.display = window.innerWidth > 767 ? 'block' : 'none';
+    playerListEl.classList.add('show');
     
-    calledNumbers.clear();
-    notifiedWinners.clear();
-    displayedPlayers.clear();
-    playersArray = [];
-    playerWins = {};
-    initialLoadComplete = true;
-    resultDiv.textContent = '';
+    if (displayGameId) displayGameId.textContent = gameId;
+    
+    gameRef = database.ref(`games/${gameId}`);
+    gameRef.child('gameType').set(gameType);
     
     setupGame(gameId);
-    
-    gameType = gameTypeSelect.value;
-    if(gameRef) {
-      gameRef.child('gameType').set(gameType).catch(err => console.error(err));
-    }
     
     displayWinPattern();
     createBoard();
     updateStats();
     
-    showToast(`🎮 Host mode enabled. Game ID: ${gameId}`, 3500);
-  }).catch(err => {
+    resultDiv.textContent = 'Ready to Roll!';
+    showToast('🎮 Host mode enabled. Share your Game ID with players!',3500);
+  }).catch(err=>{
     console.error('Auth error for host:', err);
     showToast('Failed to authenticate for host mode', 3000);
   });
 });
 
-playerModeBtn.addEventListener('click', () => {
+playerModeBtn.addEventListener('click', ()=>{
   isHost = false;
+  modeSelection.style.display = 'none';
   hostControls.style.display = 'none';
   playerControls.style.display = 'block';
-  document.getElementById('mode-selection').style.display = 'none';
-  playerListEl.style.display = 'none';
+  playerListEl.style.display = window.innerWidth <= 767 ? 'block' : 'none';
   
-  calledNumbers.clear();
-  resultDiv.textContent = '';
-  statsDiv.textContent = '';
-  currentGameTypeDiv.textContent = '';
-  
+  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+  calledNumbers = new Set(stored);
   createBoard();
   updateStats();
   displayWinPattern();
   
-  showToast('👤 Player mode: Enter Game ID and X handle to join', 3000);
+  if(xHandle) xHandleInput.value = xHandle;
+  
+  showToast('👤 Player mode: Enter Game ID and X handle to join',3000);
 });
 
-joinGameBtn.addEventListener('click', async () => {
+joinGameBtn.addEventListener('click', async ()=>{
   const providedGameId = gameIdInput.value.trim();
   const providedHandle = xHandleInput.value.trim();
   
   if(!providedGameId) return showToast('⚠️ Enter a valid Game ID', 3000);
-  if(!providedHandle || !providedHandle.startsWith('@')) {
-    return showToast('⚠️ Enter a valid X Handle (e.g., @UserX)', 3000);
-  }
+  if(!providedHandle || !providedHandle.startsWith('@')) return showToast('⚠️ Enter a valid X Handle (e.g., @UserX)', 3000);
   
   try {
     await auth.signInAnonymously();
     
     gameId = providedGameId;
     xHandle = providedHandle;
+    localStorage.setItem('gameId', gameId);
+    localStorage.setItem('xHandle', xHandle);
     
     gameRef = database.ref(`games/${gameId}`);
     
     const { card, cardID } = await generatePlayerCard();
     playerCard = card;
+    
     playerWins = {};
+    localStorage.setItem('playerWins', JSON.stringify(playerWins));
     
     displayPlayerCard();
     
@@ -513,42 +625,45 @@ joinGameBtn.addEventListener('click', async () => {
       card: playerCard
     });
     
-    showToast(`✅ Joined ${gameId} as ${xHandle}`, 3000);
+    showToast(`✅ Joined ${gameId} as ${xHandle}`,3000);
     setupGame(gameId);
     
-  } catch(err) {
+  } catch(err){
     console.error('Error joining game:', err);
     showToast('❌ Error joining game: ' + (err.message || 'Unknown error'), 3500);
   }
 });
 
-copyGameIdBtn.addEventListener('click', () => {
-  if(!gameId) return showToast('No Game ID to copy', 2000);
+copyGameIdBtn.addEventListener('click', ()=>{
+  if(!gameId) return showToast('No Game ID to copy',2000);
   navigator.clipboard.writeText(gameId)
-    .then(() => showToast('✅ Game ID copied to clipboard!', 2000))
-    .catch(() => showToast('Error copying', 2000));
+    .then(()=> showToast('✅ Game ID copied to clipboard!',2000))
+    .catch(e => showToast('Error copying',2000));
 });
 
-rollButton.addEventListener('click', () => {
+rollButton.addEventListener('click', ()=>{
   if(!isHost || !gameRef) return showToast('Host a game first', 3000);
   
   const rolled = rollBingo();
-  if(rolled) {
-    const [L, N] = rolled.split('-');
+  if(rolled){
+    const [L,N] = rolled.split('-');
     resultDiv.textContent = rolled;
     highlightNumber(L, parseInt(N));
   }
 });
 
-resetButton.addEventListener('click', () => {
+resetButton.addEventListener('click', ()=>{
   if(!confirm('Are you sure you want to reset the game? This will clear all data.')) return;
   
-  if(gameRef && isHost) {
-    gameRef.remove().catch(err => console.warn('Failed to remove game:', err));
+  if(gameRef && isHost){
+    gameRef.remove().catch(err=>console.warn('Failed to remove game:', err));
   }
   
   cleanupListeners();
   calledNumbers.clear();
+  localStorage.removeItem('calledNumbers');
+  localStorage.removeItem('playerCard');
+  localStorage.removeItem('playerWins');
   playerCard = null;
   playerWins = {};
   notifiedWinners.clear();
@@ -556,70 +671,71 @@ resetButton.addEventListener('click', () => {
   playersArray = [];
   initialLoadComplete = false;
   resultDiv.textContent = '';
-  statsDiv.textContent = '';
-  currentGameTypeDiv.textContent = '';
   
   createBoard();
   updateStats();
   playerListContent.innerHTML = '';
-  const leaderboardContent = document.getElementById('leaderboard-content');
-  if(leaderboardContent) leaderboardContent.innerHTML = '';
-  const playerCardContainer = document.getElementById('player-card-container');
-  if(playerCardContainer) playerCardContainer.innerHTML = '';
+  document.getElementById('leaderboard').innerHTML = '';
   
-  hostControls.style.display = 'none';
-  playerControls.style.display = 'none';
-  playerListEl.style.display = 'none';
-  document.getElementById('mode-selection').style.display = 'block';
+  modeSelection.style.display = 'block';
+  hostControls.style.display='none';
+  playerControls.style.display='none';
+  playerListEl.classList.remove('show');
   
   gameId = null;
+  localStorage.removeItem('gameId');
+  localStorage.removeItem('xHandle');
   xHandle = null;
   gameRef = null;
   isHost = false;
   
-  showToast('🔄 Game reset complete. Start a new game!', 2500);
+  showToast('🔄 Game reset complete. Start a new game!',2500);
 });
 
-gameTypeSelect.addEventListener('change', () => {
+gameTypeSelect.addEventListener('change', ()=>{
   const val = gameTypeSelect.value;
   if(!Object.keys(gamePatterns).includes(val)) return;
   
   gameType = val;
   if(isHost && gameRef) {
-    gameRef.child('gameType').set(gameType).catch(err => console.error(err));
+    gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
   }
   displayWinPattern();
 });
 
-(function checkUrlAutoJoin() {
+(function checkUrlAutoJoin(){
   const urlParams = new URLSearchParams(window.location.search);
   const urlGameId = urlParams.get('gameId');
-  if(urlGameId) {
+  if(urlGameId){
     gameId = urlGameId;
+    localStorage.setItem('gameId', gameId);
     playerModeBtn.click();
     gameIdInput.value = gameId;
-    showToast('🔗 Auto-join game ID detected from URL', 2500);
+    showToast('🔗 Auto-join game ID detected from URL',2500);
   }
 })();
 
-(function init() {
-  hostControls.style.display = 'none';
-  playerControls.style.display = 'none';
-  playerListEl.style.display = 'none';
-  document.getElementById('mode-selection').style.display = 'block';
-  
-  resultDiv.textContent = '';
-  statsDiv.textContent = '';
-  currentGameTypeDiv.textContent = '';
-  
+(function init(){
+  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+  calledNumbers = new Set(stored);
   createBoard();
+  updateStats();
+  displayWinPattern();
+  
+  const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
+  const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
+  playerListEl.style.transform = `translate(${savedX}px, ${savedY}px)`;
 })();
 
-(function makePlayerListDraggable() {
+(function makePlayerListDraggable(){
   const el = playerListEl;
-  let dragging = false, startX = 0, startY = 0, currentX = 0, currentY = 0, startTransform = {x:0, y:0};
+  let dragging = false, startX=0, startY=0, currentX=0, currentY=0, startTransform = {x:0,y:0};
+  const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
+  const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
+  currentX = savedX; currentY = savedY;
+  el.style.transform = `translate(${currentX}px, ${currentY}px)`;
 
-  function onDown(e) {
+  function onDown(e){
     if(window.innerWidth < 768) return;
     dragging = true;
     el.style.cursor = 'grabbing';
@@ -631,7 +747,7 @@ gameTypeSelect.addEventListener('change', () => {
     e.preventDefault();
   }
   
-  function onMove(e) {
+  function onMove(e){
     if(!dragging) return;
     const client = (e.touches && e.touches[0]) || e;
     const dx = client.clientX - startX;
@@ -643,15 +759,16 @@ gameTypeSelect.addEventListener('change', () => {
     const maxY = window.innerHeight - rect.height - 6;
     nx = Math.max(0, Math.min(nx, maxX));
     ny = Math.max(0, Math.min(ny, maxY));
-    currentX = nx;
-    currentY = ny;
+    currentX = nx; currentY = ny;
     el.style.transform = `translate(${currentX}px, ${currentY}px)`;
   }
   
-  function onUp() {
+  function onUp(){
     if(!dragging) return;
     dragging = false;
     el.style.cursor = 'grab';
+    localStorage.setItem('playerListTransformX', String(currentX));
+    localStorage.setItem('playerListTransformY', String(currentY));
   }
   
   el.addEventListener('mousedown', onDown);
@@ -677,5 +794,5 @@ window._bingoDebug = () => ({
   initialLoadComplete
 });
 
-console.log('%c$BINGO Roller v2.4 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('%c$BINGO Roller Enhanced v3.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
 console.log('Debug info: window._bingoDebug()');
