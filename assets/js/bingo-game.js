@@ -2,40 +2,55 @@ const letters = ['B','I','N','G','O'];
 const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 
 const gamePatterns = {
-  line: {
+  singleLine: {
     pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-    name: "Single Line",
-    checkFunction: 'checkLine'
+    name: "Single Line (Any Line)",
+    checkFunction: 'checkSingleLine'
   },
-  twoLines: {
+  doubleLine: {
     pattern: [[1,1,1,1,1],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-    name: "Two Lines",
-    checkFunction: 'checkTwoLines'
+    name: "Double Line (Any 2 Lines)",
+    checkFunction: 'checkDoubleLine'
   },
-  fullHouse: {
-    pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,0,1,1],[1,1,1,1,1],[1,1,1,1,1]],
-    name: "Full House",
-    checkFunction: 'checkFullHouse'
-  },
-  corners: {
+  fourCorners: {
     pattern: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
     name: "Four Corners"
   },
-  diagonal: {
-    pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,0,0,0],[0,1,0,1,0],[1,0,0,0,1]],
-    name: "Diagonal"
+  tShape: {
+    pattern: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
+    name: "T-Shape"
   },
-  X: {
-    pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,0,0,0],[0,1,0,1,0],[1,0,0,0,1]],
-    name: "X Pattern"
+  plusSign: {
+    pattern: [[0,0,1,0,0],[0,0,1,0,0],[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0]],
+    name: "Plus Sign (+)"
   },
-  outerFrame: {
+  xShape: {
+    pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+    name: "X-Shape"
+  },
+  letterH: {
+    pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
+    name: "Letter H"
+  },
+  letterL: {
+    pattern: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
+    name: "Letter L"
+  },
+  letterU: {
+    pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+    name: "Letter U"
+  },
+  pictureFrame: {
     pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-    name: "Outer Frame"
+    name: "Picture Frame"
   },
-  innerSquare: {
-    pattern: [[0,0,0,0,0],[0,1,1,1,0],[0,1,0,1,0],[0,1,1,1,0],[0,0,0,0,0]],
-    name: "Inner Square"
+  perimeter: {
+    pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+    name: "Perimeter (Outside Edge)"
+  },
+  fullCard: {
+    pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
+    name: "Full Card (Blackout)"
   }
 };
 
@@ -45,21 +60,18 @@ let gameId = null;
 let playerCard = null;
 let xHandle = localStorage.getItem('xHandle') || null;
 let gameRef = null;
-let gameType = 'line';
-let playerWins = {};
+let gameType = 'singleLine';
+let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
 const notifiedWinners = new Set();
 const displayedPlayers = new Set();
 let playersArray = [];
 let initialLoadComplete = false;
-let numbersListener = null;
-let playersListener = null;
-let gameTypeListener = null;
 
 const hostModeBtn = document.getElementById('host-mode-btn');
 const playerModeBtn = document.getElementById('player-mode-btn');
 const hostControls = document.getElementById('host-controls');
 const playerControls = document.getElementById('player-controls');
-const displayGameId = document.getElementById('display-game-id');
+const gameIdDisplay = document.getElementById('display-game-id');
 const gameIdInput = document.getElementById('game-id-input');
 const xHandleInput = document.getElementById('x-handle-input');
 const joinGameBtn = document.getElementById('join-game-btn');
@@ -70,17 +82,16 @@ const copyGameIdBtn = document.getElementById('copy-game-id-btn');
 const resultDiv = document.getElementById('result');
 const playerListEl = document.getElementById('player-list');
 const playerListContent = document.getElementById('player-list-content');
-const currentGameTypeDiv = document.getElementById('current-game-type');
 const modeSelection = document.getElementById('mode-selection');
+const numbersCalledEl = document.getElementById('numbers-called');
+const numbersRemainingEl = document.getElementById('numbers-remaining');
 
 function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
 
-function updateStats() {
-  const statsDiv = document.getElementById('stats');
-  if (statsDiv) {
-    statsDiv.textContent = `Called: ${calledNumbers.size}/75 | Remaining: ${75 - calledNumbers.size}`;
-  }
+function updateStats(){
+  if(numbersCalledEl) numbersCalledEl.textContent = calledNumbers.size;
+  if(numbersRemainingEl) numbersRemainingEl.textContent = 75 - calledNumbers.size;
 }
 
 function createBoard(){
@@ -169,7 +180,7 @@ function rollBingo(){
   localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
   
   if(gameRef){
-    gameRef.child('calledNumbers').push(rolled).catch(err => console.error('Error pushing to Firebase:', err));
+    gameRef.child('called').push(rolled).catch(err => console.error('Error pushing to Firebase:', err));
   }
   
   updateStats();
@@ -196,12 +207,15 @@ function displayWinPattern(){
     });
   });
   
-  if (currentGameTypeDiv) {
-    currentGameTypeDiv.textContent = `Current Game: ${gamePatterns[gameType]?.name || 'Unknown'}`;
+  const gameTypeName = gamePatterns[gameType]?.name || 'Unknown Pattern';
+  const currentGameTypeDiv = document.getElementById('current-game-type');
+  if(currentGameTypeDiv) {
+    currentGameTypeDiv.textContent = `Current Game: ${gameTypeName}`;
+    currentGameTypeDiv.style.display = 'block';
   }
 }
 
-function generatePlayerCard() {
+function generatePlayerCard(){
   return new Promise((resolve) => {
     const card = {};
     const cardID = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -266,7 +280,7 @@ function displayPlayerCard(){
   container.appendChild(cardEl);
 }
 
-function checkLine(card, called) {
+function checkSingleLine(card, called){
   for (let row = 0; row < 5; row++) {
     let rowComplete = true;
     for (let col = 0; col < 5; col++) {
@@ -298,7 +312,7 @@ function checkLine(card, called) {
   return false;
 }
 
-function checkTwoLines(card, called) {
+function checkDoubleLine(card, called){
   let linesComplete = 0;
   
   for (let row = 0; row < 5; row++) {
@@ -332,18 +346,6 @@ function checkTwoLines(card, called) {
   return linesComplete >= 2;
 }
 
-function checkFullHouse(card, called) {
-  for (let row = 0; row < 5; row++) {
-    for (let col = 0; col < 5; col++) {
-      if (row === 2 && col === 2) continue;
-      const L = letters[col];
-      const num = card[L][row];
-      if (!called.has(`${L}-${num}`)) return false;
-    }
-  }
-  return true;
-}
-
 function checkWinPattern(card, called, pattern){
   for(let row = 0; row < 5; row++){
     for(let col = 0; col < 5; col++){
@@ -366,12 +368,10 @@ function checkPlayerWin(){
   
   let hasWon = false;
   
-  if (patternConfig.checkFunction === 'checkLine') {
-    hasWon = checkLine(playerCard, calledNumbers);
-  } else if (patternConfig.checkFunction === 'checkTwoLines') {
-    hasWon = checkTwoLines(playerCard, calledNumbers);
-  } else if (patternConfig.checkFunction === 'checkFullHouse') {
-    hasWon = checkFullHouse(playerCard, calledNumbers);
+  if (patternConfig.checkFunction === 'checkSingleLine') {
+    hasWon = checkSingleLine(playerCard, calledNumbers);
+  } else if (patternConfig.checkFunction === 'checkDoubleLine') {
+    hasWon = checkDoubleLine(playerCard, calledNumbers);
   } else if (patternConfig.pattern) {
     hasWon = checkWinPattern(playerCard, calledNumbers, patternConfig.pattern);
   }
@@ -384,10 +384,13 @@ function checkPlayerWin(){
       
       showToast(`🎉 BINGO! You won ${gamePatterns[gameType]?.name || 'this game'}!`, 5000);
       
-      if(xHandle){
+      if(xHandle && gameRef){
         const handleKey = xHandle.replace('@','');
-        gameRef.child('players').child(handleKey).child('wins').child(gameType).set(true)
-          .catch(err => console.error('Error recording win:', err));
+        gameRef.child('winners').child(handleKey).set({
+          handle: xHandle,
+          gameType: gameType,
+          timestamp: Date.now()
+        }).catch(err => console.error('Error recording win:', err));
       }
       
       return true;
@@ -405,178 +408,141 @@ function showToast(message, duration = 3000){
   setTimeout(() => toast.classList.remove('show'), duration);
 }
 
-function setupGame(gid){
-  cleanupListeners();
-  
-  gameRef = database.ref(`games/${gid}`);
-  
-  numbersListener = gameRef.child('calledNumbers').on('child_added', (snapshot) => {
-    const num = snapshot.val();
-    if(!isValidCalledFormat(num)) return;
+function cleanupListeners(){
+  if(gameRef){
+    try {
+      gameRef.child('called').off();
+      gameRef.child('gameType').off();
+      gameRef.child('winners').off();
+      gameRef.child('players').off();
+    } catch(e){ 
+      console.error('Listener cleanup error', e); 
+    }
+  }
+}
+
+function setupGame(id){
+  try {
+    cleanupListeners();
+    initialLoadComplete = false;
+    gameRef = database.ref(`games/${id}`);
     
-    const wasNew = !calledNumbers.has(num);
-    if(wasNew){
-      calledNumbers.add(num);
+    gameRef.child('called').once('value', snap=>{
+      calledNumbers.clear();
+      const obj = snap.val();
+      if(obj){ 
+        Object.values(obj).forEach(v=> { 
+          if(isValidCalledFormat(v)) calledNumbers.add(v); 
+        }); 
+      }
       localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
-      
-      const [L,N] = num.split('-');
-      if(!isHost) resultDiv.textContent = num;
-      
-      highlightNumber(L, parseInt(N));
-      updateStats();
       createBoard();
+      updateStats();
+      if (!isHost && playerCard) displayPlayerCard();
       
-      if(playerCard && !isHost){
-        checkPlayerWin();
-      }
-    }
-  });
-  
-  gameTypeListener = gameRef.child('gameType').on('value', (snapshot) => {
-    const newType = snapshot.val();
-    if(newType && gamePatterns[newType]){
-      gameType = newType;
-      displayWinPattern();
-      
-      if(!isHost && currentGameTypeDiv){
-        currentGameTypeDiv.textContent = `Current Game: ${gamePatterns[gameType]?.name || 'Unknown'}`;
-      }
-    }
-  });
-  
-  playersListener = gameRef.child('players').on('value', (snapshot) => {
-    playersArray = [];
-    displayedPlayers.clear();
+      setTimeout(() => {
+        initialLoadComplete = true;
+      }, 1000);
+    });
     
-    snapshot.forEach(childSnap => {
-      const pData = childSnap.val();
-      if(pData && pData.handle){
-        const wins = pData.wins || {};
-        const hasWon = wins[gameType] === true;
-        playersArray.push({ handle: pData.handle, cardID: pData.cardID, hasWon, card: pData.card });
+    gameRef.child('called').on('child_added', snap=>{
+      const rolled = snap.val();
+      if(!isValidCalledFormat(rolled)) return;
+      
+      if(!initialLoadComplete) return;
+      
+      const wasNew = !calledNumbers.has(rolled);
+      if(wasNew){
+        calledNumbers.add(rolled);
+        localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+        
+        const [L,N] = rolled.split('-');
+        if(!isHost) resultDiv.textContent = rolled;
+        
+        highlightNumber(L, parseInt(N));
+        updateStats();
+        createBoard();
+        
+        if(playerCard && !isHost){
+          checkPlayerWin();
+        }
       }
     });
     
-    renderPlayerList();
+    gameRef.child('gameType').on('value', snap=>{
+      const newType = snap.val();
+      if(newType && gamePatterns[newType]){
+        gameType = newType;
+        displayWinPattern();
+      }
+    });
     
-    if(isHost && initialLoadComplete){
-      updateLeaderboard();
-    }
-  });
-  
-  initialLoadComplete = true;
-}
-
-function renderPlayerList(){
-  if(!playerListContent) return;
-  playerListContent.innerHTML = '';
-  
-  if(playersArray.length === 0){
-    playerListContent.innerHTML = '<div style="color:rgba(255,255,255,0.5);">No players yet</div>';
-    return;
-  }
-  
-  playersArray.forEach(p => {
-    const item = document.createElement('div');
-    item.className = 'player-item';
-    if(p.hasWon) item.classList.add('winner');
+    gameRef.child('players').on('value', snap=>{
+      playersArray = [];
+      displayedPlayers.clear();
+      
+      if(playerListContent) {
+        playerListContent.innerHTML = '';
+      }
+      
+      snap.forEach(childSnap => {
+        const pData = childSnap.val();
+        if(pData && pData.handle){
+          const handle = pData.handle;
+          const cardID = pData.cardID || 'N/A';
+          playersArray.push({ handle, cardID });
+          
+          if(playerListContent){
+            const div = document.createElement('div');
+            div.className = 'player-item';
+            const left = document.createElement('div');
+            left.textContent = handle;
+            const right = document.createElement('div');
+            right.className = 'cardid';
+            right.textContent = `#${cardID}`;
+            div.appendChild(left);
+            div.appendChild(right);
+            playerListContent.appendChild(div);
+          }
+        }
+      });
+      
+      if(playerListContent && playersArray.length === 0){
+        playerListContent.innerHTML = '<div style="color:rgba(255,255,255,0.5);">No players yet</div>';
+      }
+    });
     
-    const handleSpan = document.createElement('span');
-    handleSpan.textContent = p.handle;
-    item.appendChild(handleSpan);
-    
-    const cardSpan = document.createElement('span');
-    cardSpan.className = 'cardid';
-    cardSpan.textContent = p.cardID || '';
-    item.appendChild(cardSpan);
-    
-    if(p.hasWon){
-      const winBadge = document.createElement('span');
-      winBadge.textContent = '🎉 WIN';
-      winBadge.style.color = '#00FF00';
-      winBadge.style.fontWeight = '900';
-      item.appendChild(winBadge);
-    }
-    
-    playerListContent.appendChild(item);
-  });
-}
-
-function updateLeaderboard(){
-  const leaderboard = document.getElementById('leaderboard');
-  if(!leaderboard) return;
-  
-  const winners = playersArray.filter(p => p.hasWon);
-  
-  if(winners.length === 0){
-    leaderboard.innerHTML = '';
-    return;
-  }
-  
-  leaderboard.innerHTML = '<h3>🏆 Winners</h3>';
-  winners.forEach(w => {
-    const entry = document.createElement('div');
-    entry.className = 'leaderboard-entry';
-    entry.innerHTML = `
-      <span>${w.handle}</span>
-      <span>Won: ${gamePatterns[gameType]?.name || gameType}</span>
-    `;
-    leaderboard.appendChild(entry);
-  });
-}
-
-function cleanupListeners(){
-  if(numbersListener && gameRef){
-    gameRef.child('calledNumbers').off('child_added', numbersListener);
-    numbersListener = null;
-  }
-  if(gameTypeListener && gameRef){
-    gameRef.child('gameType').off('value', gameTypeListener);
-    gameTypeListener = null;
-  }
-  if(playersListener && gameRef){
-    gameRef.child('players').off('value', playersListener);
-    playersListener = null;
+  } catch(e){
+    console.error('Setup game error:', e);
+    showToast('Error setting up game', 3000);
   }
 }
 
-function clearAllGameData(){
-  cleanupListeners();
-  calledNumbers.clear();
-  localStorage.removeItem('calledNumbers');
-  localStorage.removeItem('playerCard');
-  localStorage.removeItem('playerWins');
-  localStorage.removeItem('gameId');
-  playerCard = null;
-  playerWins = {};
-  notifiedWinners.clear();
-  displayedPlayers.clear();
-  playersArray = [];
-  initialLoadComplete = false;
-  gameId = null;
-  gameRef = null;
-  isHost = false;
-}
-
-hostModeBtn.addEventListener('click', async ()=>{
-  try {
-    await auth.signInAnonymously();
-    
+hostModeBtn.addEventListener('click', ()=>{
+  auth.signInAnonymously().then(()=>{
     isHost = true;
-    gameId = 'GAME-' + Date.now().toString(36);
-    localStorage.setItem('gameId', gameId);
-    
     modeSelection.style.display = 'none';
     hostControls.style.display = 'block';
     playerControls.style.display = 'none';
     playerListEl.classList.add('show');
     
-    if (displayGameId) displayGameId.textContent = gameId;
+    calledNumbers.clear();
+    localStorage.removeItem('calledNumbers');
+    notifiedWinners.clear();
+    displayedPlayers.clear();
+    playersArray = [];
+    playerWins = {};
+    localStorage.setItem('playerWins', JSON.stringify(playerWins));
+    initialLoadComplete = true;
     
-    gameRef = database.ref(`games/${gameId}`);
-    gameRef.child('gameType').set(gameType);
+    gameId = Math.random().toString(36).substring(2,10);
+    localStorage.setItem('gameId', gameId);
+    gameIdDisplay.textContent = gameId;
     
     setupGame(gameId);
+    
+    gameType = gameTypeSelect.value;
+    if(gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
     
     displayWinPattern();
     createBoard();
@@ -584,13 +550,10 @@ hostModeBtn.addEventListener('click', async ()=>{
     
     resultDiv.textContent = 'Ready to Roll!';
     showToast('🎮 Host mode enabled. Share your Game ID with players!',3500);
-  } catch(err){
+  }).catch(err=>{
     console.error('Auth error for host:', err);
-    showToast('❌ Failed to authenticate for host mode. Retrying...', 3000);
-    setTimeout(() => {
-      hostModeBtn.click();
-    }, 2000);
-  }
+    showToast('❌ Failed to authenticate. Check console for details.', 4000);
+  });
 });
 
 playerModeBtn.addEventListener('click', ()=>{
@@ -600,6 +563,8 @@ playerModeBtn.addEventListener('click', ()=>{
   playerControls.style.display = 'block';
   playerListEl.style.display = window.innerWidth <= 767 ? 'block' : 'none';
   
+  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+  calledNumbers = new Set(stored);
   createBoard();
   updateStats();
   displayWinPattern();
@@ -675,19 +640,32 @@ resetButton.addEventListener('click', ()=>{
     gameRef.remove().catch(err=>console.warn('Failed to remove game:', err));
   }
   
-  clearAllGameData();
+  cleanupListeners();
+  calledNumbers.clear();
+  localStorage.removeItem('calledNumbers');
+  localStorage.removeItem('playerCard');
+  localStorage.removeItem('playerWins');
+  playerCard = null;
+  playerWins = {};
+  notifiedWinners.clear();
+  displayedPlayers.clear();
+  playersArray = [];
+  initialLoadComplete = false;
+  resultDiv.textContent = '';
   
   createBoard();
   updateStats();
-  playerListContent.innerHTML = '';
-  document.getElementById('leaderboard').innerHTML = '';
+  if(playerListContent) playerListContent.innerHTML = '';
   
   modeSelection.style.display = 'block';
   hostControls.style.display='none';
   playerControls.style.display='none';
   playerListEl.classList.remove('show');
   
-  resultDiv.textContent = '';
+  gameId = null;
+  localStorage.removeItem('gameId');
+  gameRef = null;
+  isHost = false;
   
   showToast('🔄 Game reset complete. Start a new game!',2500);
 });
@@ -703,31 +681,18 @@ gameTypeSelect.addEventListener('change', ()=>{
   displayWinPattern();
 });
 
-(function checkUrlAutoJoin(){
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlGameId = urlParams.get('gameId');
-  if(urlGameId){
-    gameId = urlGameId;
-    localStorage.setItem('gameId', gameId);
-    playerModeBtn.click();
-    gameIdInput.value = gameId;
-    showToast('🔗 Auto-join game ID detected from URL',2500);
-  }
-})();
-
 (function init(){
-  clearAllGameData();
+  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+  calledNumbers = new Set(stored);
   createBoard();
   updateStats();
   displayWinPattern();
-  
-  const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
-  const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
-  playerListEl.style.transform = `translate(${savedX}px, ${savedY}px)`;
 })();
 
 (function makePlayerListDraggable(){
   const el = playerListEl;
+  if(!el) return;
+  
   let dragging = false, startX=0, startY=0, currentX=0, currentY=0, startTransform = {x:0,y:0};
   const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
   const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
@@ -778,24 +743,9 @@ gameTypeSelect.addEventListener('change', ()=>{
   window.addEventListener('touchend', onUp);
 })();
 
-window.addEventListener('beforeunload', () => {
-  clearAllGameData();
-});
-
 firebase.auth().onAuthStateChanged(user => { 
-  console.log('Auth state:', user ? '✅ Authenticated' : '❌ Not authenticated'); 
+  console.log('🔐 Auth state:', user ? '✅ Authenticated' : '❌ Not authenticated'); 
 });
 
-window._bingoDebug = () => ({ 
-  gameId, 
-  isHost, 
-  gameType, 
-  calledCount: calledNumbers.size,
-  playerCard,
-  playerWins,
-  xHandle,
-  initialLoadComplete
-});
-
-console.log('%c$BINGO Roller v3.1 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
-console.log('Debug: window._bingoDebug()');
+console.log('%c$BINGO Roller v4.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('Firebase Project:', firebaseConfig.projectId);
