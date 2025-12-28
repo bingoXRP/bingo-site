@@ -46,7 +46,7 @@ let playerCard = null;
 let xHandle = localStorage.getItem('xHandle') || null;
 let gameRef = null;
 let gameType = 'line';
-let playerWins = JSON.parse(localStorage.getItem('playerWins') || '{}');
+let playerWins = {};
 const notifiedWinners = new Set();
 const displayedPlayers = new Set();
 let playersArray = [];
@@ -195,11 +195,6 @@ function displayWinPattern(){
       patternDiv.appendChild(cellDiv);
     });
   });
-  
-  const patternLabel = document.getElementById('win-pattern-label');
-  if (patternLabel) {
-    patternLabel.textContent = gamePatterns[gameType]?.name || 'Unknown Pattern';
-  }
   
   if (currentGameTypeDiv) {
     currentGameTypeDiv.textContent = `Current Game: ${gamePatterns[gameType]?.name || 'Unknown'}`;
@@ -545,8 +540,28 @@ function cleanupListeners(){
   }
 }
 
+function clearAllGameData(){
+  cleanupListeners();
+  calledNumbers.clear();
+  localStorage.removeItem('calledNumbers');
+  localStorage.removeItem('playerCard');
+  localStorage.removeItem('playerWins');
+  localStorage.removeItem('gameId');
+  playerCard = null;
+  playerWins = {};
+  notifiedWinners.clear();
+  displayedPlayers.clear();
+  playersArray = [];
+  initialLoadComplete = false;
+  gameId = null;
+  gameRef = null;
+  isHost = false;
+}
+
 hostModeBtn.addEventListener('click', async ()=>{
-  auth.signInAnonymously().then(()=>{
+  try {
+    await auth.signInAnonymously();
+    
     isHost = true;
     gameId = 'GAME-' + Date.now().toString(36);
     localStorage.setItem('gameId', gameId);
@@ -569,10 +584,13 @@ hostModeBtn.addEventListener('click', async ()=>{
     
     resultDiv.textContent = 'Ready to Roll!';
     showToast('🎮 Host mode enabled. Share your Game ID with players!',3500);
-  }).catch(err=>{
+  } catch(err){
     console.error('Auth error for host:', err);
-    showToast('Failed to authenticate for host mode', 3000);
-  });
+    showToast('❌ Failed to authenticate for host mode. Retrying...', 3000);
+    setTimeout(() => {
+      hostModeBtn.click();
+    }, 2000);
+  }
 });
 
 playerModeBtn.addEventListener('click', ()=>{
@@ -582,8 +600,6 @@ playerModeBtn.addEventListener('click', ()=>{
   playerControls.style.display = 'block';
   playerListEl.style.display = window.innerWidth <= 767 ? 'block' : 'none';
   
-  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
-  calledNumbers = new Set(stored);
   createBoard();
   updateStats();
   displayWinPattern();
@@ -659,18 +675,7 @@ resetButton.addEventListener('click', ()=>{
     gameRef.remove().catch(err=>console.warn('Failed to remove game:', err));
   }
   
-  cleanupListeners();
-  calledNumbers.clear();
-  localStorage.removeItem('calledNumbers');
-  localStorage.removeItem('playerCard');
-  localStorage.removeItem('playerWins');
-  playerCard = null;
-  playerWins = {};
-  notifiedWinners.clear();
-  displayedPlayers.clear();
-  playersArray = [];
-  initialLoadComplete = false;
-  resultDiv.textContent = '';
+  clearAllGameData();
   
   createBoard();
   updateStats();
@@ -682,12 +687,7 @@ resetButton.addEventListener('click', ()=>{
   playerControls.style.display='none';
   playerListEl.classList.remove('show');
   
-  gameId = null;
-  localStorage.removeItem('gameId');
-  localStorage.removeItem('xHandle');
-  xHandle = null;
-  gameRef = null;
-  isHost = false;
+  resultDiv.textContent = '';
   
   showToast('🔄 Game reset complete. Start a new game!',2500);
 });
@@ -716,8 +716,7 @@ gameTypeSelect.addEventListener('change', ()=>{
 })();
 
 (function init(){
-  const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
-  calledNumbers = new Set(stored);
+  clearAllGameData();
   createBoard();
   updateStats();
   displayWinPattern();
@@ -779,8 +778,12 @@ gameTypeSelect.addEventListener('change', ()=>{
   window.addEventListener('touchend', onUp);
 })();
 
+window.addEventListener('beforeunload', () => {
+  clearAllGameData();
+});
+
 firebase.auth().onAuthStateChanged(user => { 
-  console.log('Auth state changed:', user ? 'Authenticated' : 'Not authenticated'); 
+  console.log('Auth state:', user ? '✅ Authenticated' : '❌ Not authenticated'); 
 });
 
 window._bingoDebug = () => ({ 
@@ -794,5 +797,5 @@ window._bingoDebug = () => ({
   initialLoadComplete
 });
 
-console.log('%c$BINGO Roller Enhanced v3.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
-console.log('Debug info: window._bingoDebug()');
+console.log('%c$BINGO Roller v3.1 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('Debug: window._bingoDebug()');
