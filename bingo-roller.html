@@ -7,9 +7,15 @@
   <meta property="og:title" content="$BINGO Roller - Live Game">
   <meta property="og:description" content="Play live bingo on XRPL with $BINGO!">
   <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
+  <meta property="og:url" content="https://bingoxrp.com/bingo-roller.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="$BINGO Roller - Live Bingo">
+  <meta name="twitter:description" content="Real-time Bingo for Streams & Communities">
+  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
   <title>$BINGO Roller - BingoXRPL Live Tool</title>
   <link rel="icon" href="assets/images/mascot-hero.png" type="image/png">
-
+  <link rel="preload" href="assets/images/mascot-hero.png" as="image">
+  <link rel="stylesheet" href="assets/css/bingo-roller.css">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -17,34 +23,24 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
-
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  
-  
-  <link rel="stylesheet" href="assets/css/bingo-roller.css">
 </head>
 <body>
-
   <header class="site-header" role="banner">
     <div class="header-container">
       <div class="header-brand">
         <a href="/" aria-label="BingoXRPL Home">
-          <img src="assets/images/mascot-hero.png" alt="$BINGO" class="logo-image" width="120" height="40">
+          <img src="assets/images/mascot-hero.png" alt="$BINGO" class="logo-image" width="120" height="40" loading="eager">
         </a>
       </div>
-      
-      <button class="hamburger" 
-              aria-label="Toggle navigation menu" 
-              aria-expanded="false"
-              aria-controls="main-navigation">
+      <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-navigation">
         <span></span>
         <span></span>
         <span></span>
       </button>
-      
       <nav id="main-navigation" class="header-nav" role="navigation" aria-label="Main navigation">
         <ul class="nav-menu">
           <li><a href="/" class="nav-link">Home</a></li>
@@ -57,14 +53,53 @@
   </header>
 
   <main class="bingo-container">
-    <h1 class="bingo-title">🎮 $BINGO Live Roller</h1>
-    <p class="tagline">Real-time Bingo for Streams & Communities</p>
+    <div class="hero-welcome">
+      <img src="assets/images/mascot-hero.png" alt="Bingo Mascot" class="hero-mascot" width="300" height="300" loading="eager">
+      <h1 class="bingo-title">🎮 $BINGO Live Roller</h1>
+      <p class="tagline">Real-time Bingo for Streams & Communities</p>
+    </div>
 
     <div id="mode-selection" class="mode-section">
       <h2>Choose Your Mode</h2>
       <div class="mode-buttons">
-        <button id="host-mode-btn" class="mode-btn">🎙️ Host Game</button>
-        <button id="player-mode-btn" class="mode-btn">👤 Join as Player</button>
+        <button id="host-mode-btn" class="mode-btn host-btn">
+          <span class="btn-icon">🎙️</span>
+          <span class="btn-text">Host New Game</span>
+          <span class="btn-desc">Start a game & invite players</span>
+        </button>
+        <button id="player-mode-btn" class="mode-btn player-btn">
+          <span class="btn-icon">👤</span>
+          <span class="btn-text">Join Game</span>
+          <span class="btn-desc">Enter a game code to play</span>
+        </button>
+      </div>
+      
+      <details class="how-to-play">
+        <summary>How to Play</summary>
+        <div class="how-to-content">
+          <h3>For Hosts:</h3>
+          <ol>
+            <li>Click "Host New Game"</li>
+            <li>Choose your game type (Single Line, Full House, etc.)</li>
+            <li>Share the Game ID with your players</li>
+            <li>Click "ROLL" to call numbers</li>
+          </ol>
+          <h3>For Players:</h3>
+          <ol>
+            <li>Click "Join Game"</li>
+            <li>Enter the Game ID from your host</li>
+            <li>Enter your X handle (e.g., @YourName)</li>
+            <li>Your card will be generated automatically</li>
+            <li>Numbers are marked automatically as they're called</li>
+          </ol>
+        </div>
+      </details>
+      
+      <div class="share-buttons">
+        <button class="share-btn" onclick="shareGame()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          Share Game
+        </button>
       </div>
     </div>
 
@@ -157,6 +192,23 @@
         this.setAttribute('aria-expanded', !isExpanded);
         nav.classList.toggle('show');
       });
+    }
+    
+    function shareGame() {
+      const gameUrl = window.location.href;
+      if (navigator.share) {
+        navigator.share({
+          title: '$BINGO Live Roller',
+          text: 'Play live bingo with me on BingoXRPL!',
+          url: gameUrl
+        }).catch(err => console.log('Share failed:', err));
+      } else {
+        navigator.clipboard.writeText(gameUrl);
+        const toast = document.getElementById('toast');
+        toast.textContent = '✅ Link copied to clipboard!';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
     }
   </script>
 </body>
