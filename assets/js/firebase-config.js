@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyCmwT7N3F2bh8bGq5dMK4XbMMSLaQx-8Wc",
+  apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
   authDomain: "bingo-roller-1dcb0.firebaseapp.com",
   databaseURL: "https://bingo-roller-1dcb0-default-rtdb.firebaseio.com",
   projectId: "bingo-roller-1dcb0",
