@@ -4,53 +4,65 @@ const RANGES = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 const GAME_PATTERNS = {
   singleLine: {
     pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-    name: "Single Line",
-    checkFunction: 'checkSingleLine'
+    name: "Single Line (Any Row/Column)",
+    checkFunction: 'checkSingleLine',
+    description: 'Complete any horizontal row or vertical column'
   },
   doubleLine: {
     pattern: [[1,1,1,1,1],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-    name: "Double Line",
-    checkFunction: 'checkDoubleLine'
+    name: "Double Line (Any 2 Lines)",
+    checkFunction: 'checkDoubleLine',
+    description: 'Complete any two rows or columns'
   },
   fourCorners: {
     pattern: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
-    name: "Four Corners"
+    name: "Four Corners",
+    description: 'Mark all four corner squares'
   },
   tShape: {
     pattern: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
-    name: "T-Shape"
+    name: "T-Shape",
+    description: 'Form a T shape pattern'
   },
   plusSign: {
     pattern: [[0,0,1,0,0],[0,0,1,0,0],[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0]],
-    name: "Plus Sign"
+    name: "Plus Sign",
+    description: 'Form a + shape pattern'
   },
   xShape: {
     pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
-    name: "X-Shape"
+    name: "X-Shape",
+    description: 'Form an X shape with diagonals'
   },
   letterH: {
     pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
-    name: "Letter H"
+    name: "Letter H",
+    description: 'Form the letter H'
   },
   letterL: {
     pattern: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
-    name: "Letter L"
+    name: "Letter L",
+    description: 'Form the letter L'
   },
   letterU: {
     pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-    name: "Letter U"
+    name: "Letter U",
+    description: 'Form the letter U'
   },
   pictureFrame: {
     pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-    name: "Picture Frame"
+    name: "Picture Frame",
+    description: 'Mark the outer edge only'
   },
   perimeter: {
     pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-    name: "Perimeter"
+    name: "Perimeter",
+    description: 'Complete the outer perimeter'
   },
   fullCard: {
     pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
-    name: "Full Card (Blackout)"
+    name: "Full Card (Blackout)",
+    description: 'Mark all squares on the card'
   }
 };
 
@@ -67,6 +79,7 @@ let calledNumbers = new Set();
 let gameRef = null;
 let playersData = [];
 let winnersData = [];
+let playerHasWon = false;
 let initialLoadComplete = false;
 
 const screens = {
@@ -241,7 +254,10 @@ function displayPattern(gridElement, nameElement) {
   if (!gridElement) return;
   gridElement.innerHTML = '';
   
-  const pattern = GAME_PATTERNS[gameType]?.pattern || [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
+  const patternConfig = GAME_PATTERNS[gameType];
+  if (!patternConfig) return;
+  
+  const pattern = patternConfig.pattern || [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
   
   pattern.forEach((row, rowIndex) => {
     row.forEach((val, colIndex) => {
@@ -257,7 +273,8 @@ function displayPattern(gridElement, nameElement) {
   });
   
   if (nameElement) {
-    nameElement.textContent = GAME_PATTERNS[gameType]?.name || 'Unknown Pattern';
+    nameElement.textContent = patternConfig.name || 'Unknown Pattern';
+    nameElement.title = patternConfig.description || '';
   }
 }
 
@@ -401,6 +418,8 @@ function checkWinPattern(card, called, pattern) {
 }
 
 function checkAllCardsForWin() {
+  if (playerHasWon) return null;
+  
   const patternConfig = GAME_PATTERNS[gameType];
   if (!patternConfig) return null;
   
@@ -445,7 +464,10 @@ function rollNumber() {
   calledNumbers.add(rolled);
   
   if (gameRef) {
-    gameRef.child('called').push(rolled).catch(err => console.error('Firebase push error:', err));
+    gameRef.child('called').push(rolled).catch(err => {
+      console.error('Firebase push error:', err);
+      showToast('Error syncing number to Firebase', 2000);
+    });
   }
   
   return rolled;
@@ -471,7 +493,9 @@ function updatePlayersList() {
   playersData.forEach(p => {
     const div = document.createElement('div');
     div.className = 'player-item';
-    div.innerHTML = `<div>${p.handle}</div><div class="cardid">#${p.cardID || 'N/A'}</div>`;
+    const isWinner = winnersData.some(w => w.handle === p.handle);
+    if (isWinner) div.classList.add('winner');
+    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">#${p.cardID || 'N/A'}</div>`;
     elems.hostPlayersList.appendChild(div);
   });
   
@@ -499,6 +523,10 @@ function setupFirebaseListeners() {
     setTimeout(() => {
       initialLoadComplete = true;
     }, 1000);
+  }).catch(err => {
+    console.error('Firebase read error:', err);
+    showToast('Error connecting to game', 3000);
+    showLoading(false);
   });
   
   gameRef.child('called').on('child_added', snap => {
@@ -519,6 +547,7 @@ function setupFirebaseListeners() {
       if (!isHost) {
         const winResult = checkAllCardsForWin();
         if (winResult) {
+          playerHasWon = true;
           showToast(`🎉 BINGO! Card ${winResult.cardIndex + 1} wins!`, 5000);
           if (gameRef && playerHandle) {
             const handleKey = normalizeHandle(playerHandle);
@@ -527,7 +556,7 @@ function setupFirebaseListeners() {
               cardID: winResult.cardID,
               gameType: gameType,
               timestamp: Date.now()
-            });
+            }).catch(err => console.error('Error recording win:', err));
           }
         }
       }
@@ -536,11 +565,24 @@ function setupFirebaseListeners() {
   
   gameRef.child('gameType').on('value', snap => {
     const newType = snap.val();
-    if (newType && GAME_PATTERNS[newType]) {
+    if (newType && GAME_PATTERNS[newType] && newType !== gameType) {
+      const oldType = gameType;
       gameType = newType;
+      
       displayPattern(elems.hostPatternGrid, elems.hostPatternName);
       displayPattern(elems.playerPatternGrid, elems.playerPatternName);
       if (elems.infoPattern) elems.infoPattern.textContent = GAME_PATTERNS[gameType]?.name || 'Unknown';
+      
+      if (!isHost && initialLoadComplete) {
+        showToast(`🔄 Pattern changed to: ${GAME_PATTERNS[gameType].name}`, 4000);
+        playerHasWon = false;
+        
+        const winResult = checkAllCardsForWin();
+        if (winResult) {
+          playerHasWon = true;
+          showToast(`🎉 BINGO! Card ${winResult.cardIndex + 1} wins with new pattern!`, 5000);
+        }
+      }
     }
   });
   
@@ -567,6 +609,7 @@ function setupFirebaseListeners() {
       }
     });
     if (elems.statWinners) elems.statWinners.textContent = winnersData.length;
+    updatePlayersList();
   });
 }
 
@@ -605,11 +648,24 @@ function handleURLParams() {
   const hostParam = params.get('host');
   
   if (gameParam) {
-    if (elems.playerGameId) elems.playerGameId.value = gameParam;
+    if (elems.playerGameId) elems.playerGameId.value = gameParam.toUpperCase();
     showScreen('playerSetup');
+    showToast('Game ID pre-filled from link!', 2000);
   } else if (hostParam === 'true') {
     showScreen('hostSetup');
   }
+}
+
+if (elems.hostPattern) {
+  elems.hostPattern.addEventListener('change', () => {
+    if (isHost && gameRef && initialLoadComplete) {
+      const newPattern = elems.hostPattern.value;
+      gameType = newPattern;
+      gameRef.child('gameType').set(gameType).catch(err => console.error('Pattern change error:', err));
+      displayPattern(elems.hostPatternGrid, elems.hostPatternName);
+      showToast(`Pattern changed to: ${GAME_PATTERNS[gameType].name}`, 3000);
+    }
+  });
 }
 
 if (elems.btnHostMode) {
@@ -656,7 +712,7 @@ if (elems.btnStartHost) {
       calledNumbers.clear();
       playersData = [];
       winnersData = [];
-      initialLoadComplete = true;
+      initialLoadComplete = false;
       
       if (elems.displayGameId) elems.displayGameId.textContent = gameId;
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = '--';
@@ -671,6 +727,10 @@ if (elems.btnStartHost) {
       updateStats();
       updatePlayersList();
       
+      setTimeout(() => {
+        initialLoadComplete = true;
+      }, 1000);
+      
       showLoading(false);
       showScreen('hostGame');
       showToast(`🎮 Game ${gameId} started! Share the ID with players.`, 3500);
@@ -683,7 +743,7 @@ if (elems.btnStartHost) {
 }
 
 if (elems.btnJoinGame) {
-  elems.btnJoinGame.addEventListener('click', async () => {
+  elems.btnJoinGame.addEventListener('click', () => {
     const gid = elems.playerGameId.value.trim().toUpperCase();
     const handle = normalizeHandle(elems.playerHandle.value);
     const cardsCount = parseInt(elems.playerCardsSelect.value) || 1;
@@ -693,47 +753,50 @@ if (elems.btnJoinGame) {
     
     showLoading(true);
     
-    try {
-      await auth.signInAnonymously();
-      
-      gameId = gid;
-      playerHandle = handle;
-      numCards = cardsCount;
-      playerCards = [];
-      currentCardIndex = 0;
-      
-      for (let i = 0; i < numCards; i++) {
-        playerCards.push(generateCard());
-      }
-      
-      if (elems.playerNameDisplay) elems.playerNameDisplay.textContent = handle;
-      if (elems.playerLastCalled) elems.playerLastCalled.textContent = '--';
-      
-      gameRef = database.ref(`games/${gameId}`);
-      
-      const handleKey = normalizeHandle(handle);
-      await gameRef.child('players').child(handleKey).set({
-        handle: handle,
-        cardID: playerCards[0].cardID,
-        timestamp: Date.now()
+    auth.signInAnonymously()
+      .then(() => {
+        gameId = gid;
+        playerHandle = handle;
+        numCards = cardsCount;
+        playerCards = [];
+        playerHasWon = false;
+        currentCardIndex = 0;
+        
+        for (let i = 0; i < numCards; i++) {
+          playerCards.push(generateCard());
+        }
+        
+        if (elems.playerNameDisplay) elems.playerNameDisplay.textContent = handle;
+        if (elems.playerLastCalled) elems.playerLastCalled.textContent = '--';
+        
+        gameRef = database.ref(`games/${gameId}`);
+        
+        const handleKey = normalizeHandle(handle);
+        return gameRef.child('players').child(handleKey).set({
+          handle: handle,
+          cardID: playerCards[0].cardID,
+          numCards: numCards,
+          timestamp: Date.now()
+        });
+      })
+      .then(() => {
+        setupFirebaseListeners();
+        displayPlayerCards();
+        createBoard(elems.playerBoardView);
+        displayPattern(elems.playerPatternGrid, elems.playerPatternName);
+        updateStats();
+        
+        if (elems.infoGameId) elems.infoGameId.textContent = gameId;
+        
+        showLoading(false);
+        showScreen('playerGame');
+        showToast(`✅ Joined game ${gameId} as ${playerHandle}`, 3000);
+      })
+      .catch(err => {
+        console.error('Join error:', err);
+        showLoading(false);
+        showToast('❌ Error joining game: ' + (err.message || 'Check Game ID and try again'), 4000);
       });
-      
-      setupFirebaseListeners();
-      displayPlayerCards();
-      createBoard(elems.playerBoardView);
-      displayPattern(elems.playerPatternGrid, elems.playerPatternName);
-      updateStats();
-      
-      if (elems.infoGameId) elems.infoGameId.textContent = gameId;
-      
-      showLoading(false);
-      showScreen('playerGame');
-      showToast(`✅ Joined game ${gameId} as ${handle}`, 3000);
-    } catch (err) {
-      console.error('Join error:', err);
-      showLoading(false);
-      showToast('❌ Error joining game: ' + (err.message || 'Unknown error'), 3500);
-    }
   });
 }
 
@@ -855,6 +918,7 @@ if (elems.btnPlayAgain) {
   elems.btnPlayAgain.addEventListener('click', () => {
     calledNumbers.clear();
     winnersData = [];
+    playerHasWon = false;
     initialLoadComplete = false;
     
     if (gameRef) {
@@ -866,6 +930,9 @@ if (elems.btnPlayAgain) {
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = '--';
       createBoard(elems.hostBoard);
       updateStats();
+      setTimeout(() => {
+        initialLoadComplete = true;
+      }, 1000);
       showScreen('hostGame');
       showToast('🔄 New round started! Same players, same pattern.', 3000);
     } else {
@@ -873,6 +940,9 @@ if (elems.btnPlayAgain) {
       displayPlayerCards();
       createBoard(elems.playerBoardView);
       updateStats();
+      setTimeout(() => {
+        initialLoadComplete = true;
+      }, 1000);
       showScreen('playerGame');
       showToast('🔄 New round started!', 3000);
     }
@@ -893,6 +963,7 @@ if (elems.btnNewGame) {
     hostHandle = null;
     playerHandle = null;
     playerCards = [];
+    playerHasWon = false;
     calledNumbers.clear();
     playersData = [];
     winnersData = [];
@@ -916,8 +987,10 @@ handleURLParams();
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     console.log('✅ Firebase authenticated');
+  } else {
+    console.log('⚠️ Not authenticated');
   }
 });
 
-console.log('%c$BINGO Live v6.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('%c$BINGO Live v7.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
 console.log('Firebase Project:', firebaseConfig.projectId);
