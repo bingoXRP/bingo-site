@@ -1,21 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!">
-  <meta property="og:title" content="$BINGO Roller - Live Game">
-  <meta property="og:description" content="Play live bingo on XRPL with $BINGO!">
-  <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
-  <meta property="og:url" content="https://bingoxrp.com/bingo-roller.html">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="$BINGO Roller - Live Bingo">
-  <meta name="twitter:description" content="Real-time Bingo for Streams & Communities">
-  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
-  <title>$BINGO Roller - BingoXRPL Live Tool</title>
-  <link rel="icon" href="assets/images/mascot-hero.png" type="image/png">
-  <link rel="preload" href="assets/images/mascot-hero.png" as="image">
-  <link rel="stylesheet" href="assets/css/bingo-roller.css">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -23,202 +8,266 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="$BINGO Live - Multiplayer bingo on XRPL. Host games, play with friends, win prizes!">
+  <meta name="theme-color" content="#00c6c9">
+  <meta property="og:title" content="$BINGO Live - Play Now">
+  <meta property="og:description" content="Multiplayer bingo game on XRP Ledger">
+  <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
+  <meta property="og:url" content="https://bingoxrp.com/bingo-roller.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="$BINGO Live">
+  <meta name="twitter:description" content="Real-time multiplayer bingo on XRPL">
+  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
+  <title>$BINGO Live - Multiplayer Bingo on XRPL</title>
+  <link rel="icon" href="assets/images/mascot-hero.png" type="image/png">
+  <link rel="preload" href="assets/images/mascot-hero.png" as="image">
+  <link rel="stylesheet" href="assets/css/bingo-roller.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
 </head>
 <body>
-  <header class="site-header" role="banner">
-    <div class="header-container">
-      <div class="header-brand">
-        <a href="/" aria-label="BingoXRPL Home">
-          <img src="assets/images/mascot-hero.png" alt="$BINGO" class="logo-image" width="120" height="40" loading="eager">
-        </a>
-      </div>
-      <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-navigation">
-        <span></span>
-        <span></span>
-        <span></span>
+
+<div id="landing-screen" class="screen active">
+  <div class="landing-hero">
+    <img src="assets/images/mascot-hero.png" alt="Bingo Mascot" class="mascot-logo">
+    <h1 class="game-title">$BINGO Live</h1>
+    <p class="game-subtitle">Multiplayer Bingo on XRPL</p>
+    <div class="mode-buttons">
+      <button id="btn-host-mode" class="mode-btn host-mode">
+        <span class="btn-icon">🎙️</span>
+        <span class="btn-label">Host Game</span>
+        <span class="btn-desc">Start and control a game</span>
       </button>
-      <nav id="main-navigation" class="header-nav" role="navigation" aria-label="Main navigation">
-        <ul class="nav-menu">
-          <li><a href="/" class="nav-link">Home</a></li>
-          <li><a href="/#about" class="nav-link">About</a></li>
-          <li><a href="/sponsors" class="nav-link">Sponsors</a></li>
-          <li><a href="/bingo-roller.html" class="nav-link active">Play Bingo</a></li>
-        </ul>
-      </nav>
+      <button id="btn-player-mode" class="mode-btn player-mode">
+        <span class="btn-icon">🎮</span>
+        <span class="btn-label">Join Game</span>
+        <span class="btn-desc">Play with a game ID</span>
+      </button>
+    </div>
+    <a href="/" class="back-link">← Back to Home</a>
+  </div>
+</div>
+
+<div id="host-setup-screen" class="screen">
+  <div class="setup-container">
+    <button class="back-btn" id="btn-back-from-host">← Back</button>
+    <h2>🎙️ Host a Game</h2>
+    <div class="input-group">
+      <label for="host-handle">Your Handle</label>
+      <input type="text" id="host-handle" placeholder="YourName" autocomplete="off" maxlength="20">
+    </div>
+    <div class="input-group">
+      <label for="host-pattern">Game Pattern</label>
+      <select id="host-pattern">
+        <option value="singleLine">Single Line</option>
+        <option value="doubleLine">Double Line</option>
+        <option value="fourCorners">Four Corners</option>
+        <option value="tShape">T-Shape</option>
+        <option value="plusSign">Plus Sign</option>
+        <option value="xShape">X-Shape</option>
+        <option value="letterH">Letter H</option>
+        <option value="letterL">Letter L</option>
+        <option value="letterU">Letter U</option>
+        <option value="pictureFrame">Picture Frame</option>
+        <option value="perimeter">Perimeter</option>
+        <option value="fullCard">Full Card (Blackout)</option>
+      </select>
+    </div>
+    <div class="setup-actions">
+      <button id="btn-start-host" class="primary-btn">Start Hosting</button>
+    </div>
+  </div>
+</div>
+
+<div id="player-setup-screen" class="screen">
+  <div class="setup-container">
+    <button class="back-btn" id="btn-back-from-player">← Back</button>
+    <h2>🎮 Join a Game</h2>
+    <div class="input-group">
+      <label for="player-gameid">Game ID</label>
+      <input type="text" id="player-gameid" placeholder="ABC123" autocomplete="off" maxlength="10">
+    </div>
+    <div class="input-group">
+      <label for="player-handle">Your Handle</label>
+      <input type="text" id="player-handle" placeholder="YourName" autocomplete="off" maxlength="20">
+    </div>
+    <div class="input-group">
+      <label for="player-cards">Number of Cards</label>
+      <select id="player-cards">
+        <option value="1" selected>1 Card</option>
+        <option value="2">2 Cards</option>
+        <option value="3">3 Cards</option>
+        <option value="4">4 Cards</option>
+      </select>
+    </div>
+    <div class="setup-actions">
+      <button id="btn-join-game" class="primary-btn">Join Game</button>
+    </div>
+  </div>
+</div>
+
+<div id="host-game-screen" class="screen">
+  <header class="game-header">
+    <div class="header-info">
+      <span class="game-id-label">Game ID:</span>
+      <strong id="display-game-id" class="game-id-value">---</strong>
+      <button id="btn-copy-id" class="icon-btn" title="Copy Game ID">📋</button>
+    </div>
+    <div class="header-center">
+      <span id="host-last-called" class="last-called">--</span>
+    </div>
+    <div class="header-action">
+      <button id="btn-roll" class="roll-btn">🎲 ROLL</button>
     </div>
   </header>
 
-  <main class="bingo-container">
-    <div class="hero-welcome">
-      <img src="assets/images/mascot-hero.png" alt="Bingo Mascot" class="hero-mascot" width="300" height="300" loading="eager">
-      <h1 class="bingo-title">🎮 $BINGO Live Roller</h1>
-      <p class="tagline">Real-time Bingo for Streams & Communities</p>
-    </div>
-
-    <div id="mode-selection" class="mode-section">
-      <h2>Choose Your Mode</h2>
-      <div class="mode-buttons">
-        <button id="host-mode-btn" class="mode-btn host-btn">
-          <span class="btn-icon">🎙️</span>
-          <span class="btn-text">Host New Game</span>
-          <span class="btn-desc">Start a game & invite players</span>
-        </button>
-        <button id="player-mode-btn" class="mode-btn player-btn">
-          <span class="btn-icon">👤</span>
-          <span class="btn-text">Join Game</span>
-          <span class="btn-desc">Enter a game code to play</span>
-        </button>
-      </div>
-      
-      <details class="how-to-play">
-        <summary>How to Play</summary>
-        <div class="how-to-content">
-          <h3>For Hosts:</h3>
-          <ol>
-            <li>Click "Host New Game"</li>
-            <li>Choose your game type (Single Line, Full House, etc.)</li>
-            <li>Share the Game ID with your players</li>
-            <li>Click "ROLL" to call numbers</li>
-          </ol>
-          <h3>For Players:</h3>
-          <ol>
-            <li>Click "Join Game"</li>
-            <li>Enter the Game ID from your host</li>
-            <li>Enter your X handle (e.g., @YourName)</li>
-            <li>Your card will be generated automatically</li>
-            <li>Numbers are marked automatically as they're called</li>
-          </ol>
-        </div>
-      </details>
-      
-      <div class="share-buttons">
-        <button class="share-btn" onclick="shareGame()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          Share Game
-        </button>
-      </div>
-    </div>
-
-    <div id="host-controls" class="controls-section">
-      <div class="control-group">
-        <label for="game-type-select">Game Type:</label>
-        <select id="game-type-select">
-          <option value="line">Single Line</option>
-          <option value="twoLines">Two Lines</option>
-          <option value="fullHouse">Full House</option>
-          <option value="corners">Four Corners</option>
-          <option value="diagonal">Diagonal</option>
-          <option value="X">X Pattern</option>
-          <option value="outerFrame">Outer Frame</option>
-          <option value="innerSquare">Inner Square</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label>Game ID: <strong id="display-game-id"></strong></label>
-        <button id="copy-game-id-btn" class="secondary-btn">📋 Copy ID</button>
-      </div>
-      <div class="control-group">
-        <button id="reset-button" class="danger-btn">🔄 Reset Game</button>
-      </div>
-    </div>
-
-    <div id="player-controls" class="controls-section">
-      <div class="control-group">
-        <label for="game-id-input">Game ID:</label>
-        <input type="text" id="game-id-input" placeholder="Enter Game ID">
-      </div>
-      <div class="control-group">
-        <label for="x-handle-input">X Handle:</label>
-        <input type="text" id="x-handle-input" placeholder="@YourHandle">
-      </div>
-      <div class="control-group">
-        <button id="join-game-btn" class="primary-btn">Join Game</button>
-      </div>
-    </div>
-
-    <div id="current-game-type" class="game-type-display"></div>
-
-    <button id="roll-button" class="roll-btn">🎲 ROLL!</button>
-    
-    <div id="result" class="result-display"></div>
-
-    <div class="stats-container">
-      <div class="stat-item">
-        <div class="stat-label">Numbers Called</div>
-        <div class="stat-value" id="numbers-called">0</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-label">Remaining</div>
-        <div class="stat-value" id="numbers-remaining">75</div>
-      </div>
-    </div>
-
-    <div id="win-pattern-container" class="pattern-container">
-      <h3>Win Pattern</h3>
-      <div id="win-pattern" class="win-pattern"></div>
-    </div>
-
-    <div id="bingo-board" class="bingo-board"></div>
-
-    <div id="player-card-container" class="player-card-container"></div>
-
-    <div id="leaderboard" class="leaderboard-section"></div>
-  </main>
-
-  <div id="player-list" class="player-list">
-    <h3>Players</h3>
-    <div id="player-list-content"></div>
+  <div class="game-tabs">
+    <button class="tab-btn active" data-tab="host-game-tab">🎯 Game</button>
+    <button class="tab-btn" data-tab="host-players-tab">👥 Players</button>
+    <button class="tab-btn" data-tab="host-stats-tab">📊 Stats</button>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div class="tab-content active" id="host-game-tab">
+    <div class="board-wrapper">
+      <div id="host-board" class="bingo-board"></div>
+    </div>
+    <div class="pattern-display">
+      <div class="pattern-label" id="host-pattern-name">Single Line</div>
+      <div id="host-pattern-grid" class="pattern-grid"></div>
+    </div>
+  </div>
 
-  <footer class="site-footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-content">
-        <p class="footer-text">&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
-        <div class="footer-social">
-          <a href="https://x.com/BingoXRPL" target="_blank" rel="noopener noreferrer" aria-label="Follow BingoXRPL on X">X</a>
-          <a href="https://discord.com/invite/Aqx83bYQqm" target="_blank" rel="noopener noreferrer" aria-label="Join BingoXRPL Discord">Discord</a>
-          <a href="https://t.co/0Gw6NfQqPR" target="_blank" rel="noopener noreferrer" aria-label="Join BingoXRPL Telegram">Telegram</a>
-        </div>
+  <div class="tab-content" id="host-players-tab">
+    <div id="host-players-list" class="players-list"></div>
+  </div>
+
+  <div class="tab-content" id="host-stats-tab">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-called">0</div>
+        <div class="stat-label">Called</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-remaining">75</div>
+        <div class="stat-label">Remaining</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-players">0</div>
+        <div class="stat-label">Players</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-winners">0</div>
+        <div class="stat-label">Winners</div>
       </div>
     </div>
-  </footer>
+    <button id="btn-end-game" class="danger-btn">End Game</button>
+  </div>
 
-  <script src="assets/js/firebase-config.js"></script>
-  <script src="assets/js/bingo-game.js"></script>
-  <script>
-    const hamburger = document.querySelector('.hamburger');
-    const nav = document.querySelector('.header-nav');
-    
-    if(hamburger && nav) {
-      hamburger.addEventListener('click', function() {
-        const isExpanded = this.getAttribute('aria-expanded') === 'true';
-        this.setAttribute('aria-expanded', !isExpanded);
-        nav.classList.toggle('show');
-      });
-    }
-    
-    function shareGame() {
-      const gameUrl = window.location.href;
-      if (navigator.share) {
-        navigator.share({
-          title: '$BINGO Live Roller',
-          text: 'Play live bingo with me on BingoXRPL!',
-          url: gameUrl
-        }).catch(err => console.log('Share failed:', err));
-      } else {
-        navigator.clipboard.writeText(gameUrl);
-        const toast = document.getElementById('toast');
-        toast.textContent = '✅ Link copied to clipboard!';
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
-      }
-    }
-  </script>
+  <footer class="game-footer">
+    <button id="btn-host-home" class="footer-btn" title="Home">🏠</button>
+    <span class="footer-info">Host Mode</span>
+    <button id="btn-host-share" class="footer-btn" title="Share">📤</button>
+  </footer>
+</div>
+
+<div id="player-game-screen" class="screen">
+  <header class="game-header">
+    <div class="header-info">
+      <span class="player-name-label">@<span id="player-name-display">Player</span></span>
+    </div>
+    <div class="header-center">
+      <span id="player-last-called" class="last-called">--</span>
+    </div>
+    <div class="header-action">
+      <span class="cards-indicator" id="cards-indicator">1/1</span>
+    </div>
+  </header>
+
+  <div class="game-tabs">
+    <button class="tab-btn active" data-tab="player-cards-tab">🎴 My Cards</button>
+    <button class="tab-btn" data-tab="player-board-tab">🎯 Board</button>
+    <button class="tab-btn" data-tab="player-info-tab">ℹ️ Info</button>
+  </div>
+
+  <div class="tab-content active" id="player-cards-tab">
+    <div class="cards-nav" id="cards-nav" style="display:none;">
+      <button id="btn-prev-card" class="nav-arrow">◀</button>
+      <span id="card-position">Card 1 of 1</span>
+      <button id="btn-next-card" class="nav-arrow">▶</button>
+    </div>
+    <div id="player-cards-container" class="player-cards-grid"></div>
+  </div>
+
+  <div class="tab-content" id="player-board-tab">
+    <div class="board-wrapper">
+      <div id="player-board-view" class="bingo-board"></div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="player-info-tab">
+    <div class="info-section">
+      <div class="info-item">
+        <span class="info-label">Game ID:</span>
+        <span id="info-game-id" class="info-value">---</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Pattern:</span>
+        <span id="info-pattern" class="info-value">---</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Called:</span>
+        <span id="info-called" class="info-value">0/75</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Players:</span>
+        <span id="info-players" class="info-value">0</span>
+      </div>
+    </div>
+    <div class="pattern-display">
+      <div class="pattern-label" id="player-pattern-name">Single Line</div>
+      <div id="player-pattern-grid" class="pattern-grid"></div>
+    </div>
+    <button id="btn-leave-game" class="danger-btn">Leave Game</button>
+  </div>
+
+  <footer class="game-footer">
+    <button id="btn-player-home" class="footer-btn" title="Home">🏠</button>
+    <span class="footer-info">Player Mode</span>
+    <button id="btn-player-share" class="footer-btn" title="Share">📤</button>
+  </footer>
+</div>
+
+<div id="game-end-screen" class="screen">
+  <div class="end-container">
+    <h2>🎉 Game Over!</h2>
+    <div id="winners-display" class="winners-display"></div>
+    <div class="end-stats">
+      <div class="end-stat">
+        <span class="end-stat-value" id="end-numbers">0</span>
+        <span class="end-stat-label">Numbers Called</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-value" id="end-winners">0</span>
+        <span class="end-stat-label">Winners</span>
+      </div>
+    </div>
+    <div class="end-actions">
+      <button id="btn-play-again" class="primary-btn">Play Again</button>
+      <button id="btn-new-game" class="secondary-btn">New Game</button>
+      <button id="btn-go-home" class="tertiary-btn">Home</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="loading" class="loading-overlay"><div class="spinner"></div></div>
+
+<script src="assets/js/firebase-config.js"></script>
+<script src="assets/js/bingo-game.js"></script>
 </body>
 </html>
