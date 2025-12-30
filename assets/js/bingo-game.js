@@ -171,8 +171,17 @@ function showLoading(show = true) {
 function normalizeHandle(handle) {
   if (!handle) return '';
   handle = handle.trim();
-  if (handle.startsWith('@')) handle = handle.substring(1);
+  if (!handle.startsWith('@')) {
+    handle = '@' + handle;
+  }
   return handle;
+}
+
+function generateCardID() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const letter = letters[Math.floor(Math.random() * letters.length)];
+  const num = String(Math.floor(Math.random() * 100)).padStart(2, '0');
+  return `${letter}${num}`;
 }
 
 function getRandomNumber(min, max) {
@@ -189,7 +198,7 @@ function generateGameId() {
 
 function generateCard() {
   const card = {};
-  const cardID = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+  const cardID = generateCardID();
   
   LETTERS.forEach(letter => {
     const [min, max] = RANGES[letter];
@@ -287,6 +296,11 @@ function displayPlayerCards() {
     cardEl.className = 'player-card';
     cardEl.dataset.cardIndex = index;
     
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'card-label';
+    cardLabel.textContent = `Card ${cardData.cardID}`;
+    cardLabel.style.cssText = 'text-align:center;padding:0.5rem;font-weight:700;color:#00c6c9;';
+    
     LETTERS.forEach(L => {
       const h = document.createElement('div');
       h.className = 'header';
@@ -317,7 +331,10 @@ function displayPlayerCards() {
       });
     }
     
-    elems.playerCardsContainer.appendChild(cardEl);
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(cardLabel);
+    wrapper.appendChild(cardEl);
+    elems.playerCardsContainer.appendChild(wrapper);
   });
   
   updateCardNavigation();
@@ -495,7 +512,7 @@ function updatePlayersList() {
     div.className = 'player-item';
     const isWinner = winnersData.some(w => w.handle === p.handle);
     if (isWinner) div.classList.add('winner');
-    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">#${p.cardID || 'N/A'}</div>`;
+    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">#${p.cardID}</div>`;
     elems.hostPlayersList.appendChild(div);
   });
   
@@ -548,14 +565,15 @@ function setupFirebaseListeners() {
         const winResult = checkAllCardsForWin();
         if (winResult) {
           playerHasWon = true;
-          showToast(`🎉 BINGO! Card ${winResult.cardIndex + 1} wins!`, 5000);
+          showToast(`🎉 BINGO! Card ${winResult.cardID} wins!`, 5000);
           if (gameRef && playerHandle) {
-            const handleKey = normalizeHandle(playerHandle);
+            const handleKey = normalizeHandle(playerHandle).substring(1);
             gameRef.child('winners').child(handleKey).set({
               handle: playerHandle,
               cardID: winResult.cardID,
               gameType: gameType,
-              timestamp: Date.now()
+              wonAt: Date.now(),
+              numbersCalled: calledNumbers.size
             }).catch(err => console.error('Error recording win:', err));
           }
         }
@@ -580,7 +598,7 @@ function setupFirebaseListeners() {
         const winResult = checkAllCardsForWin();
         if (winResult) {
           playerHasWon = true;
-          showToast(`🎉 BINGO! Card ${winResult.cardIndex + 1} wins with new pattern!`, 5000);
+          showToast(`🎉 BINGO! Card ${winResult.cardID} wins with new pattern!`, 5000);
         }
       }
     }
@@ -593,7 +611,9 @@ function setupFirebaseListeners() {
       if (pData && pData.handle) {
         playersData.push({
           handle: pData.handle,
-          cardID: pData.cardID || 'N/A'
+          cardID: pData.cardID || 'N/A',
+          numCards: pData.numCards || 1,
+          joinedAt: pData.joinedAt || 0
         });
       }
     });
@@ -656,6 +676,29 @@ function handleURLParams() {
   }
 }
 
+function exportWinnersForPrizes() {
+  if (!winnersData || winnersData.length === 0) {
+    console.log('No winners to export');
+    return null;
+  }
+  
+  const exportData = {
+    gameId: gameId,
+    totalWinners: winnersData.length,
+    totalNumbersCalled: calledNumbers.size,
+    winners: winnersData.map(w => ({
+      handle: w.handle,
+      cardID: w.cardID,
+      pattern: GAME_PATTERNS[w.gameType]?.name || w.gameType,
+      wonAt: new Date(w.wonAt).toLocaleString(),
+      numbersCalled: w.numbersCalled
+    }))
+  };
+  
+  console.log('🏆 Winners Export for Prizes:', exportData);
+  return exportData;
+}
+
 if (elems.hostPattern) {
   elems.hostPattern.addEventListener('change', () => {
     if (isHost && gameRef && initialLoadComplete) {
@@ -697,7 +740,7 @@ if (elems.btnStartHost) {
     const handle = normalizeHandle(elems.hostHandle.value);
     const pattern = elems.hostPattern.value;
     
-    if (!handle || handle.length < 2) {
+    if (!handle || handle.length < 3) {
       return showToast('⚠️ Enter a valid handle (at least 2 characters)', 3000);
     }
     
@@ -720,6 +763,7 @@ if (elems.btnStartHost) {
       gameRef = database.ref(`games/${gameId}`);
       gameRef.child('gameType').set(gameType);
       gameRef.child('host').set(hostHandle);
+      gameRef.child('created').set(Date.now());
       
       setupFirebaseListeners();
       createBoard(elems.hostBoard);
@@ -749,7 +793,7 @@ if (elems.btnJoinGame) {
     const cardsCount = parseInt(elems.playerCardsSelect.value) || 1;
     
     if (!gid) return showToast('⚠️ Enter a valid Game ID', 3000);
-    if (!handle || handle.length < 2) return showToast('⚠️ Enter a valid handle (at least 2 characters)', 3000);
+    if (!handle || handle.length < 3) return showToast('⚠️ Enter a valid handle (at least 2 characters)', 3000);
     
     showLoading(true);
     
@@ -771,12 +815,12 @@ if (elems.btnJoinGame) {
         
         gameRef = database.ref(`games/${gameId}`);
         
-        const handleKey = normalizeHandle(handle);
+        const handleKey = handle.substring(1);
         return gameRef.child('players').child(handleKey).set({
           handle: handle,
           cardID: playerCards[0].cardID,
           numCards: numCards,
-          timestamp: Date.now()
+          joinedAt: Date.now()
         });
       })
       .then(() => {
@@ -878,10 +922,15 @@ if (elems.btnEndGame) {
         winnersData.forEach(w => {
           const div = document.createElement('div');
           div.className = 'winner-entry';
-          div.textContent = `🎉 ${w.handle}`;
+          div.textContent = `🎉 ${w.handle} - Card ${w.cardID}`;
           elems.winnersDisplay.appendChild(div);
         });
       }
+    }
+    
+    const prizeData = exportWinnersForPrizes();
+    if (prizeData) {
+      console.table(prizeData.winners);
     }
     
     showScreen('gameEnd');
@@ -894,7 +943,7 @@ if (elems.btnLeaveGame) {
     
     cleanupFirebaseListeners();
     if (gameRef && playerHandle) {
-      const handleKey = normalizeHandle(playerHandle);
+      const handleKey = playerHandle.substring(1);
       gameRef.child('players').child(handleKey).remove();
     }
     
@@ -992,5 +1041,8 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
-console.log('%c$BINGO Live v7.0 🎉', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('%c$BINGO Live v8.0 - Prize Ready 🏆', 'color: #FFD700; font-size: 20px; font-weight: bold;');
 console.log('Firebase Project:', firebaseConfig.projectId);
+console.log('Export winners: Call exportWinnersForPrizes() in console');
+
+window.exportWinnersForPrizes = exportWinnersForPrizes;
