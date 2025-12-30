@@ -1,11 +1,11 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
-  authDomain: "bingo-roller-1dcb0.firebaseapp.com",
-  databaseURL: "https://bingo-roller-1dcb0-default-rtdb.firebaseio.com",
-  projectId: "bingo-roller-1dcb0",
-  storageBucket: "bingo-roller-1dcb0.firebasestorage.app",
-  messagingSenderId: "10627009607",
-  appId: "1:10627009607:web:2c6e2ce5aa13cff7f30c09",
+  authDomain: "bingoxrpl.firebaseapp.com",
+  databaseURL: "https://bingoxrpl-default-rtdb.firebaseio.com",
+  projectId: "bingoxrpl",  // ← CORRECT PROJECT
+  storageBucket: "bingoxrpl.firebasestorage.app",
+  messagingSenderId: "1032944729350",
+  appId: "1:1032944729350:web:77c0cc92c59dce214d3287",
   measurementId: "G-H99K0B4L10"
 };
 
