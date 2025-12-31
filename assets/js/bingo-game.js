@@ -1,6 +1,8 @@
 const LETTERS = ['B','I','N','G','O'];
 const RANGES = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 
+// ✅ PRODUCTION VERSION v9.0 - ALL FIXES IMPLEMENTED
+
 const GAME_PATTERNS = {
   singleLine: {
     pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
