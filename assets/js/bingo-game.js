@@ -1,8 +1,6 @@
 const LETTERS = ['B','I','N','G','O'];
 const RANGES = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 
-// ✅ PRODUCTION VERSION v9.0 - ALL FIXES IMPLEMENTED
-
 const GAME_PATTERNS = {
   singleLine: {
     pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
@@ -81,7 +79,7 @@ let calledNumbers = new Set();
 let gameRef = null;
 let playersData = [];
 let winnersData = [];
-let playerHasWon = false;
+let cardWins = [];
 let initialLoadComplete = false;
 
 const screens = {
@@ -100,6 +98,7 @@ const elems = {
   btnBackFromPlayer: document.getElementById('btn-back-from-player'),
   hostHandle: document.getElementById('host-handle'),
   hostPattern: document.getElementById('host-pattern'),
+  hostPatternChange: document.getElementById('host-pattern-change'),
   btnStartHost: document.getElementById('btn-start-host'),
   playerGameId: document.getElementById('player-gameid'),
   playerHandle: document.getElementById('player-handle'),
@@ -129,6 +128,7 @@ const elems = {
   btnNextCard: document.getElementById('btn-next-card'),
   playerCardsContainer: document.getElementById('player-cards-container'),
   playerBoardView: document.getElementById('player-board-view'),
+  playerPlayersList: document.getElementById('player-players-list'),
   infoGameId: document.getElementById('info-game-id'),
   infoPattern: document.getElementById('info-pattern'),
   infoCalled: document.getElementById('info-called'),
@@ -293,15 +293,24 @@ function displayPlayerCards() {
   if (!elems.playerCardsContainer) return;
   elems.playerCardsContainer.innerHTML = '';
   
+  if (numCards === 1) {
+    elems.playerCardsContainer.classList.add('single-card');
+  } else {
+    elems.playerCardsContainer.classList.remove('single-card');
+  }
+  
   playerCards.forEach((cardData, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'player-card-wrapper';
+    if (index === currentCardIndex) wrapper.classList.add('active');
+    
+    const cardLabel = document.createElement('div');
+    cardLabel.className = 'card-id-label';
+    cardLabel.textContent = `Card ${cardData.cardID}`;
+    
     const cardEl = document.createElement('div');
     cardEl.className = 'player-card';
     cardEl.dataset.cardIndex = index;
-    
-    const cardLabel = document.createElement('div');
-    cardLabel.className = 'card-label';
-    cardLabel.textContent = `Card ${cardData.cardID}`;
-    cardLabel.style.cssText = 'text-align:center;padding:0.5rem;font-weight:700;color:#00c6c9;';
     
     LETTERS.forEach(L => {
       const h = document.createElement('div');
@@ -333,7 +342,6 @@ function displayPlayerCards() {
       });
     }
     
-    const wrapper = document.createElement('div');
     wrapper.appendChild(cardLabel);
     wrapper.appendChild(cardEl);
     elems.playerCardsContainer.appendChild(wrapper);
@@ -353,6 +361,14 @@ function updateCardNavigation() {
     
     if (elems.btnPrevCard) elems.btnPrevCard.disabled = (currentCardIndex === 0);
     if (elems.btnNextCard) elems.btnNextCard.disabled = (currentCardIndex === numCards - 1);
+    
+    document.querySelectorAll('.player-card-wrapper').forEach((wrapper, idx) => {
+      if (idx === currentCardIndex) {
+        wrapper.classList.add('active');
+      } else {
+        wrapper.classList.remove('active');
+      }
+    });
   }
 }
 
@@ -437,12 +453,14 @@ function checkWinPattern(card, called, pattern) {
 }
 
 function checkAllCardsForWin() {
-  if (playerHasWon) return null;
-  
   const patternConfig = GAME_PATTERNS[gameType];
-  if (!patternConfig) return null;
+  if (!patternConfig) return [];
+  
+  const newWins = [];
   
   for (let i = 0; i < playerCards.length; i++) {
+    if (cardWins[i]) continue;
+    
     const cardData = playerCards[i];
     let hasWon = false;
     
@@ -455,11 +473,12 @@ function checkAllCardsForWin() {
     }
     
     if (hasWon) {
-      return { cardIndex: i, cardID: cardData.cardID };
+      newWins.push({ cardIndex: i, cardID: cardData.cardID });
+      cardWins[i] = true;
     }
   }
   
-  return null;
+  return newWins;
 }
 
 function rollNumber() {
@@ -498,15 +517,15 @@ function updateStats() {
   if (elems.infoCalled) elems.infoCalled.textContent = `${calledNumbers.size}/75`;
 }
 
-function updatePlayersList() {
-  if (!elems.hostPlayersList) return;
-  elems.hostPlayersList.innerHTML = '';
+function displayPlayerList(listElement) {
+  if (!listElement) return;
+  listElement.innerHTML = '';
   
   if (isHost && hostHandle) {
     const hostDiv = document.createElement('div');
     hostDiv.className = 'player-item host-player';
     hostDiv.innerHTML = `<div>👑 ${hostHandle} (Host)</div><div class="cardid">HOST</div>`;
-    elems.hostPlayersList.appendChild(hostDiv);
+    listElement.appendChild(hostDiv);
   }
   
   playersData.forEach(p => {
@@ -514,12 +533,22 @@ function updatePlayersList() {
     div.className = 'player-item';
     const isWinner = winnersData.some(w => w.handle === p.handle);
     if (isWinner) div.classList.add('winner');
-    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">#${p.cardID}</div>`;
-    elems.hostPlayersList.appendChild(div);
+    
+    const cardInfo = p.cardIDs && p.cardIDs.length > 1 
+      ? `${p.cardIDs.length} cards` 
+      : `#${p.cardIDs ? p.cardIDs[0] : p.cardID || 'N/A'}`;
+    
+    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">${cardInfo}</div>`;
+    listElement.appendChild(div);
   });
   
   if (elems.statPlayers) elems.statPlayers.textContent = playersData.length + (isHost ? 1 : 0);
   if (elems.infoPlayers) elems.infoPlayers.textContent = playersData.length + (isHost ? 1 : 0);
+}
+
+function updatePlayersList() {
+  displayPlayerList(elems.hostPlayersList);
+  displayPlayerList(elems.playerPlayersList);
 }
 
 function setupFirebaseListeners() {
@@ -564,13 +593,13 @@ function setupFirebaseListeners() {
       updateStats();
       
       if (!isHost) {
-        const winResult = checkAllCardsForWin();
-        if (winResult) {
-          playerHasWon = true;
+        const newWins = checkAllCardsForWin();
+        newWins.forEach(winResult => {
           showToast(`🎉 BINGO! Card ${winResult.cardID} wins!`, 5000);
           if (gameRef && playerHandle) {
             const handleKey = normalizeHandle(playerHandle).substring(1);
-            gameRef.child('winners').child(handleKey).set({
+            const winKey = `${handleKey}_${winResult.cardID}`;
+            gameRef.child('winners').child(winKey).set({
               handle: playerHandle,
               cardID: winResult.cardID,
               gameType: gameType,
@@ -578,7 +607,7 @@ function setupFirebaseListeners() {
               numbersCalled: calledNumbers.size
             }).catch(err => console.error('Error recording win:', err));
           }
-        }
+        });
       }
     }
   });
@@ -593,15 +622,16 @@ function setupFirebaseListeners() {
       displayPattern(elems.playerPatternGrid, elems.playerPatternName);
       if (elems.infoPattern) elems.infoPattern.textContent = GAME_PATTERNS[gameType]?.name || 'Unknown';
       
+      if (elems.hostPatternChange) elems.hostPatternChange.value = gameType;
+      
       if (!isHost && initialLoadComplete) {
         showToast(`🔄 Pattern changed to: ${GAME_PATTERNS[gameType].name}`, 4000);
-        playerHasWon = false;
+        cardWins = [];
         
-        const winResult = checkAllCardsForWin();
-        if (winResult) {
-          playerHasWon = true;
+        const newWins = checkAllCardsForWin();
+        newWins.forEach(winResult => {
           showToast(`🎉 BINGO! Card ${winResult.cardID} wins with new pattern!`, 5000);
-        }
+        });
       }
     }
   });
@@ -614,6 +644,7 @@ function setupFirebaseListeners() {
         playersData.push({
           handle: pData.handle,
           cardID: pData.cardID || 'N/A',
+          cardIDs: pData.cardIDs || [pData.cardID],
           numCards: pData.numCards || 1,
           joinedAt: pData.joinedAt || 0
         });
@@ -698,13 +729,99 @@ function exportWinnersForPrizes() {
   };
   
   console.log('🏆 Winners Export for Prizes:', exportData);
+  console.table(exportData.winners);
   return exportData;
+}
+
+function startOnboardingTour() {
+  const hasSeenTour = localStorage.getItem('bingoTourCompleted');
+  if (hasSeenTour) return;
+  
+  const tourSteps = [
+    { element: '#display-game-id', text: 'This is your Game ID. Share it with players!' },
+    { element: '#btn-copy-id', text: 'Click here to copy the game link to share.' },
+    { element: '#btn-roll', text: 'Click ROLL to call the next number.' },
+    { element: '#host-pattern-change', text: 'Change patterns mid-game for progressive gameplay!' },
+    { element: '.game-tabs', text: 'Switch between tabs to see players, stats, and more.' },
+    { element: '#btn-end-game', text: 'End the game when ready to see all winners.' }
+  ];
+  
+  let currentStep = 0;
+  const overlay = document.createElement('div');
+  overlay.className = 'tour-overlay';
+  overlay.innerHTML = `
+    <div class="tour-spotlight"></div>
+    <div class="tour-tooltip">
+      <div class="tour-content"></div>
+      <div class="tour-actions">
+        <button class="tour-skip">Skip Tour</button>
+        <button class="tour-next">Next</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  function showStep(stepIndex) {
+    if (stepIndex >= tourSteps.length) {
+      endTour();
+      return;
+    }
+    
+    const step = tourSteps[stepIndex];
+    const element = document.querySelector(step.element);
+    if (!element) {
+      showStep(stepIndex + 1);
+      return;
+    }
+    
+    const rect = element.getBoundingClientRect();
+    const spotlight = overlay.querySelector('.tour-spotlight');
+    const tooltip = overlay.querySelector('.tour-tooltip');
+    const content = overlay.querySelector('.tour-content');
+    
+    spotlight.style.cssText = `
+      top: ${rect.top - 10}px;
+      left: ${rect.left - 10}px;
+      width: ${rect.width + 20}px;
+      height: ${rect.height + 20}px;
+    `;
+    
+    content.textContent = step.text;
+    
+    tooltip.style.cssText = `
+      top: ${rect.bottom + 20}px;
+      left: ${Math.max(20, rect.left)}px;
+    `;
+    
+    overlay.classList.add('active');
+  }
+  
+  function endTour() {
+    overlay.remove();
+    localStorage.setItem('bingoTourCompleted', 'true');
+    showToast('Tour complete! Ready to host! 🎉', 3000);
+  }
+  
+  overlay.querySelector('.tour-next').addEventListener('click', () => {
+    currentStep++;
+    showStep(currentStep);
+  });
+  
+  overlay.querySelector('.tour-skip').addEventListener('click', endTour);
+  
+  setTimeout(() => showStep(0), 1000);
 }
 
 if (elems.hostPattern) {
   elems.hostPattern.addEventListener('change', () => {
+    gameType = elems.hostPattern.value;
+  });
+}
+
+if (elems.hostPatternChange) {
+  elems.hostPatternChange.addEventListener('change', () => {
     if (isHost && gameRef && initialLoadComplete) {
-      const newPattern = elems.hostPattern.value;
+      const newPattern = elems.hostPatternChange.value;
       gameType = newPattern;
       gameRef.child('gameType').set(gameType).catch(err => console.error('Pattern change error:', err));
       displayPattern(elems.hostPatternGrid, elems.hostPatternName);
@@ -757,6 +874,7 @@ if (elems.btnStartHost) {
       calledNumbers.clear();
       playersData = [];
       winnersData = [];
+      cardWins = [];
       initialLoadComplete = false;
       
       if (elems.displayGameId) elems.displayGameId.textContent = gameId;
@@ -766,6 +884,8 @@ if (elems.btnStartHost) {
       gameRef.child('gameType').set(gameType);
       gameRef.child('host').set(hostHandle);
       gameRef.child('created').set(Date.now());
+      
+      if (elems.hostPatternChange) elems.hostPatternChange.value = gameType;
       
       setupFirebaseListeners();
       createBoard(elems.hostBoard);
@@ -780,6 +900,8 @@ if (elems.btnStartHost) {
       showLoading(false);
       showScreen('hostGame');
       showToast(`🎮 Game ${gameId} started! Share the ID with players.`, 3500);
+      
+      startOnboardingTour();
     }).catch(err => {
       console.error('Auth error:', err);
       showLoading(false);
@@ -805,22 +927,25 @@ if (elems.btnJoinGame) {
         playerHandle = handle;
         numCards = cardsCount;
         playerCards = [];
-        playerHasWon = false;
+        cardWins = [];
         currentCardIndex = 0;
         
         for (let i = 0; i < numCards; i++) {
           playerCards.push(generateCard());
         }
         
-        if (elems.playerNameDisplay) elems.playerNameDisplay.textContent = handle;
+        if (elems.playerNameDisplay) elems.playerNameDisplay.textContent = handle.replace('@', '');
         if (elems.playerLastCalled) elems.playerLastCalled.textContent = '--';
         
         gameRef = database.ref(`games/${gameId}`);
         
         const handleKey = handle.substring(1);
+        const allCardIDs = playerCards.map(c => c.cardID);
+        
         return gameRef.child('players').child(handleKey).set({
           handle: handle,
           cardID: playerCards[0].cardID,
+          cardIDs: allCardIDs,
           numCards: numCards,
           joinedAt: Date.now()
         });
@@ -833,6 +958,7 @@ if (elems.btnJoinGame) {
         updateStats();
         
         if (elems.infoGameId) elems.infoGameId.textContent = gameId;
+        if (elems.infoPattern) elems.infoPattern.textContent = GAME_PATTERNS[gameType]?.name || 'Unknown';
         
         showLoading(false);
         showScreen('playerGame');
@@ -931,9 +1057,6 @@ if (elems.btnEndGame) {
     }
     
     const prizeData = exportWinnersForPrizes();
-    if (prizeData) {
-      console.table(prizeData.winners);
-    }
     
     showScreen('gameEnd');
   });
@@ -969,7 +1092,7 @@ if (elems.btnPlayAgain) {
   elems.btnPlayAgain.addEventListener('click', () => {
     calledNumbers.clear();
     winnersData = [];
-    playerHasWon = false;
+    cardWins = [];
     initialLoadComplete = false;
     
     if (gameRef) {
@@ -1014,7 +1137,7 @@ if (elems.btnNewGame) {
     hostHandle = null;
     playerHandle = null;
     playerCards = [];
-    playerHasWon = false;
+    cardWins = [];
     calledNumbers.clear();
     playersData = [];
     winnersData = [];
@@ -1043,8 +1166,12 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
-console.log('%c$BINGO Live v8.0 - Prize Ready 🏆', 'color: #FFD700; font-size: 20px; font-weight: bold;');
+console.log('%c$BINGO Live v9.0 - Production Ready 🚀', 'color: #00FF00; font-size: 20px; font-weight: bold;');
 console.log('Firebase Project:', firebaseConfig.projectId);
 console.log('Export winners: Call exportWinnersForPrizes() in console');
 
 window.exportWinnersForPrizes = exportWinnersForPrizes;
+window.resetTour = () => {
+  localStorage.removeItem('bingoTourCompleted');
+  showToast('Tour reset! Start hosting to see it again.', 2000);
+};
