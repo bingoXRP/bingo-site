@@ -113,8 +113,12 @@
 
 <div id="host-game-screen" class="screen">
   <header class="game-header">
+    <div class="header-brand">
+      <img src="assets/images/mascot-hero.png" alt="Bingo" class="header-logo">
+      <span class="header-title">$BINGO</span>
+    </div>
     <div class="header-info">
-      <span class="game-id-label">Game ID:</span>
+      <span class="game-id-label">ID:</span>
       <strong id="display-game-id" class="game-id-value">---</strong>
       <button id="btn-copy-id" class="icon-btn" title="Copy Game ID">📋</button>
     </div>
@@ -139,6 +143,23 @@
     <div class="pattern-display">
       <div class="pattern-label" id="host-pattern-name">Single Line</div>
       <div id="host-pattern-grid" class="pattern-grid"></div>
+      <div class="pattern-change-section">
+        <label for="host-pattern-change">Change Pattern:</label>
+        <select id="host-pattern-change" class="pattern-change-select">
+          <option value="singleLine">Single Line</option>
+          <option value="doubleLine">Double Line</option>
+          <option value="fourCorners">Four Corners</option>
+          <option value="tShape">T-Shape</option>
+          <option value="plusSign">Plus Sign</option>
+          <option value="xShape">X-Shape</option>
+          <option value="letterH">Letter H</option>
+          <option value="letterL">Letter L</option>
+          <option value="letterU">Letter U</option>
+          <option value="pictureFrame">Picture Frame</option>
+          <option value="perimeter">Perimeter</option>
+          <option value="fullCard">Full Card (Blackout)</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -177,8 +198,12 @@
 
 <div id="player-game-screen" class="screen">
   <header class="game-header">
+    <div class="header-brand">
+      <img src="assets/images/mascot-hero.png" alt="Bingo" class="header-logo">
+      <span class="header-title">$BINGO</span>
+    </div>
     <div class="header-info">
-      <span class="player-name-label">@<span id="player-name-display">Player</span></span>
+      <span class="player-name-label" id="player-name-display">Player</span>
     </div>
     <div class="header-center">
       <span id="player-last-called" class="last-called">--</span>
@@ -191,6 +216,7 @@
   <div class="game-tabs">
     <button class="tab-btn active" data-tab="player-cards-tab">🎴 My Cards</button>
     <button class="tab-btn" data-tab="player-board-tab">🎯 Board</button>
+    <button class="tab-btn" data-tab="player-players-tab">👥 Players</button>
     <button class="tab-btn" data-tab="player-info-tab">ℹ️ Info</button>
   </div>
 
@@ -207,6 +233,10 @@
     <div class="board-wrapper">
       <div id="player-board-view" class="bingo-board"></div>
     </div>
+  </div>
+
+  <div class="tab-content" id="player-players-tab">
+    <div id="player-players-list" class="players-list"></div>
   </div>
 
   <div class="tab-content" id="player-info-tab">
