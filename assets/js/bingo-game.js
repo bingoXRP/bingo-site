@@ -1,3 +1,8 @@
+// ============================================
+// $BINGO LIVE - PRODUCTION v10.0
+// All critical fixes + improvements included
+// ============================================
+
 const LETTERS = ['B','I','N','G','O'];
 const RANGES = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 
@@ -81,6 +86,8 @@ let playersData = [];
 let winnersData = [];
 let cardWins = [];
 let initialLoadComplete = false;
+let isConnected = true;
+let connectionRef = null;
 
 const screens = {
   landing: document.getElementById('landing-screen'),
@@ -170,6 +177,29 @@ function showLoading(show = true) {
   }
 }
 
+function validateHandle(handle) {
+  if (!handle || handle.trim().length < 2) {
+    return { valid: false, error: 'Handle must be at least 2 characters' };
+  }
+  if (handle.length > 20) {
+    return { valid: false, error: 'Handle must be 20 characters or less' };
+  }
+  if (!/^[a-zA-Z0-9_-]+$/.test(handle.replace('@', ''))) {
+    return { valid: false, error: 'Handle can only contain letters, numbers, _ and -' };
+  }
+  return { valid: true };
+}
+
+function validateGameId(gameId) {
+  if (!gameId || gameId.trim().length !== 8) {
+    return { valid: false, error: 'Game ID must be exactly 8 characters' };
+  }
+  if (!/^[A-Z0-9]+$/.test(gameId)) {
+    return { valid: false, error: 'Game ID can only contain letters and numbers' };
+  }
+  return { valid: true };
+}
+
 function normalizeHandle(handle) {
   if (!handle) return '';
   handle = handle.trim();
@@ -217,6 +247,42 @@ function generateCard() {
   });
   
   return { card, cardID };
+}
+
+function setupConnectionMonitoring() {
+  if (connectionRef) return;
+  
+  connectionRef = database.ref('.info/connected');
+  connectionRef.on('value', (snap) => {
+    isConnected = snap.val() === true;
+    
+    if (!isConnected) {
+      showToast('⚠️ Connection lost. Reconnecting...', 5000);
+    } else if (STATE !== 'LANDING' && STATE !== 'HOSTSETUP' && STATE !== 'PLAYERSETUP') {
+      showToast('✅ Connected', 2000);
+    }
+  });
+}
+
+function handleFirebaseError(error, context = '') {
+  console.error(`Firebase error (${context}):`, error);
+  
+  let userMessage = 'An error occurred. Please try again.';
+  
+  if (error.code === 'PERMISSION_DENIED') {
+    userMessage = 'Access denied. The game may not exist or has ended.';
+  } else if (error.code === 'NETWORK_ERROR' || error.message.includes('network')) {
+    userMessage = 'Network error. Check your connection and try again.';
+  } else if (error.code === 'UNAVAILABLE') {
+    userMessage = 'Service temporarily unavailable. Please try again.';
+  } else if (context === 'join') {
+    userMessage = 'Could not join game. Verify the Game ID and try again.';
+  } else if (context === 'create') {
+    userMessage = 'Could not create game. Please try again.';
+  }
+  
+  showToast(`❌ ${userMessage}`, 4000);
+  return userMessage;
 }
 
 function createBoard(boardElement) {
@@ -503,8 +569,7 @@ function rollNumber() {
   
   if (gameRef) {
     gameRef.child('called').push(rolled).catch(err => {
-      console.error('Firebase push error:', err);
-      showToast('Error syncing number to Firebase', 2000);
+      handleFirebaseError(err, 'roll');
     });
   }
   
@@ -515,6 +580,11 @@ function updateStats() {
   if (elems.statCalled) elems.statCalled.textContent = calledNumbers.size;
   if (elems.statRemaining) elems.statRemaining.textContent = 75 - calledNumbers.size;
   if (elems.infoCalled) elems.infoCalled.textContent = `${calledNumbers.size}/75`;
+  
+  if (elems.btnRoll && calledNumbers.size >= 75) {
+    elems.btnRoll.disabled = true;
+    elems.btnRoll.textContent = '✓ ALL CALLED';
+  }
 }
 
 function displayPlayerList(listElement) {
@@ -572,8 +642,7 @@ function setupFirebaseListeners() {
       initialLoadComplete = true;
     }, 1000);
   }).catch(err => {
-    console.error('Firebase read error:', err);
-    showToast('Error connecting to game', 3000);
+    handleFirebaseError(err, 'load');
     showLoading(false);
   });
   
@@ -605,7 +674,7 @@ function setupFirebaseListeners() {
               gameType: gameType,
               wonAt: Date.now(),
               numbersCalled: calledNumbers.size
-            }).catch(err => console.error('Error recording win:', err));
+            }).catch(err => handleFirebaseError(err, 'win'));
           }
         });
       }
@@ -661,6 +730,7 @@ function setupFirebaseListeners() {
         winnersData.push(wData);
       }
     });
+    winnersData.sort((a, b) => a.wonAt - b.wonAt);
     if (elems.statWinners) elems.statWinners.textContent = winnersData.length;
     updatePlayersList();
   });
@@ -738,12 +808,12 @@ function startOnboardingTour() {
   if (hasSeenTour) return;
   
   const tourSteps = [
-    { element: '#display-game-id', text: 'This is your Game ID. Share it with players!' },
-    { element: '#btn-copy-id', text: 'Click here to copy the game link to share.' },
-    { element: '#btn-roll', text: 'Click ROLL to call the next number.' },
-    { element: '#host-pattern-change', text: 'Change patterns mid-game for progressive gameplay!' },
-    { element: '.game-tabs', text: 'Switch between tabs to see players, stats, and more.' },
-    { element: '#btn-end-game', text: 'End the game when ready to see all winners.' }
+    { element: '#display-game-id', text: 'This is your Game ID. Share it with players!', tab: null },
+    { element: '#btn-copy-id', text: 'Click here to copy the game link to share.', tab: null },
+    { element: '#btn-roll', text: 'Click ROLL to call the next number.', tab: null },
+    { element: '#host-pattern-change', text: 'Change patterns mid-game for progressive gameplay!', tab: 'host-game-tab' },
+    { element: '.game-tabs', text: 'Switch between tabs to see players, stats, and more.', tab: null },
+    { element: '#btn-end-game', text: 'End the game when ready to see all winners.', tab: 'host-stats-tab' }
   ];
   
   let currentStep = 0;
@@ -752,6 +822,7 @@ function startOnboardingTour() {
   overlay.innerHTML = `
     <div class="tour-spotlight"></div>
     <div class="tour-tooltip">
+      <div class="tour-progress">Step <span class="tour-current">1</span> of <span class="tour-total">${tourSteps.length}</span></div>
       <div class="tour-content"></div>
       <div class="tour-actions">
         <button class="tour-skip">Skip Tour</button>
@@ -761,6 +832,56 @@ function startOnboardingTour() {
   `;
   document.body.appendChild(overlay);
   
+  document.body.style.overflow = 'hidden';
+  
+  function positionTooltip(rect, tooltip) {
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    const tooltipRect = tooltip.getBoundingClientRect();
+    
+    if (window.innerWidth <= 767) {
+      tooltip.style.cssText = `
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        top: auto;
+        max-width: none;
+        width: calc(100vw - 40px);
+      `;
+      return;
+    }
+    
+    let top = rect.bottom + 20;
+    let left = Math.max(20, rect.left);
+    
+    if (top + tooltipRect.height > viewportHeight - 20) {
+      top = rect.top - tooltipRect.height - 20;
+    }
+    
+    if (left + tooltipRect.width > viewportWidth - 20) {
+      left = viewportWidth - tooltipRect.width - 20;
+    }
+    
+    left = Math.max(20, left);
+    
+    tooltip.style.cssText = `
+      top: ${top}px;
+      left: ${left}px;
+      right: auto;
+      bottom: auto;
+    `;
+  }
+  
+  function calculateSpotlightPadding(rect) {
+    const minPadding = 8;
+    const maxPadding = 20;
+    
+    const widthPadding = Math.max(minPadding, Math.min(maxPadding, rect.width * 0.1));
+    const heightPadding = Math.max(minPadding, Math.min(maxPadding, rect.height * 0.1));
+    
+    return { x: widthPadding, y: heightPadding };
+  }
+  
   function showStep(stepIndex) {
     if (stepIndex >= tourSteps.length) {
       endTour();
@@ -768,39 +889,87 @@ function startOnboardingTour() {
     }
     
     const step = tourSteps[stepIndex];
-    const element = document.querySelector(step.element);
-    if (!element) {
-      showStep(stepIndex + 1);
-      return;
+    
+    if (step.tab) {
+      const tabBtn = document.querySelector(`[data-tab="${step.tab}"]`);
+      if (tabBtn && !tabBtn.classList.contains('active')) {
+        tabBtn.click();
+      }
     }
     
-    const rect = element.getBoundingClientRect();
-    const spotlight = overlay.querySelector('.tour-spotlight');
-    const tooltip = overlay.querySelector('.tour-tooltip');
-    const content = overlay.querySelector('.tour-content');
-    
-    spotlight.style.cssText = `
-      top: ${rect.top - 10}px;
-      left: ${rect.left - 10}px;
-      width: ${rect.width + 20}px;
-      height: ${rect.height + 20}px;
-    `;
-    
-    content.textContent = step.text;
-    
-    tooltip.style.cssText = `
-      top: ${rect.bottom + 20}px;
-      left: ${Math.max(20, rect.left)}px;
-    `;
-    
-    overlay.classList.add('active');
+    setTimeout(() => {
+      const element = document.querySelector(step.element);
+      if (!element) {
+        console.warn(`Tour element not found: ${step.element}`);
+        showStep(stepIndex + 1);
+        return;
+      }
+      
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center'
+      });
+      
+      setTimeout(() => {
+        const rect = element.getBoundingClientRect();
+        const spotlight = overlay.querySelector('.tour-spotlight');
+        const tooltip = overlay.querySelector('.tour-tooltip');
+        const content = overlay.querySelector('.tour-content');
+        const currentSpan = overlay.querySelector('.tour-current');
+        const nextBtn = overlay.querySelector('.tour-next');
+        
+        const padding = calculateSpotlightPadding(rect);
+        
+        spotlight.style.cssText = `
+          top: ${rect.top - padding.y}px;
+          left: ${rect.left - padding.x}px;
+          width: ${rect.width + (padding.x * 2)}px;
+          height: ${rect.height + (padding.y * 2)}px;
+        `;
+        
+        content.textContent = step.text;
+        currentSpan.textContent = stepIndex + 1;
+        
+        if (stepIndex === tourSteps.length - 1) {
+          nextBtn.textContent = 'Finish';
+        } else {
+          nextBtn.textContent = 'Next';
+        }
+        
+        positionTooltip(rect, tooltip);
+        
+        overlay.classList.add('active');
+        
+        spotlight.classList.add('pulse');
+        setTimeout(() => spotlight.classList.remove('pulse'), 3000);
+      }, 500);
+    }, step.tab ? 300 : 0);
   }
   
   function endTour() {
     overlay.remove();
+    document.body.style.overflow = '';
     localStorage.setItem('bingoTourCompleted', 'true');
     showToast('Tour complete! Ready to host! 🎉', 3000);
+    document.removeEventListener('keydown', handleKeyboard);
   }
+  
+  function handleKeyboard(e) {
+    if (e.key === 'Escape') {
+      endTour();
+    } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      currentStep++;
+      showStep(currentStep);
+    } else if (e.key === 'ArrowLeft' && currentStep > 0) {
+      e.preventDefault();
+      currentStep--;
+      showStep(currentStep);
+    }
+  }
+  
+  document.addEventListener('keydown', handleKeyboard);
   
   overlay.querySelector('.tour-next').addEventListener('click', () => {
     currentStep++;
@@ -812,6 +981,38 @@ function startOnboardingTour() {
   setTimeout(() => showStep(0), 1000);
 }
 
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    if (e.code === 'Space' && isHost && STATE === 'HOSTGAME') {
+      e.preventDefault();
+      if (elems.btnRoll && !elems.btnRoll.disabled) {
+        elems.btnRoll.click();
+      }
+    }
+  });
+}
+
+function loadLastHandle() {
+  const lastHandle = localStorage.getItem('lastHandle');
+  if (lastHandle && elems.hostHandle) {
+    elems.hostHandle.value = lastHandle.replace('@', '');
+  }
+}
+
+function saveLastHandle(handle) {
+  localStorage.setItem('lastHandle', handle.replace('@', ''));
+}
+
+window.addEventListener('beforeunload', (e) => {
+  if (STATE === 'HOSTGAME' || STATE === 'PLAYERGAME') {
+    e.preventDefault();
+    e.returnValue = 'You have an active game. Are you sure you want to leave?';
+    return e.returnValue;
+  }
+});
+
 if (elems.hostPattern) {
   elems.hostPattern.addEventListener('change', () => {
     gameType = elems.hostPattern.value;
@@ -822,8 +1023,12 @@ if (elems.hostPatternChange) {
   elems.hostPatternChange.addEventListener('change', () => {
     if (isHost && gameRef && initialLoadComplete) {
       const newPattern = elems.hostPatternChange.value;
+      if (!confirm(`Change pattern to ${GAME_PATTERNS[newPattern]?.name}? This will reset all current wins.`)) {
+        elems.hostPatternChange.value = gameType;
+        return;
+      }
       gameType = newPattern;
-      gameRef.child('gameType').set(gameType).catch(err => console.error('Pattern change error:', err));
+      gameRef.child('gameType').set(gameType).catch(err => handleFirebaseError(err, 'pattern'));
       displayPattern(elems.hostPatternGrid, elems.hostPatternName);
       showToast(`Pattern changed to: ${GAME_PATTERNS[gameType].name}`, 3000);
     }
@@ -833,6 +1038,7 @@ if (elems.hostPatternChange) {
 if (elems.btnHostMode) {
   elems.btnHostMode.addEventListener('click', () => {
     showScreen('hostSetup');
+    loadLastHandle();
   });
 }
 
@@ -856,12 +1062,15 @@ if (elems.btnBackFromPlayer) {
 
 if (elems.btnStartHost) {
   elems.btnStartHost.addEventListener('click', () => {
-    const handle = normalizeHandle(elems.hostHandle.value);
-    const pattern = elems.hostPattern.value;
+    const handleInput = elems.hostHandle.value.trim();
+    const validation = validateHandle(handleInput);
     
-    if (!handle || handle.length < 3) {
-      return showToast('⚠️ Enter a valid handle (at least 2 characters)', 3000);
+    if (!validation.valid) {
+      return showToast(`⚠️ ${validation.error}`, 3000);
     }
+    
+    const handle = normalizeHandle(handleInput);
+    const pattern = elems.hostPattern.value;
     
     showLoading(true);
     
@@ -870,6 +1079,8 @@ if (elems.btnStartHost) {
       hostHandle = handle;
       gameType = pattern;
       gameId = generateGameId();
+      
+      saveLastHandle(handle);
       
       calledNumbers.clear();
       playersData = [];
@@ -903,21 +1114,30 @@ if (elems.btnStartHost) {
       
       startOnboardingTour();
     }).catch(err => {
-      console.error('Auth error:', err);
       showLoading(false);
-      showToast('❌ Failed to start game. Check Firebase settings.', 4000);
+      handleFirebaseError(err, 'create');
     });
   });
 }
 
 if (elems.btnJoinGame) {
   elems.btnJoinGame.addEventListener('click', () => {
-    const gid = elems.playerGameId.value.trim().toUpperCase();
-    const handle = normalizeHandle(elems.playerHandle.value);
+    const gidInput = elems.playerGameId.value.trim().toUpperCase();
+    const handleInput = elems.playerHandle.value.trim();
     const cardsCount = parseInt(elems.playerCardsSelect.value) || 1;
     
-    if (!gid) return showToast('⚠️ Enter a valid Game ID', 3000);
-    if (!handle || handle.length < 3) return showToast('⚠️ Enter a valid handle (at least 2 characters)', 3000);
+    const gidValidation = validateGameId(gidInput);
+    if (!gidValidation.valid) {
+      return showToast(`⚠️ ${gidValidation.error}`, 3000);
+    }
+    
+    const handleValidation = validateHandle(handleInput);
+    if (!handleValidation.valid) {
+      return showToast(`⚠️ ${handleValidation.error}`, 3000);
+    }
+    
+    const gid = gidInput;
+    const handle = normalizeHandle(handleInput);
     
     showLoading(true);
     
@@ -965,9 +1185,8 @@ if (elems.btnJoinGame) {
         showToast(`✅ Joined game ${gameId} as ${playerHandle}`, 3000);
       })
       .catch(err => {
-        console.error('Join error:', err);
         showLoading(false);
-        showToast('❌ Error joining game: ' + (err.message || 'Check Game ID and try again'), 4000);
+        handleFirebaseError(err, 'join');
       });
   });
 }
@@ -975,6 +1194,7 @@ if (elems.btnJoinGame) {
 if (elems.btnRoll) {
   elems.btnRoll.addEventListener('click', () => {
     if (!isHost || !gameRef) return showToast('You must be hosting a game', 3000);
+    if (calledNumbers.size >= 75) return showToast('All numbers have been called!', 2000);
     
     const rolled = rollNumber();
     if (rolled) {
@@ -1037,7 +1257,7 @@ if (elems.btnNextCard) {
 
 if (elems.btnEndGame) {
   elems.btnEndGame.addEventListener('click', () => {
-    if (!confirm('Are you sure you want to end the game?')) return;
+    if (!confirm('End game and show results? This cannot be undone.')) return;
     
     if (elems.endNumbers) elems.endNumbers.textContent = calledNumbers.size;
     if (elems.endWinners) elems.endWinners.textContent = winnersData.length;
@@ -1064,7 +1284,7 @@ if (elems.btnEndGame) {
 
 if (elems.btnLeaveGame) {
   elems.btnLeaveGame.addEventListener('click', () => {
-    if (!confirm('Are you sure you want to leave the game?')) return;
+    if (!confirm('Leave this game? You cannot rejoin with the same cards.')) return;
     
     cleanupFirebaseListeners();
     if (gameRef && playerHandle) {
@@ -1079,7 +1299,7 @@ if (elems.btnLeaveGame) {
 
 if (elems.btnHostHome || elems.btnPlayerHome) {
   const homeHandler = () => {
-    if (!confirm('Are you sure you want to go home? The game will continue.')) return;
+    if (!confirm('Leave to home? The game will continue without you.')) return;
     cleanupFirebaseListeners();
     showScreen('landing');
   };
@@ -1102,6 +1322,10 @@ if (elems.btnPlayAgain) {
     
     if (isHost) {
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = '--';
+      if (elems.btnRoll) {
+        elems.btnRoll.disabled = false;
+        elems.btnRoll.textContent = '🎲 ROLL';
+      }
       createBoard(elems.hostBoard);
       updateStats();
       setTimeout(() => {
@@ -1156,7 +1380,9 @@ if (elems.btnGoHome) {
 }
 
 setupTabNavigation();
+setupKeyboardShortcuts();
 handleURLParams();
+setupConnectionMonitoring();
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
@@ -1166,9 +1392,10 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
-console.log('%c$BINGO Live v9.0 - Production Ready 🚀', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('%c$BINGO Live v10.0 - Production Ready 🚀', 'color: #00FF00; font-size: 20px; font-weight: bold;');
 console.log('Firebase Project:', firebaseConfig.projectId);
 console.log('Export winners: Call exportWinnersForPrizes() in console');
+console.log('Reset tour: Call window.resetTour() in console');
 
 window.exportWinnersForPrizes = exportWinnersForPrizes;
 window.resetTour = () => {
