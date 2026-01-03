@@ -1453,3 +1453,112 @@ button:disabled {
     border: 2px solid black;
   }
 }
+
+/* ========================================
+   v12.0 CRITICAL FIXES
+   ======================================== */
+
+/* ANIMATION FIX - Only animate newly called numbers */
+.bingo-card .cell,
+.bingo-board .cell,
+.player-card .cell {
+  transition: background-color 0.3s ease,
+              transform 0.3s ease,
+              box-shadow 0.3s ease !important;
+}
+
+/* Pop-in animation for called numbers */
+.bingo-card .cell.called,
+.bingo-board .cell.called,
+.player-card .cell.called {
+  animation: pop-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pop-in {
+  0% { 
+    transform: scale(0.8); 
+    opacity: 0.5; 
+  }
+  50% { 
+    transform: scale(1.15); 
+  }
+  100% { 
+    transform: scale(1.05); 
+    opacity: 1; 
+  }
+}
+
+/* MOBILE CARD/BOARD FIX - Ensure O column visible */
+.bingo-card,
+.bingo-board,
+.player-card {
+  max-width: 100%;
+  width: min(100%, 500px);
+  margin: 0 auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Very small screens - reduce cell size */
+@media (max-width: 380px) {
+  .bingo-cell,
+  .board-cell,
+  .player-card .cell {
+    font-size: clamp(0.9rem, 4vw, 1.2rem) !important;
+    padding: clamp(0.3rem, 1.5vw, 0.5rem) !important;
+  }
+  
+  .bingo-card,
+  .bingo-board,
+  .player-card {
+    padding: 0.5rem;
+  }
+}
+
+/* Ensure grid cells don't overflow */
+.bingo-card .cell,
+.bingo-board .cell,
+.player-card .cell {
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* Mobile Play Bingo Button in Nav (for index.html) */
+.mobile-nav-play {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-nav-play {
+    display: block;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .nav-link-play {
+    display: block;
+    background: var(--primary, #00c6c9) !important;
+    color: #000 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+  }
+  
+  .nav-link-play:hover {
+    opacity: 0.9;
+  }
+  
+  /* Hide desktop CTA on mobile */
+  .header-cta {
+    display: none !important;
+  }
+}
+
+/* Host player styling */
+.player-item.host-player {
+  background: rgba(0, 198, 201, 0.1);
+  border-left: 3px solid var(--primary, #00c6c9);
+}
