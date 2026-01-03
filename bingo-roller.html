@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="$BINGO Roller - Epic bingo game for live streams on BingoXRPL!" />
+  <title>$BINGO Roller - BingoXRPL Live Tool</title>
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-H99K0B4L10"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -8,296 +13,1485 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
-  
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="description" content="$BINGO Live - Multiplayer bingo on XRPL. Host games, play with friends, win prizes!">
-  <meta name="theme-color" content="#00c6c9">
-  <meta property="og:title" content="$BINGO Live - Play Now">
-  <meta property="og:description" content="Multiplayer bingo game on XRP Ledger">
-  <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
-  <meta property="og:url" content="https://bingoxrp.com/bingo-roller.html">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="$BINGO Live">
-  <meta name="twitter:description" content="Real-time multiplayer bingo on XRPL">
-  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
-  <title>$BINGO Live - Multiplayer Bingo on XRPL</title>
-  <link rel="icon" href="assets/images/mascot-hero.png" type="image/png">
-  <link rel="preload" href="assets/images/mascot-hero.png" as="image">
-  <link rel="stylesheet" href="assets/css/bingo-roller.css">
+
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <link rel="stylesheet" href="assets/css/bingo-roller.css">
+  <link rel="stylesheet" href="assets/css/wallet-ui.css">
+      --bg: #0A0F2A;
+      --accent: #00B8D9;
+      --glow: #00FF00;
+      --card-bg: #1A1F3A;
+      --muted: rgba(255,255,255,0.06);
+    }
+    html,body { height:100%; }
+    body {
+      font-family: 'Arial', Helvetica, sans-serif;
+      background: var(--bg);
+      color: #FFF;
+      margin:0;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    header {
+      background: var(--accent);
+      padding: clamp(0.8rem, 2vw, 1.2rem);
+      position: sticky;
+      top:0;
+      z-index:100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.25rem;
+      gap: 1rem;
+    }
+    h1 { margin:0; color:#000; font-size: clamp(1.5rem, 3.2vw, 2.6rem); }
+    nav .nav-menu { display:flex; gap:1rem; list-style:none; margin:0; padding:0; align-items:center; }
+    nav .nav-menu a { color:#000; font-weight:700; text-decoration:none; }
+
+    /* Hamburger menu styles */
+    .hamburger {
+      display: none;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      cursor: pointer;
+      color: #000;
+      padding: 0.5rem;
+    }
+    @media (max-width: 767px) {
+      .hamburger { display: block; }
+      nav .nav-menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--accent);
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+        z-index: 99;
+      }
+      nav .nav-menu.show { display: flex; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: clamp(1rem, 2vw, 2rem) auto;
+      padding: 0 1rem;
+      text-align: center;
+    }
+    .container h1 { color: var(--glow); font-size: clamp(2rem, 4vw, 3rem); margin-top: 1rem; }
+    .container .tagline { color: var(--glow); font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin: 0.5rem 0; }
+
+    /* Buttons & controls */
+    button { cursor:pointer; border: none; background: var(--accent); color:#000; padding: .75rem 1.25rem; border-radius: 10px; font-weight:700; transition: all 0.2s ease; }
+    button:hover { opacity: 0.9; }
+    button:active{ transform: translateY(1px); }
+    select, input { padding:.6rem .8rem; border-radius:8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; }
+    #roll-button { 
+      background:#FF0000; 
+      color:#fff; 
+      padding: 1.2rem 2.5rem; 
+      border-radius: 999px; 
+      font-size: clamp(1.4rem, 3.5vw, 2rem); 
+      box-shadow: 0 6px 20px rgba(255,0,0,0.5);
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+    #roll-button:hover{ transform:scale(1.05); background: #00FF00; color:#000; box-shadow: 0 8px 25px rgba(0,255,0,0.6); }
+
+    /* ENHANCED Result Display - Large and Centered */
+    #result {
+      font-size: clamp(3rem, 8vw, 6rem);
+      color: var(--glow);
+      text-shadow: 0 0 20px rgba(0,255,0,0.8), 0 0 40px rgba(0,255,0,0.4);
+      margin: 2rem 0;
+      min-height: 6rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      letter-spacing: 3px;
+      animation: pulse 0.5s ease-in-out;
+      background: rgba(0,255,0,0.05);
+      border-radius: 20px;
+      padding: 1rem 2rem;
+      border: 3px solid var(--glow);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* Current game type display for players */
+    #current-game-type {
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      color: var(--glow);
+      font-weight: 800;
+      margin: 1rem 0;
+      padding: 0.8rem;
+      background: rgba(0,255,0,0.1);
+      border-radius: 10px;
+      border: 2px solid var(--glow);
+    }
+
+    /* Bingo Board */
+    .bingo-board {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(40px, 1fr));
+      gap: clamp(.5rem, 1vw, 1rem);
+      justify-items: center;
+      max-width: min(98vw, 1000px);
+      margin: 1.5rem auto;
+    }
+    .bingo-board .header { grid-column: span 2; color: var(--glow); font-weight:800; font-size: clamp(1rem, 1.8vw, 1.6rem); text-align:center; }
+    .bingo-board .cell {
+      width:100%;
+      aspect-ratio: 1/1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      background: var(--card-bg);
+      color: var(--accent);
+      font-size: clamp(.95rem, 1.4vw, 1.2rem);
+      box-sizing: border-box;
+      transition: all .3s ease;
+      font-weight: 600;
+    }
+    .bingo-board .cell.called {
+      background: var(--glow);
+      color: #000;
+      box-shadow: 0 0 15px rgba(0,255,0,0.4);
+      transform: scale(1.1);
+      font-weight: 900;
+    }
+    .bingo-board .empty { visibility: hidden; }
+
+    /* Player card - FIXED 5x5 grid with headers on top */
+    .player-card { 
+      display:grid; 
+      grid-template-columns:repeat(5,1fr); 
+      grid-template-rows: auto repeat(5, 1fr);
+      gap:.6rem; 
+      max-width: min(80vw,600px); 
+      margin: 1.5rem auto; 
+      padding: 1rem; 
+      border: 3px solid var(--glow); 
+      border-radius:12px;
+      box-shadow: 0 4px 20px rgba(0,255,0,0.2);
+    }
+    .player-card .header {
+      color: var(--glow);
+      font-weight: 900;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+    }
+    .player-card .cell { 
+      aspect-ratio:1/1; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      background:var(--card-bg); 
+      color:var(--accent); 
+      border-radius:8px; 
+      transition: all .3s ease;
+      font-weight: 700;
+      font-size: clamp(1rem, 1.5vw, 1.3rem);
+    }
+    .player-card .cell.free { background:#FF0000; color:#FFF; font-weight:900; }
+    .player-card .cell.called { 
+      background: var(--glow); 
+      color: #000; 
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    }
+
+    /* Win pattern preview */
+    .win-pattern {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .8rem;
+      max-width: 400px;
+      margin: 1rem auto;
+      padding: 1rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(0,255,0,0.2);
+    }
+    .win-pattern .cell { 
+      aspect-ratio:1/1; 
+      background:var(--card-bg); 
+      border-radius:8px; 
+      opacity:.3; 
+      transition: all .3s ease;
+    }
+    .win-pattern .cell.win { 
+      background: var(--glow); 
+      opacity:1; 
+      box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    }
+    .win-pattern-label { 
+      color: var(--glow); 
+      font-weight: 700; 
+      margin-top: 0.5rem; 
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+
+    /* Draggable player list */
+    #player-list {
+      position: fixed;
+      right: 20px;
+      top: 80px;
+      width: clamp(200px, 18vw, 320px);
+      background: rgba(0,0,0,0.9);
+      padding: 0.8rem;
+      border-radius: 12px;
+      border: 2px solid var(--glow);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.7);
+      z-index: 9999;
+      cursor: grab;
+      user-select: none;
+      transform: translate(0,0);
+      touch-action: none;
+    }
+    #player-list h3 { margin:0 0 .6rem 0; color:var(--glow); font-size:1.1rem; }
+    #player-list-content { max-height: 60vh; overflow-y:auto; padding-right:6px; }
+    #player-list-content::-webkit-scrollbar { width: 6px; }
+    #player-list-content::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+    #player-list-content::-webkit-scrollbar-thumb { background: var(--glow); border-radius: 10px; }
+    .player-item { 
+      padding:8px 10px; 
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center; 
+      gap:8px; 
+      border-bottom: 1px solid rgba(255,255,255,0.05); 
+      color:#fff; 
+      font-weight:600;
+      transition: background 0.2s ease;
+    }
+    .player-item:hover { background: rgba(0,255,0,0.05); }
+    .player-item .cardid{ color:var(--glow); font-weight:800; }
+
+    /* Host controls */
+    #host-controls { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+
+    /* Stats display */
+    .stats-display {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      background: rgba(0,255,0,0.05);
+      padding: 0.8rem 1.5rem;
+      border-radius: 10px;
+      border: 2px solid var(--glow);
+    }
+    .stat-label {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+    .stat-value {
+      color: var(--glow);
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+
+    /* Small screens */
+    @media (max-width:767px) {
+      .container { padding: 0 12px; }
+      #player-list { 
+        position: static; 
+        width: 100%; 
+        right:auto; 
+        top:auto; 
+        transform:none; 
+        margin: 1rem 0; 
+        cursor:default;
+      }
+      .bingo-board { grid-template-columns: repeat(10, minmax(30px, 1fr)); gap: .3rem; }
+      .win-pattern { max-width: 300px; gap: .6rem; }
+      #result { font-size: clamp(2.5rem, 6vw, 4rem); min-height: 4rem; }
+    }
+  </style>
+</head>
+
 </head>
 <body>
-
-<div id="landing-screen" class="screen active">
-  <div class="landing-hero">
-    <img src="assets/images/mascot-hero.png" alt="Bingo Mascot" class="mascot-logo">
-    <h1 class="game-title">$BINGO Live</h1>
-    <p class="game-subtitle">Multiplayer Bingo on XRPL</p>
-    <div class="mode-buttons">
-      <button id="btn-host-mode" class="mode-btn host-mode">
-        <span class="btn-icon">🎙️</span>
-        <span class="btn-label">Host Game</span>
-        <span class="btn-desc">Start and control a game</span>
-      </button>
-      <button id="btn-player-mode" class="mode-btn player-mode">
-        <span class="btn-icon">🎮</span>
-        <span class="btn-label">Join Game</span>
-        <span class="btn-desc">Play with a game ID</span>
-      </button>
-    </div>
-    <a href="/" class="back-link">← Back to Home</a>
-  </div>
-</div>
-
-<div id="host-setup-screen" class="screen">
-  <div class="setup-container">
-    <button class="back-btn" id="btn-back-from-host">← Back</button>
-    <h2>🎙️ Host a Game</h2>
-    <div class="input-group">
-      <label for="host-handle">Your Handle</label>
-      <input type="text" id="host-handle" placeholder="YourName" autocomplete="off" maxlength="20">
-    </div>
-    <div class="input-group">
-      <label for="host-pattern">Game Pattern</label>
-      <select id="host-pattern">
-        <option value="singleLine">Single Line</option>
-        <option value="doubleLine">Double Line</option>
-        <option value="fourCorners">Four Corners</option>
-        <option value="tShape">T-Shape</option>
-        <option value="plusSign">Plus Sign</option>
-        <option value="xShape">X-Shape</option>
-        <option value="letterH">Letter H</option>
-        <option value="letterL">Letter L</option>
-        <option value="letterU">Letter U</option>
-        <option value="pictureFrame">Picture Frame</option>
-        <option value="perimeter">Perimeter</option>
-        <option value="fullCard">Full Card (Blackout)</option>
-      </select>
-    </div>
-    <div class="setup-actions">
-      <button id="btn-start-host" class="primary-btn">Start Hosting</button>
-    </div>
-  </div>
-</div>
-
-<div id="player-setup-screen" class="screen">
-  <div class="setup-container">
-    <button class="back-btn" id="btn-back-from-player">← Back</button>
-    <h2>🎮 Join a Game</h2>
-    <div class="input-group">
-      <label for="player-gameid">Game ID</label>
-      <input type="text" id="player-gameid" placeholder="ABC123" autocomplete="off" maxlength="10">
-    </div>
-    <div class="input-group">
-      <label for="player-handle">Your Handle</label>
-      <input type="text" id="player-handle" placeholder="YourName" autocomplete="off" maxlength="20">
-    </div>
-    <div class="input-group">
-      <label for="player-cards">Number of Cards</label>
-      <select id="player-cards">
-        <option value="1" selected>1 Card</option>
-        <option value="2">2 Cards</option>
-        <option value="3">3 Cards</option>
-        <option value="4">4 Cards</option>
-      </select>
-    </div>
-    <div class="setup-actions">
-      <button id="btn-join-game" class="primary-btn">Join Game</button>
-    </div>
-  </div>
-</div>
-
-<div id="host-game-screen" class="screen">
-  <header class="game-header">
-    <div class="header-brand">
-      <img src="assets/images/mascot-hero.png" alt="Bingo" class="header-logo">
-      <span class="header-title">$BINGO</span>
-    </div>
-    <div class="header-info">
-      <span class="game-id-label">ID:</span>
-      <strong id="display-game-id" class="game-id-value">---</strong>
-      <button id="btn-copy-id" class="icon-btn" title="Copy Game ID">📋</button>
-    </div>
-    <div class="header-center">
-      <span id="host-last-called" class="last-called">--</span>
-    </div>
-    <div class="header-action">
-      <button id="btn-roll" class="roll-btn">🎲 ROLL</button>
+  <header>
+    <div class="header-inner">
+      <h1>$BINGO</h1>
+      <div class="wallet-container" id="wallet-container"></div>
+      <div class="hamburger" id="hamburger">☰</div>
+      <nav>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="https://bingoxrp.com/" aria-label="Go to Home">Home</a></li>
+          <li><a href="https://bingoxrp.com/#buy">How to Trade</a></li>
+          <li><a href="https://bingoxrp.com/#nft">NFT Collection</a></li>
+          <li><a href="https://bingoxrp.com/#community">Community</a></li>
+        </ul>
+      </nav>
     </div>
   </header>
+  <div class="container">
+    <h1>$BINGO Roller</h1>
+    <p class="tagline">Roll epic $BINGO numbers during your live streams!</p>
 
-  <div class="game-tabs">
-    <button class="tab-btn active" data-tab="host-game-tab">🎯 Game</button>
-    <button class="tab-btn" data-tab="host-players-tab">👥 Players</button>
-    <button class="tab-btn" data-tab="host-stats-tab">📊 Stats</button>
-  </div>
-
-  <div class="tab-content active" id="host-game-tab">
-    <div class="board-wrapper">
-      <div id="host-board" class="bingo-board"></div>
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
+      <button id="host-mode">Host a Game</button>
+      <button id="player-mode">Join as Player</button>
     </div>
-    <div class="pattern-display">
-      <div class="pattern-label" id="host-pattern-name">Single Line</div>
-      <div id="host-pattern-grid" class="pattern-grid"></div>
-      <div class="pattern-change-section">
-        <label for="host-pattern-change">Change Pattern:</label>
-        <select id="host-pattern-change" class="pattern-change-select">
-          <option value="singleLine">Single Line</option>
-          <option value="doubleLine">Double Line</option>
+
+    <!-- Host Controls -->
+    <div id="host-controls" style="display:none; margin-top:1.5rem;">
+      <div style="display:flex; gap:.8rem; align-items:center; justify-content:center; flex-wrap:wrap;">
+        <label for="game-type" style="font-weight:700; color: var(--glow);">Select Game Type:</label>
+        <select id="game-type" aria-label="Select Bingo Game Type">
+          <option value="singleLine">Single Line (Any Line)</option>
+          <option value="doubleLine">Double Line (Any 2 Lines)</option>
           <option value="fourCorners">Four Corners</option>
           <option value="tShape">T-Shape</option>
-          <option value="plusSign">Plus Sign</option>
+          <option value="plusSign">Plus Sign (+)</option>
           <option value="xShape">X-Shape</option>
           <option value="letterH">Letter H</option>
           <option value="letterL">Letter L</option>
           <option value="letterU">Letter U</option>
           <option value="pictureFrame">Picture Frame</option>
-          <option value="perimeter">Perimeter</option>
+          <option value="perimeter">Perimeter (Outside Edge)</option>
           <option value="fullCard">Full Card (Blackout)</option>
         </select>
       </div>
+
+      <div id="win-pattern" class="win-pattern" aria-hidden="false"></div>
+      <div class="win-pattern-label" id="win-pattern-label"></div>
+
+      <div style="display:flex; flex-direction: column; gap:1.5rem; align-items:center; margin-top:1.5rem;">
+        <button id="roll-button" aria-label="Roll a new bingo number">🎲 ROLL! 🎲</button>
+        <div id="result" role="status" aria-live="polite" aria-atomic="true">Ready to Roll!</div>
+      </div>
+
+      <div class="stats-display">
+        <div class="stat-item">
+          <div class="stat-label">Numbers Called</div>
+          <div class="stat-value" id="numbers-called">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Remaining</div>
+          <div class="stat-value" id="numbers-remaining">75</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:1rem; justify-content:center; margin-top:1rem; align-items:center; flex-wrap:wrap;">
+        <div id="game-id-display" style="font-size: 1.2rem; color: var(--glow); font-weight: 700;">Game ID: Loading...</div>
+        <button id="copy-game-id">Copy Game ID</button>
+        <button id="reset-button" aria-label="Reset the bingo game" style="background: #FF6B6B; color: #fff;">Reset Game</button>
+      </div>
+
+      <div id="leaderboard" style="margin-top:2rem; text-align:center;"></div>
     </div>
+
+    <!-- Player Controls -->
+    <div id="player-controls" style="display:none; margin-top:1.5rem; text-align:center;">
+      <div style="max-width: 500px; margin: 0 auto;">
+        <input id="x-handle-input" type="text" placeholder="Enter your X Handle (e.g., @UserX)" aria-label="X Handle" style="margin-bottom:1rem; width: 100%; box-sizing: border-box;" />
+        <input id="game-id-input" type="text" placeholder="Enter Game ID" aria-label="Game ID" style="margin-bottom:1rem; width: 100%; box-sizing: border-box;" />
+        <button id="join-game-button" style="width: 100%; padding: 1rem;">Join Game & Generate Card</button>
+      </div>
+      
+      <div id="current-game-type" style="display:none; margin-top: 1.5rem;">
+        <strong>Current Game:</strong> <span id="game-type-name">Loading...</span>
+      </div>
+      
+      <div id="player-win-pattern" class="win-pattern" style="display:none;" aria-hidden="false"></div>
+      <div class="win-pattern-label" id="player-win-pattern-label" style="display:none;"></div>
+      
+      <div id="player-card" class="player-card" style="display:none;" aria-hidden="true"></div>
+    </div>
+
+    <!-- Game Board - ALWAYS VISIBLE -->
+    <h2 style="margin-top:2.5rem; text-align:center; color: var(--glow);">Game Board - Called Numbers</h2>
+    <div id="bingo-board" class="bingo-board" aria-hidden="false"></div>
   </div>
 
-  <div class="tab-content" id="host-players-tab">
-    <div id="host-players-list" class="players-list"></div>
+  <!-- Floating Player List -->
+  <div id="player-list" aria-hidden="true" style="display:none;">
+    <h3>👥 Player List</h3>
+    <div id="player-list-content"></div>
   </div>
 
-  <div class="tab-content" id="host-stats-tab">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-called">0</div>
-        <div class="stat-label">Called</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-remaining">75</div>
-        <div class="stat-label">Remaining</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-players">0</div>
-        <div class="stat-label">Players</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-winners">0</div>
-        <div class="stat-label">Winners</div>
+  <footer style="padding:1.2rem; text-align:center; color:#AAA; margin-top: 3rem;">
+    <div class="container">
+      <p>&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
+      <div style="margin-top:.5rem;">
+        <a href="https://x.com/BingoXRPL" target="_blank" style="color:#AAA;">X</a> |
+        <a href="https://discord.com/invite/ZSQzZd2bPg" target="_blank" style="color:#AAA;">Discord</a> |
+        <a href="https://t.me/bingoonxrp" target="_blank" style="color:#AAA;">Telegram</a>
       </div>
     </div>
-    <button id="btn-end-game" class="danger-btn">End Game</button>
-  </div>
-
-  <footer class="game-footer">
-    <button id="btn-host-home" class="footer-btn" title="Home">🏠</button>
-    <span class="footer-info">Host Mode</span>
-    <button id="btn-host-share" class="footer-btn" title="Share">📤</button>
   </footer>
-</div>
 
-<div id="player-game-screen" class="screen">
-  <header class="game-header">
-    <div class="header-brand">
-      <img src="assets/images/mascot-hero.png" alt="Bingo" class="header-logo">
-      <span class="header-title">$BINGO</span>
-    </div>
-    <div class="header-info">
-      <span class="player-name-label" id="player-name-display">Player</span>
-    </div>
-    <div class="header-center">
-      <span id="player-last-called" class="last-called">--</span>
-    </div>
-    <div class="header-action">
-      <span class="cards-indicator" id="cards-indicator">1/1</span>
-    </div>
-  </header>
+  <script>
+    // Firebase setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFX2YygpK6ELMXwJZwZ3tnmT-DfLge2Sc",
+      authDomain: "bingoxrpl.firebaseapp.com",
+      databaseURL: "https://bingoxrpl-default-rtdb.firebaseio.com",
+      projectId: "bingoxrpl",
+      storageBucket: "bingoxrpl.firebasestorage.app",
+      messagingSenderId: "1032944729350",
+      appId: "1:1032944729350:web:77c0c92c59dce214d3287",
+      measurementId: "G-H99K0B4L10"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+    const database = firebase.database();
+    const auth = firebase.auth();
 
-  <div class="game-tabs">
-    <button class="tab-btn active" data-tab="player-cards-tab">🎴 My Cards</button>
-    <button class="tab-btn" data-tab="player-board-tab">🎯 Board</button>
-    <button class="tab-btn" data-tab="player-players-tab">👥 Players</button>
-    <button class="tab-btn" data-tab="player-info-tab">ℹ️ Info</button>
+    // Constants & state
+    const letters = ['B','I','N','G','O'];
+    const ranges = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
+    
+    // Enhanced game patterns with names
+    const gamePatterns = {
+      singleLine: {
+        pattern: [[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+        name: "Single Line (Any Line)",
+        checkFunction: 'checkSingleLine'
+      },
+      doubleLine: {
+        pattern: [[1,1,1,1,1],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+        name: "Double Line (Any 2 Lines)",
+        checkFunction: 'checkDoubleLine'
+      },
+      fourCorners: {
+        pattern: [[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[1,0,0,0,1]],
+        name: "Four Corners"
+      },
+      tShape: {
+        pattern: [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
+        name: "T-Shape"
+      },
+      plusSign: {
+        pattern: [[0,0,1,0,0],[0,0,1,0,0],[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0]],
+        name: "Plus Sign (+)"
+      },
+      xShape: {
+        pattern: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1]],
+        name: "X-Shape"
+      },
+      letterH: {
+        pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1]],
+        name: "Letter H"
+      },
+      letterL: {
+        pattern: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
+        name: "Letter L"
+      },
+      letterU: {
+        pattern: [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+        name: "Letter U"
+      },
+      pictureFrame: {
+        pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+        name: "Picture Frame"
+      },
+      perimeter: {
+        pattern: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+        name: "Perimeter (Outside Edge)"
+      },
+      fullCard: {
+        pattern: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
+        name: "Full Card (Blackout)"
+      }
+    };
+
+    let calledNumbers = new Set();
+    let isHost = false;
+    let gameId = null;
+    let playerCard = null;
+    let xHandle = localStorage.getItem('xHandle') || null;
+    let gameRef = null;
+    let gameType = 'singleLine';
+    let playerWins = {}; // Track wins by "gameId-gameType" to prevent duplicates
+    const notifiedWinners = new Set();
+    const displayedPlayers = new Set();
+    let playersArray = [];
+    let initialLoadComplete = false; // Track if initial game load is complete
+
+    // DOM refs
+    const hostModeBtn = document.getElementById('host-mode');
+    const playerModeBtn = document.getElementById('player-mode');
+    const hostControls = document.getElementById('host-controls');
+    const playerControls = document.getElementById('player-controls');
+    const gameIdDisplay = document.getElementById('game-id-display');
+    const gameIdInput = document.getElementById('game-id-input');
+    const xHandleInput = document.getElementById('x-handle-input');
+    const joinGameBtn = document.getElementById('join-game-button');
+    const rollButton = document.getElementById('roll-button');
+    const resetButton = document.getElementById('reset-button');
+    const gameTypeSelect = document.getElementById('game-type');
+    const copyGameIdBtn = document.getElementById('copy-game-id');
+    const resultDiv = document.getElementById('result');
+    const playerListEl = document.getElementById('player-list');
+    const playerListContent = document.getElementById('player-list-content');
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
+    const currentGameTypeDiv = document.getElementById('current-game-type');
+    const gameTypeName = document.getElementById('game-type-name');
+    const playerWinPatternDiv = document.getElementById('player-win-pattern');
+    const playerWinPatternLabel = document.getElementById('player-win-pattern-label');
+    const numbersCalledEl = document.getElementById('numbers-called');
+    const numbersRemainingEl = document.getElementById('numbers-remaining');
+
+    // Utility helpers
+    function getRandomNumber(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function isValidCalledFormat(str){ return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str); }
+
+    // Update stats
+    function updateStats() {
+      if (numbersCalledEl) numbersCalledEl.textContent = calledNumbers.size;
+      if (numbersRemainingEl) numbersRemainingEl.textContent = 75 - calledNumbers.size;
+    }
+
+    // Board creation - ALWAYS CREATE ON LOAD
+    function createBoard(){
+      const board = document.getElementById('bingo-board');
+      if(!board) return;
+      board.innerHTML = '';
+      
+      // Headers
+      letters.forEach(l=>{
+        const header = document.createElement('div');
+        header.textContent = l;
+        header.className = 'header';
+        board.appendChild(header);
+      });
+      
+      // Numbers
+      const maxRows = 8;
+      for(let row = 0; row < maxRows; row++){
+        letters.forEach(letter=>{
+          const [min] = ranges[letter];
+          
+          // Left column
+          const leftNum = row < 8 ? min + row : null;
+          const leftDiv = document.createElement('div');
+          if (leftNum !== null) {
+            leftDiv.textContent = leftNum;
+            leftDiv.className = 'cell';
+            leftDiv.id = `${letter}-${leftNum}`;
+            if(calledNumbers.has(`${letter}-${leftNum}`)) leftDiv.classList.add('called');
+          } else {
+            leftDiv.className = 'empty';
+          }
+          board.appendChild(leftDiv);
+          
+          // Right column
+          const rightNum = row < 7 ? min + row + 8 : null;
+          const rightDiv = document.createElement('div');
+          if (rightNum !== null) {
+            rightDiv.textContent = rightNum;
+            rightDiv.className = 'cell';
+            rightDiv.id = `${letter}-${rightNum}`;
+            if(calledNumbers.has(`${letter}-${rightNum}`)) rightDiv.classList.add('called');
+          } else {
+            rightDiv.className = 'empty';
+          }
+          board.appendChild(rightDiv);
+        });
+      }
+    }
+
+    // Win pattern preview - FIXED to show pattern immediately
+    function displayWinPattern(targetDiv = null, labelDiv = null){
+      const winPatternDiv = targetDiv || document.getElementById('win-pattern');
+      const winPatternLabelDiv = labelDiv || document.getElementById('win-pattern-label');
+      
+      if(!winPatternDiv) return;
+      
+      winPatternDiv.innerHTML = '';
+      winPatternDiv.style.display = 'grid'; // Ensure it's visible
+      
+      const patternData = gamePatterns[gameType] || gamePatterns.singleLine;
+      const pattern = patternData.pattern;
+      
+      for(let r=0;r<5;r++){
+        for(let c=0;c<5;c++){
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          if(pattern[r][c]) cell.classList.add('win');
+          winPatternDiv.appendChild(cell);
+        }
+      }
+      
+      if(winPatternLabelDiv) {
+        winPatternLabelDiv.textContent = patternData.name;
+        winPatternLabelDiv.style.display = 'block';
+      }
+    }
+
+    // Player card generation with uniqueness check
+    async function generatePlayerCard(){
+      const maxAttempts = 10;
+      let attempts = 0;
+      let card, cardID;
+
+      while (attempts < maxAttempts) {
+        card = { B:[], I:[], N:[], G:[], O:[] };
+        letters.forEach(letter => {
+          const [min,max] = ranges[letter];
+          const arr = [];
+          while(arr.length < 5){
+            const n = getRandomNumber(min,max);
+            if(!arr.includes(n)) arr.push(n);
+          }
+          card[letter] = arr.sort((a,b)=>a-b);
+        });
+        card.N[2] = 'FREE';
+        cardID = computeCardID(card);
+
+        // Check if cardID exists in Firebase
+        if(gameRef) {
+          const snapshot = await gameRef.child('players').orderByChild('cardID').equalTo(cardID).once('value');
+          if (!snapshot.exists()) break;
+        } else {
+          break;
+        }
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        throw new Error('Failed to generate unique card after max attempts');
+      }
+
+      localStorage.setItem('playerCard', JSON.stringify(card));
+      return { card, cardID };
+    }
+
+    function computeCardID(card){
+      let sum=0, product=1;
+      letters.forEach(letter=>{
+        card[letter].forEach(num=>{
+          if(num!=='FREE'){ sum+=num; product=(product*num)%1000000; }
+        });
+      });
+      const combined=(sum*31 + product) % 1000;
+      return combined.toString().padStart(3,'0');
+    }
+
+    // FIXED: Player card display with proper 5x5 grid and headers on top
+    function displayPlayerCard(){
+      const cardDiv = document.getElementById('player-card');
+      if(!cardDiv || !playerCard) return;
+      
+      cardDiv.style.display = 'grid';
+      cardDiv.innerHTML = '';
+      cardDiv.setAttribute('aria-hidden', 'false');
+      
+      // Add headers in first row
+      letters.forEach(l=>{
+        const header = document.createElement('div');
+        header.textContent = l;
+        header.className = 'header';
+        cardDiv.appendChild(header);
+      });
+      
+      // Add cells in rows 2-6 (5 rows of numbers)
+      for(let r=0;r<5;r++){
+        letters.forEach(letter=>{
+          const num = playerCard[letter][r];
+          const el = document.createElement('div');
+          el.className = 'cell';
+          el.textContent = num;
+          el.id = `player-${letter}-${num}`;
+          if(num === 'FREE') el.classList.add('free', 'called');
+          else if(calledNumbers.has(`${letter}-${num}`)) el.classList.add('called');
+          cardDiv.appendChild(el);
+        });
+      }
+    }
+
+    // Highlight called numbers
+    function highlightNumber(letter, number){
+      try {
+        const id = `${letter}-${number}`;
+        const boardCell = document.getElementById(id);
+        if(boardCell && !boardCell.classList.contains('called')) {
+          boardCell.classList.add('called');
+        }
+        
+        if(playerCard) {
+          const playerCell = document.getElementById(`player-${letter}-${number}`);
+          if(playerCell && !playerCell.classList.contains('called')) {
+            playerCell.classList.add('called');
+          }
+        }
+        
+        updateStats();
+      } catch(e){
+        console.error('Highlight error', e);
+      }
+    }
+
+    // Check for single line win (any horizontal, vertical, or diagonal)
+    function checkSingleLine() {
+      if (!playerCard) return false;
+      
+      // Check horizontal lines
+      for (let r = 0; r < 5; r++) {
+        let isWin = true;
+        for (let c = 0; c < 5; c++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) return true;
+      }
+      
+      // Check vertical lines
+      for (let c = 0; c < 5; c++) {
+        let isWin = true;
+        for (let r = 0; r < 5; r++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) return true;
+      }
+      
+      // Check diagonal (top-left to bottom-right)
+      let diag1Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag1Win = false;
+          break;
+        }
+      }
+      if (diag1Win) return true;
+      
+      // Check diagonal (top-right to bottom-left)
+      let diag2Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[4-i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag2Win = false;
+          break;
+        }
+      }
+      if (diag2Win) return true;
+      
+      return false;
+    }
+
+    // Check for double line win (any 2 lines)
+    function checkDoubleLine() {
+      if (!playerCard) return false;
+      let linesCompleted = 0;
+      
+      // Check horizontal lines
+      for (let r = 0; r < 5; r++) {
+        let isWin = true;
+        for (let c = 0; c < 5; c++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) linesCompleted++;
+      }
+      
+      // Check vertical lines
+      for (let c = 0; c < 5; c++) {
+        let isWin = true;
+        for (let r = 0; r < 5; r++) {
+          const letter = letters[c];
+          const num = playerCard[letter][r];
+          if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+            isWin = false;
+            break;
+          }
+        }
+        if (isWin) linesCompleted++;
+      }
+      
+      // Check diagonals
+      let diag1Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag1Win = false;
+          break;
+        }
+      }
+      if (diag1Win) linesCompleted++;
+      
+      let diag2Win = true;
+      for (let i = 0; i < 5; i++) {
+        const letter = letters[4-i];
+        const num = playerCard[letter][i];
+        if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+          diag2Win = false;
+          break;
+        }
+      }
+      if (diag2Win) linesCompleted++;
+      
+      return linesCompleted >= 2;
+    }
+
+    // Generic bingo check using pattern - FIXED to only check after initial load
+    function checkForBingo() {
+      if (!playerCard || !gamePatterns[gameType] || !initialLoadComplete) return false;
+      
+      const patternData = gamePatterns[gameType];
+      
+      // Use custom check function if available
+      if (patternData.checkFunction === 'checkSingleLine') {
+        return checkSingleLine();
+      } else if (patternData.checkFunction === 'checkDoubleLine') {
+        return checkDoubleLine();
+      }
+      
+      // Use pattern matching for other game types
+      const pattern = patternData.pattern;
+      let isWin = true;
+      
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          if (pattern[r][c] === 1) {
+            const letter = letters[c];
+            const num = playerCard[letter][r];
+            if (num !== 'FREE' && !calledNumbers.has(`${letter}-${num}`)) {
+              isWin = false;
+              break;
+            }
+          }
+        }
+        if (!isWin) break;
+      }
+      
+      return isWin;
+    }
+
+    // Roll logic
+    function rollBingo(){
+      if(calledNumbers.size >= 75){ 
+        showToast('All 75 numbers have been called!',3000); 
+        return null; 
+      }
+      
+      let letter, number, attempts=0;
+      do {
+        letter = letters[Math.floor(Math.random()*letters.length)];
+        const [min,max] = ranges[letter];
+        number = getRandomNumber(min,max);
+        attempts++;
+        if(attempts>200){ 
+          showToast('Unable to find new number',4000); 
+          return null; 
+        }
+      } while(calledNumbers.has(`${letter}-${number}`));
+      
+      const rolled = `${letter}-${number}`;
+      calledNumbers.add(rolled);
+      
+      if(gameRef && isHost){
+        gameRef.child('called').push(rolled).catch(err=>console.error('DB push error',err));
+      } else {
+        localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+        highlightNumber(letter, number);
+      }
+      
+      return rolled;
+    }
+
+    // Toast utility
+    function showToast(msg, duration=2500, isWin=false){
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      Object.assign(t.style, { 
+        position: 'fixed', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)',
+        padding: isWin ? '20px 30px' : '12px 18px', 
+        background: isWin ? '#FFD700' : 'var(--glow)', 
+        color: '#000', 
+        zIndex: 99999, 
+        borderRadius: '12px', 
+        boxShadow: '0 8px 30px rgba(0,0,0,0.5)', 
+        fontWeight: 900,
+        fontSize: isWin ? '1.5rem' : '1.1rem',
+        opacity: 0,
+        transition: 'opacity 0.3s ease'
+      });
+      document.body.appendChild(t);
+      setTimeout(()=> t.style.opacity = '1', 20);
+      setTimeout(()=> { 
+        t.style.opacity='0'; 
+        setTimeout(()=> t.remove(),300); 
+      }, duration);
+    }
+
+    // Leaderboard
+    function updateLeaderboardSnapshot(winnersObj){
+      const lb = document.getElementById('leaderboard');
+      if(!lb) return;
+      lb.innerHTML = '<h3 style="color:var(--glow); margin-bottom: 1rem;">🏆 Winners 🏆</h3>';
+      if(!winnersObj || Object.keys(winnersObj).length===0){ 
+        lb.innerHTML += '<p style="color:#AAA">No winners yet. Keep playing!</p>'; 
+        return; 
+      }
+      const ul = document.createElement('ul');
+      ul.style.listStyle='none'; 
+      ul.style.padding='0';
+      ul.style.maxWidth='600px';
+      ul.style.margin='0 auto';
+      
+      Object.keys(winnersObj).forEach(k=>{
+        const v = winnersObj[k];
+        const li = document.createElement('li'); 
+        li.style.padding='10px';
+        li.style.margin='5px 0';
+        li.style.background='rgba(0,255,0,0.05)';
+        li.style.borderRadius='8px';
+        li.style.border='1px solid rgba(0,255,0,0.2)';
+        li.textContent = `${v.handle} - ${v.gameType} at ${new Date(parseInt(v.timestamp)).toLocaleTimeString()}`;
+        ul.appendChild(li);
+      });
+      lb.appendChild(ul);
+    }
+    
+    function appendWinnerToLeaderboard(key, value){
+      const lb = document.getElementById('leaderboard');
+      if(!lb) return;
+      if(!lb.querySelector('ul')){ 
+        const ul = document.createElement('ul'); 
+        ul.style.listStyle='none'; 
+        ul.style.padding='0';
+        ul.style.maxWidth='600px';
+        ul.style.margin='0 auto';
+        lb.appendChild(ul); 
+      }
+      const ul = lb.querySelector('ul');
+      const li = document.createElement('li'); 
+      li.style.padding='10px';
+      li.style.margin='5px 0';
+      li.style.background='rgba(0,255,0,0.05)';
+      li.style.borderRadius='8px';
+      li.style.border='1px solid rgba(0,255,0,0.2)';
+      li.textContent = `${value.handle} - ${value.gameType} at ${new Date(parseInt(value.timestamp)).toLocaleTimeString()}`;
+      ul.appendChild(li);
+    }
+
+    // Player list
+    function updatePlayerListSnapshot(playersObj){
+      playerListContent.innerHTML = '';
+      playersArray = [];
+      displayedPlayers.clear();
+      
+      if(!playersObj || Object.keys(playersObj).length===0){
+        playerListContent.innerHTML = '<p style="color:#AAA;margin:6px 0;text-align:center;">No players yet.</p>';
+        return;
+      }
+      
+      const keys = Object.keys(playersObj).sort();
+      keys.forEach(k=>{
+        const p = playersObj[k];
+        const handle = p.handle || ('@'+k);
+        const cardID = p.cardID || 'N/A';
+        if (playersArray.some(player => player.key === k)) return;
+        
+        playersArray.push({key:k,handle,cardID});
+        displayedPlayers.add(k);
+        
+        const div = document.createElement('div'); 
+        div.className = 'player-item';
+        const left = document.createElement('div'); 
+        left.textContent = handle;
+        const right = document.createElement('div'); 
+        right.className = 'cardid'; 
+        right.textContent = `#${cardID}`;
+        div.appendChild(left); 
+        div.appendChild(right);
+        playerListContent.appendChild(div);
+      });
+    }
+    
+    function appendPlayerToList(key, value){
+      if(!playerListContent || displayedPlayers.has(key) || playersArray.some(p => p.key === key)) return;
+      if(playerListContent.textContent.includes('No players yet.')) playerListContent.innerHTML = '';
+      
+      const handle = value.handle || ('@'+key);
+      const cardID = value.cardID || 'N/A';
+      
+      const div = document.createElement('div'); 
+      div.className = 'player-item';
+      const left = document.createElement('div'); 
+      left.textContent = handle;
+      const right = document.createElement('div'); 
+      right.className='cardid'; 
+      right.textContent = `#${cardID}`;
+      div.appendChild(left); 
+      div.appendChild(right);
+      playerListContent.appendChild(div);
+      
+      playersArray.push({key,handle,cardID});
+      displayedPlayers.add(key);
+      
+      if(isHost) showToast(`${handle} joined the game! 🎉`,2500);
+    }
+
+    // Setup / cleanup firebase listeners
+    function cleanupListeners(){
+      if(gameRef){
+        try {
+          gameRef.child('called').off();
+          gameRef.child('gameType').off();
+          gameRef.child('winners').off();
+          gameRef.child('players').off();
+        } catch(e){ console.error('Listener cleanup error', e); }
+      }
+    }
+
+    function setupGame(id){
+      try {
+        cleanupListeners();
+        initialLoadComplete = false; // Reset flag
+        gameRef = database.ref(`games/${id}`);
+        
+        // Called numbers - load existing first
+        gameRef.child('called').once('value', snap=>{
+          calledNumbers.clear();
+          const obj = snap.val();
+          if(obj){ 
+            Object.values(obj).forEach(v=> { 
+              if(isValidCalledFormat(v)) calledNumbers.add(v); 
+            }); 
+          }
+          localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+          createBoard();
+          updateStats();
+          if (!isHost && playerCard) displayPlayerCard();
+          
+          // Mark initial load as complete after a brief delay
+          setTimeout(() => {
+            initialLoadComplete = true;
+          }, 1000);
+        });
+        
+        // Listen for new called numbers
+        gameRef.child('called').on('child_added', snap=>{
+          const rolled = snap.val();
+          if(!isValidCalledFormat(rolled)) return;
+          
+          // Skip if this number was part of initial load
+          if(!initialLoadComplete) return;
+          
+          const [letter, num] = rolled.split('-');
+          if(!calledNumbers.has(rolled)) {
+            calledNumbers.add(rolled);
+            localStorage.setItem('calledNumbers', JSON.stringify([...calledNumbers]));
+            highlightNumber(letter, parseInt(num));
+            
+            // Update result display for all users
+            if(resultDiv) resultDiv.textContent = rolled;
+            
+            if (!isHost && playerCard) {
+              displayPlayerCard();
+              
+              // Check for win - only if we haven't won this specific game+type combo yet
+              const winKey = `${gameId}-${gameType}`;
+              if (!playerWins[winKey] && checkForBingo()) {
+                playerWins[winKey] = true;
+                localStorage.setItem('playerWins', JSON.stringify(playerWins));
+                
+                // Submit win to Firebase
+                gameRef.child('winners').push({
+                  handle: xHandle,
+                  timestamp: Date.now().toString(),
+                  gameType: gameType
+                }).catch(err => console.error('Win push error', err));
+                
+                showToast(`🎉 BINGO! You won ${gamePatterns[gameType].name}! 🎉`, 5000, true);
+              }
+            }
+          }
+        });
+
+        // Game type changes
+        gameRef.child('gameType').on('value', snap=>{
+          const newGameType = snap.val() || 'singleLine';
+          gameType = newGameType;
+          
+          if(isHost) {
+            gameTypeSelect.value = gameType;
+            displayWinPattern();
+          } else {
+            // Update player UI
+            if(currentGameTypeDiv && gameTypeName) {
+              currentGameTypeDiv.style.display = 'block';
+              gameTypeName.textContent = gamePatterns[gameType].name;
+              playerWinPatternDiv.style.display = 'grid';
+              playerWinPatternLabel.style.display = 'block';
+              displayWinPattern(playerWinPatternDiv, playerWinPatternLabel);
+            }
+          }
+        });
+
+        // Winners
+        gameRef.child('winners').once('value', snap=>{
+          const obj = snap.val() || {};
+          Object.keys(obj).forEach(k => notifiedWinners.add(k));
+          updateLeaderboardSnapshot(obj);
+        });
+        
+        gameRef.child('winners').on('child_added', snap=>{
+          const key = snap.key, val = snap.val();
+          if(!notifiedWinners.has(key)){
+            notifiedWinners.add(key);
+            appendWinnerToLeaderboard(key, val);
+            if(isHost) {
+              showToast(`🎉 BINGO! ${val.handle} won ${val.gameType}! 🎉`, 4000, true);
+            }
+          }
+        });
+
+        // Players
+        gameRef.child('players').once('value', snap=>{
+          updatePlayerListSnapshot(snap.val());
+        });
+        
+        gameRef.child('players').on('child_added', snap=>{
+          const key = snap.key, val = snap.val();
+          appendPlayerToList(key, val);
+        });
+
+      } catch(e){
+        console.error('Setup game error:', e);
+        showToast('Error setting up game', 3000);
+      }
+    }
+
+    // Hamburger menu toggle
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('show');
+    });
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('show');
+      });
+    });
+
+    // Event handlers
+    hostModeBtn.addEventListener('click', ()=>{
+      auth.signInAnonymously().then(()=>{
+        isHost = true;
+        hostControls.style.display = 'flex';
+        playerControls.style.display = 'none';
+        playerListEl.style.display = 'block';
+        
+        calledNumbers.clear();
+        localStorage.removeItem('calledNumbers');
+        notifiedWinners.clear();
+        displayedPlayers.clear();
+        playersArray = [];
+        playerWins = {};
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        initialLoadComplete = true; // Host starts with complete state
+        
+        gameId = Math.random().toString(36).substring(2,10);
+        localStorage.setItem('gameId', gameId);
+        gameIdDisplay.textContent = `Game ID: ${gameId}`;
+        
+        setupGame(gameId);
+        
+        gameType = gameTypeSelect.value;
+        if(gameRef) gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
+        
+        displayWinPattern(); // Show pattern immediately for host
+        createBoard();
+        updateStats();
+        
+        resultDiv.textContent = 'Ready to Roll!';
+        showToast('🎮 Host mode enabled. Share your Game ID with players!',3500);
+      }).catch(err=>{
+        console.error('Auth error for host:', err);
+        showToast('Failed to authenticate for host mode', 3000);
+      });
+    });
+
+    playerModeBtn.addEventListener('click', ()=>{
+      isHost = false;
+      hostControls.style.display = 'none';
+      playerControls.style.display = 'block';
+      playerListEl.style.display = window.innerWidth <= 767 ? 'block' : 'none';
+      
+      const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+      calledNumbers = new Set(stored);
+      createBoard();
+      updateStats();
+      displayWinPattern();
+      
+      if(xHandle) xHandleInput.value = xHandle;
+      
+      showToast('👤 Player mode: Enter Game ID and X handle to join',3000);
+    });
+
+    joinGameBtn.addEventListener('click', async ()=>{
+      const providedGameId = gameIdInput.value.trim();
+      const providedHandle = xHandleInput.value.trim();
+      
+      if(!providedGameId) return showToast('⚠️ Enter a valid Game ID', 3000);
+      if(!providedHandle || !providedHandle.startsWith('@')) return showToast('⚠️ Enter a valid X Handle (e.g., @UserX)', 3000);
+      
+      try {
+        await auth.signInAnonymously();
+        
+        gameId = providedGameId;
+        xHandle = providedHandle;
+        localStorage.setItem('gameId', gameId);
+        localStorage.setItem('xHandle', xHandle);
+        
+        gameRef = database.ref(`games/${gameId}`);
+        
+        // Generate unique card
+        const { card, cardID } = await generatePlayerCard();
+        playerCard = card;
+        
+        // Reset wins for new session/game
+        playerWins = {};
+        localStorage.setItem('playerWins', JSON.stringify(playerWins));
+        
+        displayPlayerCard();
+        
+        const handleKey = xHandle.replace('@','');
+        await gameRef.child('players').child(handleKey).set({
+          handle: xHandle,
+          cardID: cardID,
+          card: playerCard
+        });
+        
+        showToast(`✅ Joined ${gameId} as ${xHandle}`,3000);
+        setupGame(gameId);
+        
+      } catch(err){
+        console.error('Error joining game:', err);
+        showToast('❌ Error joining game: ' + (err.message || 'Unknown error'), 3500);
+      }
+    });
+
+    copyGameIdBtn.addEventListener('click', ()=>{
+      if(!gameId) return showToast('No Game ID to copy',2000);
+      navigator.clipboard.writeText(gameId)
+        .then(()=> showToast('✅ Game ID copied to clipboard!',2000))
+        .catch(e => showToast('Error copying',2000));
+    });
+
+    rollButton.addEventListener('click', ()=>{
+      if(!isHost || !gameRef) return showToast('Host a game first', 3000);
+      
+      const rolled = rollBingo();
+      if(rolled){
+        const [L,N] = rolled.split('-');
+        resultDiv.textContent = rolled;
+        highlightNumber(L, parseInt(N));
+      }
+    });
+
+    resetButton.addEventListener('click', ()=>{
+      if(!confirm('Are you sure you want to reset the game? This will clear all data.')) return;
+      
+      if(gameRef && isHost){
+        gameRef.remove().catch(err=>console.warn('Failed to remove game:', err));
+      }
+      
+      cleanupListeners();
+      calledNumbers.clear();
+      localStorage.removeItem('calledNumbers');
+      localStorage.removeItem('playerCard');
+      localStorage.removeItem('playerWins');
+      playerCard = null;
+      playerWins = {};
+      notifiedWinners.clear();
+      displayedPlayers.clear();
+      playersArray = [];
+      initialLoadComplete = false;
+      resultDiv.textContent = '';
+      
+      createBoard();
+      updateStats();
+      playerListContent.innerHTML = '';
+      document.getElementById('leaderboard').innerHTML = '';
+      
+      hostControls.style.display='none';
+      playerControls.style.display='none';
+      playerListEl.style.display='none';
+      
+      gameId = null;
+      localStorage.removeItem('gameId');
+      localStorage.removeItem('xHandle');
+      xHandle = null;
+      gameRef = null;
+      isHost = false;
+      
+      showToast('🔄 Game reset complete. Start a new game!',2500);
+    });
+
+    gameTypeSelect.addEventListener('change', ()=>{
+      const val = gameTypeSelect.value;
+      if(!Object.keys(gamePatterns).includes(val)) return;
+      
+      gameType = val;
+      if(isHost && gameRef) {
+        gameRef.child('gameType').set(gameType).catch(err=>console.error(err));
+      }
+      displayWinPattern(); // Update pattern preview immediately
+    });
+
+    // Auto-join via URL
+    (function checkUrlAutoJoin(){
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlGameId = urlParams.get('gameId');
+      if(urlGameId){
+        gameId = urlGameId;
+        localStorage.setItem('gameId', gameId);
+        playerModeBtn.click();
+        gameIdInput.value = gameId;
+        showToast('🔗 Auto-join game ID detected from URL',2500);
+      }
+    })();
+
+    // Init - Always show board on page load
+    (function init(){
+      const stored = JSON.parse(localStorage.getItem('calledNumbers') || '[]');
+      calledNumbers = new Set(stored);
+      createBoard(); // ALWAYS CREATE BOARD ON LOAD
+      updateStats();
+      displayWinPattern();
+      
+      const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
+      const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
+      playerListEl.style.transform = `translate(${savedX}px, ${savedY}px)`;
+    })();
+
+    // Dragging logic for player list
+    (function makePlayerListDraggable(){
+      const el = playerListEl;
+      let dragging = false, startX=0, startY=0, currentX=0, currentY=0, startTransform = {x:0,y:0};
+      const savedX = parseFloat(localStorage.getItem('playerListTransformX') || '0');
+      const savedY = parseFloat(localStorage.getItem('playerListTransformY') || '0');
+      currentX = savedX; currentY = savedY;
+      el.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+      function onDown(e){
+        if(window.innerWidth < 768) return;
+        dragging = true;
+        el.style.cursor = 'grabbing';
+        const client = (e.touches && e.touches[0]) || e;
+        startX = client.clientX;
+        startY = client.clientY;
+        startTransform.x = currentX;
+        startTransform.y = currentY;
+        e.preventDefault();
+      }
+      
+      function onMove(e){
+        if(!dragging) return;
+        const client = (e.touches && e.touches[0]) || e;
+        const dx = client.clientX - startX;
+        const dy = client.clientY - startY;
+        let nx = startTransform.x + dx;
+        let ny = startTransform.y + dy;
+        const rect = el.getBoundingClientRect();
+        const maxX = window.innerWidth - rect.width - 6;
+        const maxY = window.innerHeight - rect.height - 6;
+        nx = Math.max(0, Math.min(nx, maxX));
+        ny = Math.max(0, Math.min(ny, maxY));
+        currentX = nx; currentY = ny;
+        el.style.transform = `translate(${currentX}px, ${currentY}px)`;
+      }
+      
+      function onUp(){
+        if(!dragging) return;
+        dragging = false;
+        el.style.cursor = 'grab';
+        localStorage.setItem('playerListTransformX', String(currentX));
+        localStorage.setItem('playerListTransformY', String(currentY));
+      }
+      
+      el.addEventListener('mousedown', onDown);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+      el.addEventListener('touchstart', onDown, {passive:false});
+      window.addEventListener('touchmove', onMove, {passive:false});
+      window.addEventListener('touchend', onUp);
+    })();
+
+    // Debug helper
+
+  <div class="wallet-selector-modal" id="wallet-selector-modal">
+    <div class="wallet-selector-content">
+      <div class="wallet-selector-header">
+        <h2 class="wallet-selector-title">Connect Wallet</h2>
+        <p class="wallet-selector-subtitle">Choose your XRPL wallet</p>
+      </div>
+      <div class="wallet-options" id="wallet-options"></div>
+      <div class="wallet-selector-close">
+        <button class="wallet-selector-close-btn" id="close-wallet-selector">Cancel</button>
+      </div>
+    </div>
   </div>
 
-  <div class="tab-content active" id="player-cards-tab">
-    <div class="cards-nav" id="cards-nav" style="display:none;">
-      <button id="btn-prev-card" class="nav-arrow">◀</button>
-      <span id="card-position">Card 1 of 1</span>
-      <button id="btn-next-card" class="nav-arrow">▶</button>
+  <div class="player-rejoin-modal" id="player-rejoin-modal">
+    <div class="player-rejoin-content">
+      <div class="player-rejoin-icon">🎮</div>
+      <h2 class="player-rejoin-title">NEW GAME!</h2>
+      <div class="player-rejoin-message" id="rejoin-message"></div>
+      <div class="player-rejoin-details">
+        <div class="player-rejoin-detail" id="rejoin-details"></div>
+      </div>
+      <div class="player-rejoin-timer" id="rejoin-timer"></div>
+      <div class="player-rejoin-actions">
+        <button class="player-rejoin-btn join" id="rejoin-join">🎲 JOIN NOW</button>
+        <button class="player-rejoin-btn leave" id="rejoin-leave">Leave</button>
+      </div>
     </div>
-    <div id="player-cards-container" class="player-cards-grid"></div>
   </div>
 
-  <div class="tab-content" id="player-board-tab">
-    <div class="board-wrapper">
-      <div id="player-board-view" class="bingo-board"></div>
-    </div>
-  </div>
-
-  <div class="tab-content" id="player-players-tab">
-    <div id="player-players-list" class="players-list"></div>
-  </div>
-
-  <div class="tab-content" id="player-info-tab">
-    <div class="info-section">
-      <div class="info-item">
-        <span class="info-label">Game ID:</span>
-        <span id="info-game-id" class="info-value">---</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Pattern:</span>
-        <span id="info-pattern" class="info-value">---</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Called:</span>
-        <span id="info-called" class="info-value">0/75</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Players:</span>
-        <span id="info-players" class="info-value">0</span>
-      </div>
-    </div>
-    <div class="pattern-display">
-      <div class="pattern-label" id="player-pattern-name">Single Line</div>
-      <div id="player-pattern-grid" class="pattern-grid"></div>
-    </div>
-    <button id="btn-leave-game" class="danger-btn">Leave Game</button>
-  </div>
-
-  <footer class="game-footer">
-    <button id="btn-player-home" class="footer-btn" title="Home">🏠</button>
-    <span class="footer-info">Player Mode</span>
-    <button id="btn-player-share" class="footer-btn" title="Share">📤</button>
-  </footer>
-</div>
-
-<div id="game-end-screen" class="screen">
-  <div class="end-container">
-    <h2>🎉 Game Over!</h2>
-    <div id="winners-display" class="winners-display"></div>
-    <div class="end-stats">
-      <div class="end-stat">
-        <span class="end-stat-value" id="end-numbers">0</span>
-        <span class="end-stat-label">Numbers Called</span>
-      </div>
-      <div class="end-stat">
-        <span class="end-stat-value" id="end-winners">0</span>
-        <span class="end-stat-label">Winners</span>
-      </div>
-    </div>
-    <div class="end-actions">
-      <button id="btn-play-again" class="primary-btn">Play Again</button>
-      <button id="btn-new-game" class="secondary-btn">New Game</button>
-      <button id="btn-go-home" class="tertiary-btn">Home</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-<div id="loading" class="loading-overlay"><div class="spinner"></div></div>
-
-<script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/bingo-game.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/xrpl-wallet.js"></script>
+  <script src="assets/js/session-manager.js"></script>
+  <script src="assets/js/csv-export.js"></script>
+  <script src="assets/js/bingo-game.js"></script>
 </body>
 </html>
