@@ -1,6 +1,9 @@
 // ============================================
-// $BINGO LIVE - PRODUCTION v10.0
-// All critical fixes + improvements included
+// $BINGO LIVE - PRODUCTION v12.0 Phase 1
+// Critical fixes applied:
+// - Connection monitor delay
+// - Player list host priority  
+// - Winner notifications on host side
 // ============================================
 
 const LETTERS = ['B','I','N','G','O'];
@@ -591,29 +594,37 @@ function displayPlayerList(listElement) {
   if (!listElement) return;
   listElement.innerHTML = '';
   
-  if (isHost && hostHandle) {
-    const hostDiv = document.createElement('div');
-    hostDiv.className = 'player-item host-player';
-    hostDiv.innerHTML = `<div>👑 ${hostHandle} (Host)</div><div class="cardid">HOST</div>`;
-    listElement.appendChild(hostDiv);
-  }
+  const sortedPlayers = [...playersData].sort((a, b) => {
+    const aIsHost = a.handle === hostHandle || (gameData && a.handle === gameData.host);
+    const bIsHost = b.handle === hostHandle || (gameData && b.handle === gameData.host);
+    
+    if (aIsHost && !bIsHost) return -1;
+    if (!aIsHost && bIsHost) return 1;
+    return a.handle.localeCompare(b.handle);
+  });
   
-  playersData.forEach(p => {
+  sortedPlayers.forEach(p => {
     const div = document.createElement('div');
-    div.className = 'player-item';
     const isWinner = winnersData.some(w => w.handle === p.handle);
+    const isHostPlayer = p.handle === hostHandle || (gameData && p.handle === gameData.host);
+    
+    div.className = 'player-item';
     if (isWinner) div.classList.add('winner');
+    if (isHostPlayer) div.classList.add('host-player');
     
     const cardInfo = p.cardIDs && p.cardIDs.length > 1 
       ? `${p.cardIDs.length} cards` 
       : `#${p.cardIDs ? p.cardIDs[0] : p.cardID || 'N/A'}`;
     
-    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">${cardInfo}</div>`;
+    const hostBadge = isHostPlayer ? '👑 ' : '';
+    const winnerBadge = isWinner ? '🏆 ' : '';
+    
+    div.innerHTML = `<div>${hostBadge}${winnerBadge}${p.handle}</div><div class="cardid">${cardInfo}</div>`;
     listElement.appendChild(div);
   });
   
-  if (elems.statPlayers) elems.statPlayers.textContent = playersData.length + (isHost ? 1 : 0);
-  if (elems.infoPlayers) elems.infoPlayers.textContent = playersData.length + (isHost ? 1 : 0);
+  if (elems.statPlayers) elems.statPlayers.textContent = playersData.length;
+  if (elems.infoPlayers) elems.infoPlayers.textContent = playersData.length;
 }
 
 function updatePlayersList() {
@@ -734,6 +745,17 @@ function setupFirebaseListeners() {
     if (elems.statWinners) elems.statWinners.textContent = winnersData.length;
     updatePlayersList();
   });
+  
+  if (isHost) {
+    gameRef.child('winners').on('child_added', (snapshot) => {
+      if (STATE === 'HOSTSETUP') return;
+      
+      const winner = snapshot.val();
+      if (winner && winner.handle) {
+        showToast(`🎉 ${winner.handle} wins with Card ${winner.cardID}!`, 5000);
+      }
+    });
+  }
 }
 
 function cleanupFirebaseListeners() {
@@ -1382,11 +1404,13 @@ if (elems.btnGoHome) {
 setupTabNavigation();
 setupKeyboardShortcuts();
 handleURLParams();
-setupConnectionMonitoring();
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     console.log('✅ Firebase authenticated');
+    setTimeout(() => {
+      setupConnectionMonitoring();
+    }, 2000);
   } else {
     console.log('⚠️ Not authenticated');
   }
