@@ -6,89 +6,115 @@ document.addEventListener('DOMContentLoaded', function() {
   let isPaused = false;
   let timeRemaining = 15;
   
-  function initSponsorsPage() {
-    renderFeaturedSpotlight();
-    renderAllSponsors();
-    setupCategoryFilters();
-    setupRotationControls();
-    startRotation();
-  }
+  const spotlightElement = document.getElementById('featured-spotlight');
+  const sponsorsGrid = document.getElementById('sponsors-grid');
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const pauseBtn = document.getElementById('pause-rotation');
+  const timerDisplay = document.getElementById('rotation-timer');
+  const dotsContainer = document.getElementById('spotlight-dots');
+  
+  if (!spotlightElement || !sponsorsGrid) return;
   
   function renderFeaturedSpotlight() {
-    const spotlight = document.getElementById('featured-spotlight');
-    if (!spotlight || !featuredSponsors || featuredSponsors.length === 0) return;
+    if (!featuredSponsors || featuredSponsors.length === 0) {
+      spotlightElement.innerHTML = '<p>No featured sponsors available.</p>';
+      return;
+    }
     
     const sponsor = featuredSponsors[currentFeaturedIndex];
-    const logoPath = `../assets/images/sponsors/${sponsor.logo}`;
     
-    spotlight.innerHTML = `
+    const categoriesHTML = sponsor.category.map(cat => 
+      `<span class="category-badge">${cat}</span>`
+    ).join('');
+    
+    const linksHTML = [];
+    if (sponsor.website) linksHTML.push(`<a href="${sponsor.website}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">🌐 Website</a>`);
+    if (sponsor.x) linksHTML.push(`<a href="${sponsor.x}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">𝕏 Follow</a>`);
+    if (sponsor.telegram) linksHTML.push(`<a href="${sponsor.telegram}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">📱 Telegram</a>`);
+    if (sponsor.discord) linksHTML.push(`<a href="${sponsor.discord}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">💬 Discord</a>`);
+    
+    spotlightElement.innerHTML = `
       <div class="spotlight-card">
         <div class="spotlight-logo-container">
-          <img src="${logoPath}" 
+          <img src="assets/images/sponsors/${sponsor.logo}" 
                alt="${sponsor.name}" 
                class="spotlight-logo"
-               onerror="this.src='../assets/images/logo.png'">
+               onerror="this.src='assets/images/mascot-hero.png'">
         </div>
         <div class="spotlight-info">
           <h3 class="spotlight-name">${sponsor.name}</h3>
           <div class="spotlight-categories">
-            ${sponsor.category.map(cat => `
-              <span class="category-badge">${cat}</span>
-            `).join('')}
+            ${categoriesHTML}
           </div>
           <p class="spotlight-description">${sponsor.description}</p>
           <div class="spotlight-links">
-            ${sponsor.website ? `<a href="${sponsor.website}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">🌐 Website</a>` : ''}
-            ${sponsor.x ? `<a href="${sponsor.x}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">𝕏 Follow</a>` : ''}
-            ${sponsor.telegram ? `<a href="${sponsor.telegram}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">📱 Telegram</a>` : ''}
-            ${sponsor.discord ? `<a href="${sponsor.discord}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">💬 Discord</a>` : ''}
+            ${linksHTML.join('')}
           </div>
         </div>
       </div>
     `;
+    
+    updateDots();
+  }
+  
+  function updateDots() {
+    if (!dotsContainer) return;
+    
+    const dotsHTML = featuredSponsors.map((_, index) => 
+      `<div class="spotlight-dot ${index === currentFeaturedIndex ? 'active' : ''}" data-index="${index}"></div>`
+    ).join('');
+    
+    dotsContainer.innerHTML = dotsHTML;
+    
+    document.querySelectorAll('.spotlight-dot').forEach(dot => {
+      dot.addEventListener('click', function() {
+        currentFeaturedIndex = parseInt(this.getAttribute('data-index'));
+        renderFeaturedSpotlight();
+        resetRotationTimer();
+      });
+    });
   }
   
   function renderAllSponsors(filter = 'All') {
-    const grid = document.getElementById('sponsors-grid');
-    if (!grid || !sponsorsData) return;
-    
     const filtered = filter === 'All' 
       ? sponsorsData 
       : sponsorsData.filter(s => s.category.includes(filter));
     
-    grid.innerHTML = filtered.map(sponsor => {
-      const logoPath = `../assets/images/sponsors/${sponsor.logo}`;
+    const html = filtered.map(sponsor => {
+      const categoriesHTML = sponsor.category.map(cat => 
+        `<span class="category-badge">${cat}</span>`
+      ).join('');
+      
+      const linksHTML = [];
+      if (sponsor.website) linksHTML.push(`<a href="${sponsor.website}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Website</a>`);
+      if (sponsor.x) linksHTML.push(`<a href="${sponsor.x}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">X</a>`);
+      if (sponsor.telegram) linksHTML.push(`<a href="${sponsor.telegram}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Telegram</a>`);
+      if (sponsor.discord) linksHTML.push(`<a href="${sponsor.discord}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Discord</a>`);
+      if (sponsor.firstLedger) linksHTML.push(`<a href="${sponsor.firstLedger}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Token</a>`);
+      if (sponsor.linktree) linksHTML.push(`<a href="${sponsor.linktree}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Links</a>`);
       
       return `
         <div class="sponsor-card">
-          <img src="${logoPath}" 
+          <img src="assets/images/sponsors/${sponsor.logo}" 
                alt="${sponsor.name}" 
                class="sponsor-logo"
-               onerror="this.src='../assets/images/logo.png'">
+               onerror="this.src='assets/images/mascot-hero.png'">
           <h3 class="sponsor-name">${sponsor.name}</h3>
           <div class="sponsor-card-categories">
-            ${sponsor.category.map(cat => `
-              <span class="category-badge">${cat}</span>
-            `).join('')}
+            ${categoriesHTML}
           </div>
           <p class="sponsor-description">${sponsor.description}</p>
           <div class="sponsor-links">
-            ${sponsor.website ? `<a href="${sponsor.website}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Website</a>` : ''}
-            ${sponsor.x ? `<a href="${sponsor.x}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">X</a>` : ''}
-            ${sponsor.telegram ? `<a href="${sponsor.telegram}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Telegram</a>` : ''}
-            ${sponsor.discord ? `<a href="${sponsor.discord}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Discord</a>` : ''}
-            ${sponsor.firstLedger ? `<a href="${sponsor.firstLedger}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Token</a>` : ''}
-            ${sponsor.linktree ? `<a href="${sponsor.linktree}" target="_blank" rel="noopener noreferrer" class="sponsor-link-small">Linktree</a>` : ''}
+            ${linksHTML.join('')}
           </div>
         </div>
       `;
     }).join('');
+    
+    sponsorsGrid.innerHTML = html;
   }
   
-  function setupCategoryFilters() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    if (!filterButtons) return;
-    
+  function setupFilters() {
     filterButtons.forEach(btn => {
       btn.addEventListener('click', function() {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -100,22 +126,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  function setupRotationControls() {
-    const pauseBtn = document.getElementById('pause-rotation');
-    if (!pauseBtn) return;
+  function nextFeaturedSponsor() {
+    if (!featuredSponsors || featuredSponsors.length === 0) return;
     
-    pauseBtn.addEventListener('click', function() {
-      if (isPaused) {
-        resumeRotation();
-      } else {
-        pauseRotation();
-      }
-    });
+    currentFeaturedIndex = (currentFeaturedIndex + 1) % featuredSponsors.length;
+    renderFeaturedSpotlight();
+    timeRemaining = 15;
   }
   
   function startRotation() {
-    if (!featuredSponsors || featuredSponsors.length === 0) return;
-    
     clearInterval(rotationTimer);
     clearInterval(countdownTimer);
     
@@ -146,47 +165,44 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function updateTimerDisplay() {
-    const timerElement = document.getElementById('rotation-timer');
-    if (timerElement) {
-      timerElement.textContent = `${timeRemaining}s`;
+    if (timerDisplay) {
+      timerDisplay.textContent = `${timeRemaining}s`;
     }
   }
   
-  function nextFeaturedSponsor() {
-    if (!featuredSponsors || featuredSponsors.length === 0) return;
-    
-    currentFeaturedIndex = (currentFeaturedIndex + 1) % featuredSponsors.length;
-    renderFeaturedSpotlight();
+  function resetRotationTimer() {
+    clearInterval(rotationTimer);
+    clearInterval(countdownTimer);
     timeRemaining = 15;
+    startRotation();
   }
   
-  function pauseRotation() {
-    isPaused = true;
-    const pauseIcon = document.querySelector('.pause-icon');
-    const playIcon = document.querySelector('.play-icon');
-    if (pauseIcon) pauseIcon.style.display = 'none';
-    if (playIcon) playIcon.style.display = 'block';
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', function() {
+      isPaused = !isPaused;
+      this.textContent = isPaused ? '▶️ Resume' : '⏸️ Pause';
+    });
   }
   
-  function resumeRotation() {
-    isPaused = false;
-    const pauseIcon = document.querySelector('.pause-icon');
-    const playIcon = document.querySelector('.play-icon');
-    if (pauseIcon) pauseIcon.style.display = 'block';
-    if (playIcon) playIcon.style.display = 'none';
-  }
-  
-  const spotlight = document.getElementById('featured-spotlight');
-  if (spotlight) {
-    spotlight.addEventListener('mouseenter', () => {
-      if (!isPaused) pauseRotation();
+  if (spotlightElement) {
+    spotlightElement.addEventListener('mouseenter', () => {
+      if (!isPaused) {
+        isPaused = true;
+        if (pauseBtn) pauseBtn.textContent = '▶️ Resume';
+      }
     });
     
-    spotlight.addEventListener('mouseleave', () => {
-      if (isPaused) resumeRotation();
+    spotlightElement.addEventListener('mouseleave', () => {
+      if (isPaused && pauseBtn && pauseBtn.textContent === '▶️ Resume') {
+        isPaused = false;
+        pauseBtn.textContent = '⏸️ Pause';
+      }
     });
   }
   
-  initSponsorsPage();
+  renderFeaturedSpotlight();
+  renderAllSponsors();
+  setupFilters();
+  startRotation();
   
 });
