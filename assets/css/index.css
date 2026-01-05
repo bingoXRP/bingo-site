@@ -454,6 +454,49 @@
   font-size: 1.2rem;
 }
 
+.hero-stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+  padding: 2rem;
+  background: rgba(0, 198, 201, 0.05);
+  border: 1px solid rgba(0, 198, 201, 0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.hero-stats-bar .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-stats-bar .stat-number {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  color: var(--color-primary);
+  text-shadow: 0 0 20px rgba(0, 198, 201, 0.4);
+}
+
+.hero-stats-bar .stat-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .hero-stats-bar {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
 /* Mobile Hero Adjustments */
 @media (max-width: 768px) {
   .hero-container {
@@ -511,31 +554,28 @@
 }
 
 .section-title {
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 900;
-  color: var(--color-glow, #00FF00);
-  text-align: center;
-  margin-bottom: 1rem;
-  text-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+  letter-spacing: -0.02em;
 }
 
 .section-subtitle {
-  font-size: clamp(1.1rem, 2vw, 1.3rem);
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  margin-bottom: 3rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  font-family: var(--font-body);
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
 }
 
-.subsection-title {
-  font-size: clamp(1.8rem, 3vw, 2.2rem);
+h3, .subsection-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 800;
-  color: #00c6c9;
-  margin: 3rem 0 1.5rem;
 }
 
+p {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.7;
+}
 /* ================================
    ABOUT SECTION
    ================================ */
