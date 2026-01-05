@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,34 +17,35 @@
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#00c6c9">
   
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bingoxrp.com/">
   <meta property="og:title" content="BingoXRPL | Live Bingo Gaming on XRP Ledger">
   <meta property="og:description" content="$BINGO - Play live bingo on XRPL. Real prizes, NFT utility, global community. Join the game!">
-  <meta property="og:image" content="https://bingoxrp.com/assets/images/logo.png">
+  <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
   
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@BingoXRPL">
   <meta name="twitter:title" content="BingoXRPL | Live Bingo Gaming on XRP Ledger">
   <meta name="twitter:description" content="$BINGO - Play live bingo on XRPL. Real prizes, NFT utility, global community.">
-  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/logo.png">
+  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
   
   <title>BingoXRPL | $BINGO on XRP Ledger</title>
-  <link rel="icon" href="assets/images/logo.png" type="image/png">
+  <link rel="icon" href="assets/images/mascot-hero.png" type="image/png">
   <link rel="canonical" href="https://bingoxrp.com/">
   
-  <!-- Preload Critical Assets -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  
   <link rel="preload" href="assets/css/variables.css" as="style">
   <link rel="preload" href="assets/css/global.css" as="style">
-  <link rel="preload" href="assets/images/logo.png" as="image">
+  <link rel="preload" href="assets/images/mascot-hero.png" as="image">
   
-  <!-- Stylesheets -->
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/global.css">
   <link rel="stylesheet" href="assets/css/animations.css">
   <link rel="stylesheet" href="assets/css/index.css">
+  <link rel="stylesheet" href="assets/css/sponsors.css">
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -56,12 +56,11 @@
     </div>
   </noscript>
 
-  <!-- Header -->
   <header class="site-header" role="banner">
     <div class="header-container">
       <div class="header-brand">
         <a href="/" aria-label="BingoXRPL Home">
-          <img src="assets/images/logo.png" alt="$BINGO" class="logo-image" width="120" height="40">
+          <img src="assets/images/mascot-hero.png" alt="$BINGO" class="logo-image" width="120" height="40">
         </a>
       </div>
       
@@ -99,16 +98,14 @@
 
   <main id="main-content">
     
-    <!-- HERO SECTION -->
     <section class="hero">
       <div class="hero-background-gradient" aria-hidden="true"></div>
       <div class="particle-container" aria-hidden="true"></div>
       
       <div class="hero-container">
         
-        <!-- Mascot -->
         <div class="hero-mascot">
-          <img src="assets/images/logo.png" 
+          <img src="assets/images/mascot-hero.png" 
                alt="Bingo mascot" 
                class="mascot-image"
                width="400"
@@ -116,7 +113,6 @@
                loading="eager">
         </div>
         
-        <!-- Animated Subtitle Lines -->
         <div class="hero-animated-text">
           <p class="hero-subtitle-line animated-line">
             <span class="word" style="animation-delay: 0.1s">Entertainment.</span>
@@ -125,19 +121,23 @@
           </p>
         </div>
         
-        <!-- Approved Tagline -->
         <p class="hero-tagline">
           There was a farmer had a dog, and $Bingo was his name-o.... on the XRP Ledger!
         </p>
         
-        <!-- Feature Pills -->
         <div class="hero-features">
           <span class="feature-pill">🎮 Live Games</span>
           <span class="feature-pill">💰 Real Prizes</span>
           <span class="feature-pill">⚡ XRPL Native</span>
         </div>
         
-        <!-- Primary CTAs -->
+        <div class="hero-stats-bar">
+          <div class="stat-item">
+            <span class="stat-number stats-games-count">0</span>
+            <span class="stat-label">Games Played</span>
+          </div>
+        </div>
+        
         <div class="hero-ctas">
           <a href="bingo-roller.html" class="btn btn-primary btn-large" aria-label="Play Bingo Game Now">
             Play Bingo
@@ -187,7 +187,6 @@
           </button>
         </div>
         
-        <!-- Social Links -->
         <div class="hero-social">
           <a href="https://x.com/BingoXRPL" 
              target="_blank" 
@@ -222,7 +221,6 @@
       </div>
     </section>
 
-    <!-- ABOUT SECTION -->
     <section id="about" class="section about-section">
       <div class="container">
         <h2 class="section-title">About $BINGO</h2>
@@ -264,7 +262,6 @@
       </div>
     </section>
 
-    <!-- TOKENOMICS SECTION -->
     <section id="tokenomics" class="section tokenomics-section">
       <div class="container">
         <h2 class="section-title">Tokenomics</h2>
@@ -272,7 +269,6 @@
           <strong>Total Supply:</strong> 396,000,000,000 (396B) $BINGO, reflecting Gematria's symbolic significance.
         </p>
         
-        <!-- Visual Pie Chart -->
         <div class="tokenomics-visual">
           <div class="pie-chart-container">
             <svg viewBox="0 0 200 200" class="pie-chart" role="img" aria-label="Token distribution pie chart">
@@ -316,7 +312,6 @@
           </div>
         </div>
         
-        <!-- Distribution Accordion -->
         <h3 class="subsection-title">Distribution</h3>
         <div class="tokenomics-accordion">
           
@@ -375,7 +370,6 @@
           
         </div>
 
-        <!-- Burn Mechanisms -->
         <h3 class="subsection-title">Burn Mechanisms</h3>
         <div class="burn-mechanisms">
           <div class="burn-card">
@@ -408,7 +402,6 @@
       </div>
     </section>
 
-    <!-- NFT SECTION -->
     <section id="nft" class="section nft-section">
       <div class="container">
         <h2 class="section-title">Bingo NFT Collection</h2>
@@ -470,7 +463,6 @@
       </div>
     </section>
 
-    <!-- HOW TO BUY SECTION -->
     <section id="how-to-buy" class="section how-to-buy-section">
       <div class="container">
         <h2 class="section-title">How To Buy $BINGO</h2>
@@ -540,7 +532,6 @@
       </div>
     </section>
 
-    <!-- ROADMAP SECTION -->
     <section id="roadmap" class="section roadmap-section">
       <div class="container">
         <h2 class="section-title">Road Map</h2>
@@ -633,7 +624,6 @@
       </div>
     </section>
 
-    <!-- FAQ SECTION -->
     <section id="faq" class="section faq-section">
       <div class="container">
         <h2 class="section-title">FAQ</h2>
@@ -684,17 +674,29 @@
       </div>
     </section>
 
-    <!-- SPONSORS SECTION -->
-    <section id="sponsors" class="section sponsors-section">
-      <div class="container">
-        <h2 class="section-title">Sponsors</h2>
-        <p class="section-subtitle">Coming soon! This section will showcase our amazing community sponsors and partners.</p>
+    <section id="sponsors" class="sponsors-marquee-section">
+      <div class="sponsors-marquee-container">
+        <div class="sponsors-marquee-header">
+          <h2 class="sponsors-marquee-title">Our Sponsors</h2>
+          <p class="sponsors-marquee-subtitle">
+            Powered by 16 amazing XRPL ecosystem partners
+          </p>
+        </div>
+        
+        <div class="marquee-wrapper">
+          <div class="marquee-track"></div>
+        </div>
+        
+        <div class="sponsors-cta-wrapper">
+          <a href="sponsors" class="btn-view-sponsors">
+            View All Partners <span class="arrow">→</span>
+          </a>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer" role="contentinfo">
     <div class="container">
       <div class="footer-content">
@@ -717,8 +719,18 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/stats-counter.js"></script>
+  <script src="assets/js/sponsors-data.js"></script>
   <script src="assets/js/navigation.js" defer></script>
   <script src="assets/js/index.js" defer></script>
+  <script src="assets/js/sponsors-marquee.js" defer></script>
+  <script>
+    if (typeof StatsCounter !== 'undefined' && typeof database !== 'undefined') {
+      StatsCounter.init(database);
+    }
+  </script>
 </body>
 </html>
