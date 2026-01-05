@@ -11,22 +11,29 @@
   
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Meet the 18 amazing XRPL projects supporting $BINGO. Memecoins, NFTs, artists, and community builders powering the ecosystem.">
-  <meta name="keywords" content="BingoXRPL sponsors, XRPL ecosystem, crypto partners, memecoin community, NFT projects, XRPL sponsors">
+  <meta name="description" content="Meet our amazing XRPL ecosystem sponsors and partners supporting BingoXRPL. 16 projects backing the future of gaming on XRP Ledger.">
+  <meta name="keywords" content="BingoXRPL sponsors, XRPL partners, crypto sponsors, memecoin partners">
+  <meta name="theme-color" content="#00c6c9">
   
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bingoxrp.com/sponsors">
-  <meta property="og:title" content="Ecosystem Partners | BingoXRPL Sponsors">
-  <meta property="og:description" content="18 amazing XRPL projects supporting $BINGO and building the future together.">
-  <meta property="og:image" content="https://bingoxrp.com/assets/images/logo.png">
+  <meta property="og:title" content="BingoXRPL Sponsors | XRPL Ecosystem Partners">
+  <meta property="og:description" content="16 amazing XRPL projects supporting BingoXRPL. Meet our sponsors.">
+  <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
   
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ecosystem Partners | BingoXRPL Sponsors">
-  <meta name="twitter:description" content="18 amazing XRPL projects supporting $BINGO.">
+  <meta name="twitter:site" content="@BingoXRPL">
+  <meta name="twitter:title" content="BingoXRPL Sponsors">
+  <meta name="twitter:description" content="Meet our 16 XRPL ecosystem sponsors">
+  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
   
-  <title>Ecosystem Partners | BingoXRPL Sponsors</title>
-  <link rel="icon" href="../assets/images/logo.png" type="image/png">
+  <title>Sponsors | BingoXRPL</title>
+  <link rel="icon" href="../assets/images/mascot-hero.png" type="image/png">
   <link rel="canonical" href="https://bingoxrp.com/sponsors">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/global.css">
@@ -34,12 +41,13 @@
   <link rel="stylesheet" href="../assets/css/sponsors.css">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <header class="site-header" role="banner">
     <div class="header-container">
       <div class="header-brand">
         <a href="/" aria-label="BingoXRPL Home">
-          <img src="../assets/images/logo.png" alt="$BINGO" class="logo-image" width="120" height="40">
+          <img src="../assets/images/mascot-hero.png" alt="$BINGO" class="logo-image" width="120" height="40">
         </a>
       </div>
       
@@ -58,95 +66,60 @@
           <li><a href="/#tokenomics" class="nav-link">Tokenomics</a></li>
           <li><a href="/#nft" class="nav-link">NFTs</a></li>
           <li><a href="/#roadmap" class="nav-link">Roadmap</a></li>
-          <li><a href="/sponsors" class="nav-link active">Sponsors</a></li>
+          <li><a href="/sponsors" class="nav-link">Sponsors</a></li>
+          <li class="mobile-nav-play">
+            <a href="../bingo-roller.html" class="nav-link nav-link-play">
+              🎮 Play Bingo
+            </a>
+          </li>
         </ul>
       </nav>
       
       <div class="header-cta">
-        <a href="/bingo-roller.html" class="btn btn-play-nav" aria-label="Play Bingo Game">
+        <a href="../bingo-roller.html" class="btn btn-play-nav" aria-label="Play Bingo Game">
           Play Bingo <span class="arrow">→</span>
         </a>
       </div>
     </div>
   </header>
 
-  <main id="main-content">
-
-    <section class="sponsors-hero">
-      <div class="container">
-        <h1 class="hero-title">🤝 Ecosystem Partners</h1>
-        <p class="hero-subtitle">
-          Powered by the XRPL community. These amazing projects support $BINGO 
-          and build the future of decentralized entertainment together.
+  <main id="main-content" class="sponsors-page">
+    
+    <div class="container">
+      <div class="sponsors-page-header">
+        <h1 class="sponsors-page-title">Our Sponsors</h1>
+        <p class="sponsors-page-subtitle">
+          Powered by 16 amazing XRPL ecosystem partners. Together we're building the future of gaming on XRP Ledger.
         </p>
-        <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-number">18</span>
-            <span class="stat-label">Partners</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">8</span>
-            <span class="stat-label">Featured</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">100%</span>
-            <span class="stat-label">XRPL Native</span>
-          </div>
-        </div>
+      </div>
+    </div>
+
+    <section class="featured-spotlight" id="featured-spotlight">
+    </section>
+
+    <div class="spotlight-controls">
+      <div id="spotlight-dots" class="spotlight-dots"></div>
+      <div class="rotation-controls">
+        <button id="pause-rotation" class="pause-rotation-btn">⏸️ Pause</button>
+        <span class="rotation-timer" id="rotation-timer">15s</span>
+      </div>
+    </div>
+
+    <section class="filters-section">
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-category="All">All</button>
+        <button class="filter-btn" data-category="Memecoin">Memecoins</button>
+        <button class="filter-btn" data-category="NFT">NFTs</button>
+        <button class="filter-btn" data-category="Artist">Artists</button>
+        <button class="filter-btn" data-category="Community">Community</button>
+        <button class="filter-btn" data-category="Business">Business</button>
+        <button class="filter-btn" data-category="Gaming">Gaming</button>
+        <button class="filter-btn" data-category="Media">Media</button>
       </div>
     </section>
 
-    <section class="featured-sponsor-section">
-      <div class="container">
-        <h2 class="section-title-small">✨ Featured Spotlight</h2>
-        <div id="featured-spotlight" class="featured-spotlight">
-          <div class="spotlight-loading">Loading featured sponsor...</div>
-        </div>
-        <div class="spotlight-controls">
-          <button id="pause-rotation" class="control-btn" aria-label="Pause rotation">
-            <span class="pause-icon">⏸</span>
-            <span class="play-icon" style="display:none;">▶</span>
-          </button>
-          <div class="rotation-indicator">
-            <span id="rotation-timer">15s</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="all-sponsors-section">
-      <div class="container">
-        <h2 class="section-title-small">All Partners</h2>
-        
-        <div class="category-filters">
-          <button class="filter-btn active" data-category="All">All</button>
-          <button class="filter-btn" data-category="Memecoin">Memecoins</button>
-          <button class="filter-btn" data-category="NFT">NFTs</button>
-          <button class="filter-btn" data-category="Artist">Artists</button>
-          <button class="filter-btn" data-category="Community">Community</button>
-          <button class="filter-btn" data-category="Business">Business</button>
-          <button class="filter-btn" data-category="Gaming">Gaming</button>
-          <button class="filter-btn" data-category="Media">Media</button>
-        </div>
-
-        <div id="sponsors-grid" class="sponsors-grid">
-        </div>
-      </div>
-    </section>
-
-    <section class="become-sponsor-section">
-      <div class="container">
-        <div class="become-sponsor-card">
-          <h2>Want to Sponsor $BINGO?</h2>
-          <p>Join our ecosystem partners and get featured on our platform. Reach thousands of XRPL community members.</p>
-          <a href="https://discord.com/invite/Aqx83bYQqm" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="btn btn-primary btn-large">
-            Contact Us on Discord
-          </a>
-        </div>
-      </div>
+    <section class="sponsors-grid-section">
+      <div id="sponsors-grid" class="sponsors-grid"></div>
     </section>
 
   </main>
@@ -173,8 +146,8 @@
     </div>
   </footer>
 
+  <script src="../assets/js/sponsors-data.js"></script>
   <script src="../assets/js/navigation.js" defer></script>
-  <script src="../assets/js/sponsors-data.js" defer></script>
-  <script src="../assets/js/sponsors.js" defer></script>
+  <script src="../assets/js/sponsors-page.js" defer></script>
 </body>
 </html>
