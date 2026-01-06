@@ -1,4 +1,4 @@
-const StatsCounter = (function() {
+ const StatsCounter = (function() {
   let database = null;
   let statsRef = null;
   let gamesListener = null;
