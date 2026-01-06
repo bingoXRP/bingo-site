@@ -1,736 +1,1351 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HBCFY2880X"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-HBCFY2880X');
-  </script>
+/* ================================
+   INDEX.CSS - DRAMATICALLY IMPROVED
+   BingoXRPL - Legendary Build
+   ================================ */
+
+/* ================================
+   HEADER & NAVIGATION
+   ================================ */
+
+.site-header {
+  background: #00c6c9;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.header-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.2rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.header-brand .logo-image {
+  height: 50px;
+  width: auto;
+  transition: opacity 0.3s ease;
+}
+
+.header-brand a {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.header-brand a:hover .logo-image {
+  opacity: 0.85;
+}
+
+.header-nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav-link {
+  color: #000;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.3s ease;
+  font-family: var(--font-display);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-glow, #00FF00);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link:hover {
+  color: var(--color-glow, #00FF00);
+}
+
+.header-cta {
+  display: flex;
+}
+
+.btn-play-nav {
+  background: var(--color-glow, #00FF00);
+  color: #000;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 900;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+  transition: all 0.3s ease;
+  animation: glow-pulse 2s ease-in-out infinite;
+  font-family: var(--font-display);
+}
+
+.btn-play-nav .arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.btn-play-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+}
+
+.btn-play-nav:hover .arrow {
+  animation: arrow-slide 0.6s ease-in-out infinite;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+}
+
+.hamburger span {
+  width: 28px;
+  height: 3px;
+  background: #000;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger[aria-expanded="true"] span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger[aria-expanded="true"] span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
   
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="$BINGO - Live bingo gaming on XRP Ledger. Play for real prizes, NFT utility, and join the global crypto community. Built on XRPL.">
-  <meta name="keywords" content="BingoXRPL, $BINGO, memecoin, XRP Ledger, NFT, cryptocurrency, bingo game, XRPL gaming, crypto bingo, play to earn">
-  <meta name="author" content="BingoXRPL Team">
-  <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#00c6c9">
+  .header-nav {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--color-bg-dark, #0A0F2A);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
   
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://bingoxrp.com/">
-  <meta property="og:title" content="BingoXRPL | Live Bingo Gaming on XRP Ledger">
-  <meta property="og:description" content="$BINGO - Play live bingo on XRPL. Real prizes, NFT utility, global community. Join the game!">
-  <meta property="og:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
+  .header-nav.show {
+    display: flex;
+    animation: fade-in-up 0.3s ease-out;
+  }
   
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@BingoXRPL">
-  <meta name="twitter:title" content="BingoXRPL | Live Bingo Gaming on XRP Ledger">
-  <meta name="twitter:description" content="$BINGO - Play live bingo on XRPL. Real prizes, NFT utility, global community.">
-  <meta name="twitter:image" content="https://bingoxrp.com/assets/images/mascot-hero.png">
+  .nav-menu {
+    flex-direction: column;
+    gap: 2rem;
+  }
   
-  <title>BingoXRPL | $BINGO on XRP Ledger</title>
-  <link rel="icon" href="assets/images/mascot-hero.png" type="image/png">
-  <link rel="canonical" href="https://bingoxrp.com/">
+  .nav-link {
+    font-size: 1.5rem;
+    color: #FFF;
+  }
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  .header-cta {
+    display: none;
+  }
   
-  <link rel="preload" href="assets/css/variables.css" as="style">
-  <link rel="preload" href="assets/css/global.css" as="style">
-  <link rel="preload" href="assets/images/mascot-hero.png" as="image">
+  .mobile-nav-play {
+    display: block;
+  }
+}
+
+.mobile-nav-play {
+  display: none;
+}
+
+/* ================================
+   HERO SECTION - DRAMATIC
+   ================================ */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0A0F2A 0%, #1A1F3A 50%, #0A0F2A 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
+  padding: 8rem 2rem;
+}
+
+.hero-background-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 229, 232, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.particle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-mascot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mascot-image {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  filter: drop-shadow(0 30px 60px rgba(0, 229, 232, 0.4));
+  animation: mascot-float 3s ease-in-out infinite;
+}
+
+.hero-animated-text {
+  width: 100%;
+}
+
+.hero-subtitle-line {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 900;
+  color: #00ff88;
+  line-height: 1.1;
+  text-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle-line .word {
+  display: inline-block;
+  opacity: 0;
+  animation: letter-reveal 0.6s ease-out forwards;
+  margin: 0 0.5rem;
+}
+
+.hero-tagline {
+  font-family: var(--font-body);
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.hero-features {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.feature-pill {
+  background: rgba(0, 229, 232, 0.15);
+  border: 2px solid rgba(0, 229, 232, 0.4);
+  border-radius: 50px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #00e5e8;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  font-family: var(--font-display);
+}
+
+.feature-pill:hover {
+  background: rgba(0, 229, 232, 0.25);
+  border-color: #00e5e8;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 229, 232, 0.3);
+}
+
+.hero-stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+  padding: 2.5rem 3rem;
+  background: rgba(0, 229, 232, 0.1);
+  border: 2px solid rgba(0, 229, 232, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0, 229, 232, 0.2);
+}
+
+.hero-stats-bar .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.hero-stats-bar .stat-number {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 900;
+  color: #00e5e8;
+  text-shadow: 0 0 30px rgba(0, 229, 232, 0.6);
+  line-height: 1;
+}
+
+.hero-stats-bar .stat-label {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-hero {
+  padding: 2rem 4rem;
+  font-size: 1.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #00ff88, #00dd77);
+  color: #000;
+  box-shadow: 0 8px 40px rgba(0, 255, 136, 0.6);
+}
+
+.btn-hero:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 50px rgba(0, 255, 136, 0.8);
+}
+
+.btn-large {
+  padding: 1.2rem 2.5rem;
+  font-size: 1.15rem;
+  border-radius: 50px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00ff88, #00dd77);
+  color: #000;
+  box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 30px rgba(0, 255, 136, 0.6);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #00e5e8, #00c6c9);
+  color: #000;
+  box-shadow: 0 4px 20px rgba(0, 229, 232, 0.4);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 30px rgba(0, 229, 232, 0.6);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #FFF;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-3px);
+}
+
+.buy-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.buy-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s ease;
+}
+
+.buy-dropdown-btn[aria-expanded="true"] .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.buy-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1A1F3A;
+  border: 2px solid rgba(0, 229, 232, 0.3);
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 100;
+}
+
+.buy-dropdown-menu.show {
+  display: block;
+  animation: slide-down 0.3s ease-out;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.8rem 1.5rem;
+  color: #FFF;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 229, 232, 0.2);
+  color: #00e5e8;
+}
+
+.hero-social {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: var(--font-body);
+}
+
+.social-link:hover {
+  color: #00e5e8;
+  transform: translateY(-2px);
+}
+
+.social-icon {
+  font-size: 1.3rem;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 4rem 1rem;
+    min-height: 90vh;
+  }
   
-  <link rel="stylesheet" href="assets/css/variables.css">
-  <link rel="stylesheet" href="assets/css/global.css">
-  <link rel="stylesheet" href="assets/css/animations.css">
-  <link rel="stylesheet" href="assets/css/index.css">
-  <link rel="stylesheet" href="assets/css/sponsors.css">
-</head>
-<body>
-  <a href="#main-content" class="skip-link">Skip to main content</a>
+  .hero-container {
+    gap: 2rem;
+  }
+  
+  .mascot-image {
+    max-width: 350px;
+  }
+  
+  .hero-subtitle-line {
+    font-size: clamp(2rem, 7vw, 3rem);
+  }
+  
+  .hero-tagline {
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  }
+  
+  .btn-hero {
+    padding: 1.5rem 3rem;
+    font-size: 1.3rem;
+    width: 100%;
+  }
+  
+  .hero-ctas {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+  }
+  
+  .hero-ctas .btn {
+    width: 100%;
+  }
+  
+  .buy-dropdown {
+    width: 100%;
+  }
+  
+  .buy-dropdown-menu {
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+  }
+  
+  .hero-stats-bar {
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+  
+  .hero-social {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
 
-  <noscript>
-    <div class="noscript-warning">
-      JavaScript is disabled. Enable it for the best experience.
-    </div>
-  </noscript>
+/* ================================
+   SECTIONS - 2X SPACING
+   ================================ */
 
-  <header class="site-header" role="banner">
-    <div class="header-container">
-      <div class="header-brand">
-        <a href="/" aria-label="BingoXRPL Home">
-          <img src="assets/images/mascot-hero.png" alt="$BINGO" class="logo-image" width="120" height="40">
-        </a>
-      </div>
-      
-      <button class="hamburger" 
-              aria-label="Toggle navigation menu" 
-              aria-expanded="false"
-              aria-controls="main-navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      
-      <nav id="main-navigation" class="header-nav" role="navigation" aria-label="Main navigation">
-        <ul class="nav-menu">
-          <li><a href="#about" class="nav-link smooth-scroll">About</a></li>
-          <li><a href="#tokenomics" class="nav-link smooth-scroll">Tokenomics</a></li>
-          <li><a href="#nft" class="nav-link smooth-scroll">NFTs</a></li>
-          <li><a href="#roadmap" class="nav-link smooth-scroll">Roadmap</a></li>
-          <li><a href="#sponsors" class="nav-link smooth-scroll">Sponsors</a></li>
-          <li class="mobile-nav-play">
-            <a href="bingo-roller.html" class="nav-link nav-link-play">
-              🎮 Play Bingo
-            </a>
-          </li>
-        </ul>
-      </nav>
-      
-      <div class="header-cta">
-        <a href="bingo-roller.html" class="btn btn-play-nav" aria-label="Play Bingo Game">
-          Play Bingo <span class="arrow">→</span>
-        </a>
-      </div>
-    </div>
-  </header>
+.section {
+  padding: clamp(6rem, 12vw, 10rem) 0;
+  position: relative;
+}
 
-  <main id="main-content">
-    
-    <section class="hero">
-      <div class="hero-background-gradient" aria-hidden="true"></div>
-      <div class="particle-container" aria-hidden="true"></div>
-      
-      <div class="hero-container">
-        
-        <div class="hero-mascot">
-          <img src="assets/images/mascot-hero.png" 
-               alt="Bingo mascot" 
-               class="mascot-image"
-               width="600"
-               height="600"
-               loading="eager">
-        </div>
-        
-        <div class="hero-animated-text">
-          <p class="hero-subtitle-line animated-line">
-            <span class="word" style="animation-delay: 0.1s">Entertainment.</span>
-            <span class="word" style="animation-delay: 0.3s">Game.</span>
-            <span class="word" style="animation-delay: 0.5s">Community.</span>
-          </p>
-        </div>
-        
-        <p class="hero-tagline">
-          There was a farmer had a dog, and $Bingo was his name-o.... on the XRP Ledger!
-        </p>
-        
-        <div class="hero-features">
-          <span class="feature-pill">🎮 Live Games</span>
-          <span class="feature-pill">💰 Real Prizes</span>
-          <span class="feature-pill">⚡ XRPL Native</span>
-        </div>
-        
-        <div class="hero-stats-bar">
-          <div class="stat-item">
-            <span class="stat-number stats-games-count">0</span>
-            <span class="stat-label">Games Played</span>
-          </div>
-        </div>
-        
-        <div class="hero-ctas">
-          <a href="bingo-roller.html" class="btn btn-primary btn-hero" aria-label="Play Bingo Game Now">
-            Play Bingo
-          </a>
-          
-          <div class="buy-dropdown">
-            <button class="btn btn-secondary btn-large buy-dropdown-btn" 
-                    aria-label="Buy $BINGO token - Show options"
-                    aria-expanded="false"
-                    aria-haspopup="true">
-              Buy $BINGO <span class="dropdown-arrow">▼</span>
-            </button>
-            <div class="buy-dropdown-menu" role="menu">
-              <a href="https://xmagnetic.org/dex/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN_XRP+XRP?network=mainnet" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 role="menuitem"
-                 class="dropdown-item">
-                X Magnetic
-              </a>
-              <a href="https://firstledger.net/token/rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN/2442494E474F0000000000000000000000000000" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 role="menuitem"
-                 class="dropdown-item">
-                First Ledger
-              </a>
-              <a href="https://xpmarket.com/dex/%24BINGO-rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN/XRP?trade=market" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 role="menuitem"
-                 class="dropdown-item">
-                XPMarket
-              </a>
-              <a href="https://horizonxrpl.com/token/2442494E474F0000000000000000000000000000:rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 role="menuitem"
-                 class="dropdown-item">
-                Horizon
-              </a>
-            </div>
-          </div>
-          
-          <button class="btn btn-outline btn-large" id="connect-wallet-btn" aria-label="Connect XRPL Wallet">
-            Connect Wallet
-          </button>
-        </div>
-        
-        <div class="hero-social">
-          <a href="https://x.com/BingoXRPL" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="social-link"
-             aria-label="Follow BingoXRPL on X">
-            <span class="social-icon" aria-hidden="true">𝕏</span> Follow on X
-          </a>
-          <a href="https://t.co/0Gw6NfQqPR" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="social-link"
-             aria-label="Join BingoXRPL Telegram">
-            <span class="social-icon" aria-hidden="true">📱</span> Telegram
-          </a>
-          <a href="https://discord.com/invite/Aqx83bYQqm" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="social-link"
-             aria-label="Join BingoXRPL Discord">
-            <span class="social-icon" aria-hidden="true">💬</span> Discord
-          </a>
-          <a href="https://xmagnetic.org/tokens/%24BINGO%2Brf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet&currency=%24BINGO&issuer=rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="social-link"
-             aria-label="Set $BINGO trustline">
-            <span class="social-icon" aria-hidden="true">🔗</span> Set Trustline
-          </a>
-        </div>
-        
-      </div>
-    </section>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
 
-    <section id="about" class="section about-section">
-      <div class="container">
-        <h2 class="section-title">About $BINGO</h2>
-        
-        <div class="section-content">
-          <div class="about-text">
-            <p class="section-description">
-              $BINGO combines the appeal of meme coins with the cultural resonance and lore of "Bingo was his name-O", 
-              "Ol' MacDonald", and the symbolic power of Gematria (396). By integrating micro-tipping, NFT utility, 
-              and gamified community engagement, $BINGO is aiming for the XRP community's enthusiasm and adoption 
-              on platforms like X (#BINGO, #EIEIO, @bingoxrpl). Inspired by other XRPL meme tokens, $BINGO introduces 
-              unique tokenomics to provide long-term value and community loyalty.
-            </p>
-          </div>
-          
-          <div class="about-features">
-            <div class="feature-icon-card">
-              <div class="feature-icon" aria-hidden="true">🎮</div>
-              <h3>Gaming</h3>
-              <p>Live bingo gameplay with real prizes</p>
-            </div>
-            <div class="feature-icon-card">
-              <div class="feature-icon" aria-hidden="true">💎</div>
-              <h3>XRPL Native</h3>
-              <p>Built on XRP Ledger blockchain</p>
-            </div>
-            <div class="feature-icon-card">
-              <div class="feature-icon" aria-hidden="true">🏆</div>
-              <h3>Rewards</h3>
-              <p>Real token prizes and NFT utility</p>
-            </div>
-            <div class="feature-icon-card">
-              <div class="feature-icon" aria-hidden="true">🌍</div>
-              <h3>Global</h3>
-              <p>Worldwide community of players</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 900;
+  color: #00e5e8;
+  text-align: center;
+  margin-bottom: 3rem;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 30px rgba(0, 229, 232, 0.3);
+}
 
-    <section id="tokenomics" class="section tokenomics-section">
-      <div class="container">
-        <h2 class="section-title">Tokenomics</h2>
-        <p class="tokenomics-supply">
-          <strong>Total Supply:</strong> 396,000,000,000 (396B) $BINGO, reflecting Gematria's symbolic significance.
-        </p>
-        
-        <div class="tokenomics-visual">
-          <div class="pie-chart-container">
-            <svg viewBox="0 0 200 200" class="pie-chart" role="img" aria-label="Token distribution pie chart">
-              <title>Token Distribution</title>
-              <circle cx="100" cy="100" r="80" fill="transparent" stroke="#00FF00" stroke-width="60" 
-                      stroke-dasharray="251 503" transform="rotate(-90 100 100)" class="chart-segment segment-community">
-                <title>50% Community</title>
-              </circle>
-              <circle cx="100" cy="100" r="80" fill="transparent" stroke="#00B8D9" stroke-width="60" 
-                      stroke-dasharray="100 503" stroke-dashoffset="-251" transform="rotate(-90 100 100)" class="chart-segment segment-marketing">
-                <title>20% Marketing</title>
-              </circle>
-              <circle cx="100" cy="100" r="80" fill="transparent" stroke="#00FFD700" stroke-width="60" 
-                      stroke-dasharray="75 503" stroke-dashoffset="-351" transform="rotate(-90 100 100)" class="chart-segment segment-team">
-                <title>15% Team</title>
-              </circle>
-              <circle cx="100" cy="100" r="80" fill="transparent" stroke="#FF6B6B" stroke-width="60" 
-                      stroke-dasharray="75 503" stroke-dashoffset="-426" transform="rotate(-90 100 100)" class="chart-segment segment-liquidity">
-                <title>15% Liquidity</title>
-              </circle>
-            </svg>
-          </div>
-          
-          <div class="chart-legend">
-            <div class="legend-item" role="button" tabindex="0">
-              <span class="legend-color" style="background: #00FF00;" aria-hidden="true"></span>
-              <span class="legend-label">50% Community (198B)</span>
-            </div>
-            <div class="legend-item" role="button" tabindex="0">
-              <span class="legend-color" style="background: #00B8D9;" aria-hidden="true"></span>
-              <span class="legend-label">20% Marketing (79.2B)</span>
-            </div>
-            <div class="legend-item" role="button" tabindex="0">
-              <span class="legend-color" style="background: #FFD700;" aria-hidden="true"></span>
-              <span class="legend-label">15% Team (59.4B)</span>
-            </div>
-            <div class="legend-item" role="button" tabindex="0">
-              <span class="legend-color" style="background: #FF6B6B;" aria-hidden="true"></span>
-              <span class="legend-label">15% Liquidity (59.4B)</span>
-            </div>
-          </div>
-        </div>
-        
-        <h3 class="subsection-title">Distribution</h3>
-        <div class="tokenomics-accordion">
-          
-          <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-1">
-              <span class="accordion-title">50% (198B) Community</span>
-              <span class="accordion-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="accordion-content" id="accordion-1">
-              <div class="accordion-body">
-                <p><strong>10% (39.6B) Airdrops:</strong> Vested over 12 months (up to 3.3B/month). Tasks: hold at least 10 XRP worth of $BINGO, tweet #BINGO, participate in Discord activities.</p>
-                <p><strong>25% (99B) Initial DEX Offering (IDO):</strong> launched on the XRPL Native DEX.</p>
-                <p><strong>10% (39.6B) Gamified Community Pool:</strong> Locked in XRPL escrow, released via "$BINGO" challenges.</p>
-                <p><strong>5% (19.8B) NFT Staking:</strong> Locked to 3,960 NFT holders (5,000 $BINGO/month each, 12 months, 2% APY).</p>
-              </div>
-            </div>
-          </div>
+.section-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  margin-bottom: 3rem;
+  font-weight: 500;
+}
 
-          <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-2">
-              <span class="accordion-title">15% (59.4B) Team</span>
-              <span class="accordion-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="accordion-content" id="accordion-2">
-              <div class="accordion-body">
-                <p>Locked in XRPL escrow for 12 months.</p>
-              </div>
-            </div>
-          </div>
+.section-description {
+  font-family: var(--font-body);
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2rem;
+}
 
-          <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-3">
-              <span class="accordion-title">15% (59.4B) Liquidity</span>
-              <span class="accordion-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="accordion-content" id="accordion-3">
-              <div class="accordion-body">
-                <p>Allocated to $BINGO/XRP AMM pool.</p>
-              </div>
-            </div>
-          </div>
+.subsection-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  color: #00e5e8;
+  margin-bottom: 2rem;
+  letter-spacing: -0.02em;
+}
 
-          <div class="accordion-item">
-            <button class="accordion-header" aria-expanded="false" aria-controls="accordion-4">
-              <span class="accordion-title">20% (79.2B) Marketing/Charity</span>
-              <span class="accordion-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="accordion-content" id="accordion-4">
-              <div class="accordion-body">
-                <p><strong>10% (39.6B)</strong> for the "Barn burning" mechanism.</p>
-                <p><strong>5% (19.8B)</strong> for NFT art, sponsorships, X campaigns.</p>
-                <p><strong>5% (19.8B)</strong> for farm-related charity.</p>
-              </div>
-            </div>
-          </div>
-          
-        </div>
+/* About Section */
+.about-section {
+  background: linear-gradient(180deg, #0A0F2A, #1A1F3A);
+}
 
-        <h3 class="subsection-title">Burn Mechanisms</h3>
-        <div class="burn-mechanisms">
-          <div class="burn-card">
-            <div class="burn-icon" aria-hidden="true">🔥</div>
-            <h4>"Barn Burning"</h4>
-            <p>Burn 0.1% of each transaction.</p>
-          </div>
-          <div class="burn-card">
-            <div class="burn-icon" aria-hidden="true">📅</div>
-            <h4>Fixed "Barn Burns"</h4>
-            <p>Burn 2.3B/month, totaling up to 3.3B/month.</p>
-          </div>
-          <div class="burn-card">
-            <div class="burn-icon" aria-hidden="true">🔒</div>
-            <h4>NFT Staking</h4>
-            <p>Locks 19.8B tokens.</p>
-          </div>
-          <div class="burn-card">
-            <div class="burn-icon" aria-hidden="true">🎨</div>
-            <h4>NFT Burning</h4>
-            <p>Merge and burn NFTs to create 1 of 1 NFT.</p>
-          </div>
-          <div class="burn-card">
-            <div class="burn-icon" aria-hidden="true">⚫</div>
-            <h4>Blackholing</h4>
-            <p>No additional issuance.</p>
-          </div>
-        </div>
-        
-      </div>
-    </section>
+.section-content {
+  display: grid;
+  gap: 4rem;
+}
 
-    <section id="nft" class="section nft-section">
-      <div class="container">
-        <h2 class="section-title">Bingo NFT Collection</h2>
-        <p class="section-subtitle">Unlock exclusive benefits and multi-card gameplay</p>
-        
-        <div class="nft-grid">
-          
-          <article class="nft-card">
-            <a href="https://xrp.cafe/collection/bingomup" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="nft-link">
-              <div class="nft-image-container">
-                <img src="assets/images/bingo_monthly_utility_pass.png" 
-                     alt="Bingo Monthly Utility Pass NFT" 
-                     class="nft-image"
-                     loading="lazy"
-                     width="300"
-                     height="300">
-              </div>
-              <div class="nft-info">
-                <h3 class="nft-title">$Bingo Monthly Utility Passes</h3>
-                <div class="nft-benefits">
-                  <span class="benefit-badge">✅ Multi-card gameplay</span>
-                  <span class="benefit-badge">✅ Custom card designs</span>
-                  <span class="benefit-badge">✅ Exclusive benefits</span>
-                </div>
-                <span class="nft-cta">View Collection →</span>
-              </div>
-            </a>
-          </article>
-          
-          <article class="nft-card">
-            <a href="https://xrp.cafe/collection/vip-bingo-mup" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               class="nft-link">
-              <div class="nft-image-container">
-                <img src="assets/images/vip_bingo_monthly_utility_pass.png" 
-                     alt="VIP Bingo Monthly Utility Pass NFT" 
-                     class="nft-image"
-                     loading="lazy"
-                     width="300"
-                     height="300">
-              </div>
-              <div class="nft-info">
-                <h3 class="nft-title">VIP $Bingo Monthly Utility Passes</h3>
-                <div class="nft-benefits">
-                  <span class="benefit-badge">✅ VIP-only tournaments</span>
-                  <span class="benefit-badge">✅ Priority game entry</span>
-                  <span class="benefit-badge">✅ Enhanced rewards</span>
-                </div>
-                <span class="nft-cta">View Collection →</span>
-              </div>
-            </a>
-          </article>
-          
-        </div>
-      </div>
-    </section>
+.about-text {
+  max-width: 900px;
+  margin: 0 auto;
+}
 
-    <section id="how-to-buy" class="section how-to-buy-section">
-      <div class="container">
-        <h2 class="section-title">How To Buy $BINGO</h2>
-        
-        <div class="how-to-buy-steps">
-          
-          <div class="step-card">
-            <div class="step-number" aria-hidden="true">1</div>
-            <div class="step-content">
-              <h3>Download Wallet</h3>
-              <p>Download Xaman or Joey Wallet app to your device.</p>
-            </div>
-          </div>
-          
-          <div class="step-card">
-            <div class="step-number" aria-hidden="true">2</div>
-            <div class="step-content">
-              <h3>Create Wallet</h3>
-              <p>Create a new wallet and securely store your recovery phrase.</p>
-            </div>
-          </div>
-          
-          <div class="step-card">
-            <div class="step-number" aria-hidden="true">3</div>
-            <div class="step-content">
-              <h3>Fund with XRP</h3>
-              <p>Activate and fund your wallet with XRP.</p>
-            </div>
-          </div>
-          
-          <div class="step-card">
-            <div class="step-number" aria-hidden="true">4</div>
-            <div class="step-content">
-              <h3>Swap for $BINGO</h3>
-              <p>Navigate to the Swap page in the bottom menu and select $BINGO as the token.</p>
-            </div>
-          </div>
-          
-        </div>
-        
-        <div class="additional-links">
-          <a href="https://x.com/BingoXRPL" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="link-btn">
-            Follow On X
-          </a>
-          <a href="https://t.co/0Gw6NfQqPR" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="link-btn">
-            Join Telegram
-          </a>
-          <a href="https://dexscreener.com/xrpl/42414e414e410000000000000000000000000000.rpopnahpwzxiwapipm5ehq6kslehvgilqp_xrp" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="link-btn">
-            Dex Screener
-          </a>
-          <a href="https://xmagnetic.org/tokens/$BINGO+rf3CVf559UKrvzGD24PxXDcFYcG7h2ySyN?network=mainnet" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="link-btn">
-            X Magnetic
-          </a>
-        </div>
-      </div>
-    </section>
+.about-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
 
-    <section id="roadmap" class="section roadmap-section">
-      <div class="container">
-        <h2 class="section-title">Road Map</h2>
-        
-        <div class="timeline">
-          
-          <div class="timeline-item completed">
-            <div class="timeline-marker">
-              <div class="timeline-dot" aria-label="Completed">✓</div>
-              <div class="timeline-line" aria-hidden="true"></div>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-date">Q3 2025</div>
-              <div class="timeline-card">
-                <ul>
-                  <li>Blackhole issuer</li>
-                  <li>Finalize NFT designs</li>
-                  <li>Grow community</li>
-                  <li>Monetize account</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div class="timeline-item in-progress">
-            <div class="timeline-marker">
-              <div class="timeline-dot" aria-label="In Progress">⚡</div>
-              <div class="timeline-line" aria-hidden="true"></div>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-date">Q4 2025</div>
-              <div class="timeline-card">
-                <ul>
-                  <li>Mint NFTs</li>
-                  <li>Launch rewards</li>
-                  <li>Start Barn burning</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div class="timeline-item upcoming">
-            <div class="timeline-marker">
-              <div class="timeline-dot" aria-label="Upcoming">○</div>
-              <div class="timeline-line" aria-hidden="true"></div>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-date">Q1 2026</div>
-              <div class="timeline-card">
-                <ul>
-                  <li>Implement staking and challenges</li>
-                  <li>Announce charity</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div class="timeline-item upcoming">
-            <div class="timeline-marker">
-              <div class="timeline-dot" aria-label="Upcoming">○</div>
-              <div class="timeline-line" aria-hidden="true"></div>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-date">Q2 2026</div>
-              <div class="timeline-card">
-                <ul>
-                  <li>Expand campaigns</li>
-                  <li>Target 10,000+ holders</li>
-                  <li>Evaluate CEX</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div class="timeline-item upcoming">
-            <div class="timeline-marker">
-              <div class="timeline-dot" aria-label="Upcoming">○</div>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-date">2027</div>
-              <div class="timeline-card">
-                <ul>
-                  <li>Reach ~356B token cap after burning</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-        </div>
-      </div>
-    </section>
+.feature-icon-card {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
 
-    <section id="faq" class="section faq-section">
-      <div class="container">
-        <h2 class="section-title">FAQ</h2>
-        
-        <div class="faq-list">
-          
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
-              <span class="faq-text">What is $BINGO?</span>
-              <span class="faq-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="faq-answer" id="faq-1">
-              <p>$BINGO is a memecoin on the XRP Ledger inspired by the classic "Bingo was his name-o" song. It combines community engagement, NFT utility, and gamification to create a fun and rewarding ecosystem for holders.</p>
-            </div>
-          </div>
-          
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
-              <span class="faq-text">How do I buy $BINGO?</span>
-              <span class="faq-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="faq-answer" id="faq-2">
-              <p>You can purchase $BINGO on XRPL DEXs like xMagnetic, First Ledger, XPMarket, and Horizon. First, you'll need an XRPL wallet (Xaman or Joey), fund it with XRP, set a trustline for $BINGO, then swap XRP for $BINGO on your chosen DEX.</p>
-            </div>
-          </div>
-          
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
-              <span class="faq-text">What are the NFT utility passes?</span>
-              <span class="faq-icon" aria-hidden="true">+</span>
-            </button>
-            <div class="faq-answer" id="faq-3">
-              <p>$BINGO offers Monthly Utility Passes and VIP passes as NFTs. These passes provide holders with exclusive benefits, staking rewards, and access to community events. Holders can earn 5,000 $BINGO per month through NFT staking.</p>
-            </div>
-          </div>
-          
-        </div>
-        
-        <div class="faq-cta">
-          <p>Still have questions?</p>
-          <a href="https://discord.com/invite/Aqx83bYQqm" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             class="btn btn-secondary">
-            Join Our Discord
-          </a>
-        </div>
-      </div>
-    </section>
+.feature-icon-card:hover {
+  transform: translateY(-8px);
+  border-color: #00e5e8;
+  box-shadow: 0 12px 40px rgba(0, 229, 232, 0.3);
+  background: rgba(0, 229, 232, 0.1);
+}
 
-    <section id="sponsors" class="sponsors-marquee-section">
-      <div class="sponsors-marquee-container">
-        <div class="sponsors-marquee-header">
-          <h2 class="sponsors-marquee-title">Our Sponsors</h2>
-          <p class="sponsors-marquee-subtitle">
-            Backed by amazing XRPL ecosystem sponsors
-          </p>
-        </div>
-        
-        <div class="marquee-wrapper">
-          <div class="marquee-track"></div>
-        </div>
-        
-        <div class="sponsors-cta-wrapper">
-          <a href="sponsors" class="btn-view-sponsors">
-            View All Sponsors <span class="arrow">→</span>
-          </a>
-        </div>
-      </div>
-    </section>
+.feature-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+}
 
-  </main>
+.feature-icon-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #00e5e8;
+  margin-bottom: 1rem;
+}
 
-  <footer class="site-footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-content">
-        <p class="footer-text">&copy; 2025 BingoXRPL. All rights reserved. This is a memecoin – DYOR and invest responsibly. Not financial advice.</p>
-        <div class="footer-social">
-          <a href="https://x.com/BingoXRPL" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             aria-label="Follow BingoXRPL on X">X</a>
-          <a href="https://discord.com/invite/Aqx83bYQqm" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             aria-label="Join BingoXRPL Discord">Discord</a>
-          <a href="https://t.co/0Gw6NfQqPR" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             aria-label="Join BingoXRPL Telegram">Telegram</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+.feature-icon-card p {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+}
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="assets/js/firebase-config.js"></script>
-  <script src="assets/js/stats-counter.js"></script>
-  <script src="assets/js/sponsors-data.js"></script>
-  <script src="assets/js/navigation.js" defer></script>
-  <script src="assets/js/index.js" defer></script>
-  <script src="assets/js/sponsors-marquee.js" defer></script>
-  <script>
-    if (typeof StatsCounter !== 'undefined' && typeof database !== 'undefined') {
-      StatsCounter.init(database);
-    }
-  </script>
-</body>
-</html>
+/* Tokenomics Section */
+.tokenomics-section {
+  background: linear-gradient(180deg, #1A1F3A, #0A0F2A);
+}
+
+.tokenomics-supply {
+  font-family: var(--font-body);
+  font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 4rem;
+  font-weight: 600;
+}
+
+.tokenomics-visual {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 4rem;
+  align-items: center;
+  margin-bottom: 5rem;
+}
+
+.pie-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pie-chart {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  filter: drop-shadow(0 10px 30px rgba(0, 229, 232, 0.3));
+}
+
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.legend-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(8px);
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.tokenomics-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 5rem;
+}
+
+.accordion-item {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordion-item:hover {
+  border-color: rgba(0, 229, 232, 0.4);
+}
+
+.accordion-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.accordion-header:hover {
+  background: rgba(0, 229, 232, 0.08);
+}
+
+.accordion-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #00e5e8;
+  text-align: left;
+}
+
+.accordion-icon {
+  font-size: 1.8rem;
+  color: #00e5e8;
+  transition: transform 0.3s ease;
+  font-weight: 300;
+}
+
+.accordion-header[aria-expanded="true"] .accordion-icon {
+  transform: rotate(45deg);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.accordion-header[aria-expanded="true"] + .accordion-content {
+  max-height: 1000px;
+}
+
+.accordion-body {
+  padding: 0 2rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.accordion-body p {
+  margin-bottom: 1rem;
+}
+
+.accordion-body strong {
+  color: #00e5e8;
+  font-weight: 700;
+}
+
+.burn-mechanisms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.burn-card {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.burn-card:hover {
+  transform: translateY(-8px);
+  border-color: #00e5e8;
+  box-shadow: 0 12px 40px rgba(0, 229, 232, 0.3);
+  background: rgba(0, 229, 232, 0.1);
+}
+
+.burn-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.burn-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #00e5e8;
+  margin-bottom: 0.8rem;
+}
+
+.burn-card p {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+}
+
+/* NFT Section */
+.nft-section {
+  background: linear-gradient(180deg, #0A0F2A, #1A1F3A);
+}
+
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.nft-card {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.nft-card:hover {
+  transform: translateY(-12px);
+  border-color: #00e5e8;
+  box-shadow: 0 16px 50px rgba(0, 229, 232, 0.4);
+}
+
+.nft-link {
+  text-decoration: none;
+  display: block;
+}
+
+.nft-image-container {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.nft-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.nft-card:hover .nft-image {
+  transform: scale(1.05);
+}
+
+.nft-info {
+  padding: 2rem;
+}
+
+.nft-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #00e5e8;
+  margin-bottom: 1.5rem;
+}
+
+.nft-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.benefit-badge {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.nft-cta {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #00e5e8;
+  display: inline-block;
+  margin-top: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.nft-card:hover .nft-cta {
+  transform: translateX(8px);
+}
+
+/* How To Buy Section */
+.how-to-buy-section {
+  background: linear-gradient(180deg, #1A1F3A, #0A0F2A);
+}
+
+.how-to-buy-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2.5rem;
+  margin-bottom: 4rem;
+}
+
+.step-card {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-8px);
+  border-color: #00e5e8;
+  box-shadow: 0 12px 40px rgba(0, 229, 232, 0.3);
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e5e8, #00c6c9);
+  color: #000;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0, 229, 232, 0.4);
+}
+
+.step-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #00e5e8;
+  margin-bottom: 1rem;
+}
+
+.step-content p {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+}
+
+.additional-links {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.link-btn {
+  padding: 1rem 2rem;
+  background: rgba(0, 229, 232, 0.1);
+  border: 2px solid rgba(0, 229, 232, 0.3);
+  border-radius: 50px;
+  color: #00e5e8;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+}
+
+.link-btn:hover {
+  background: rgba(0, 229, 232, 0.2);
+  border-color: #00e5e8;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 229, 232, 0.3);
+}
+
+/* Roadmap Section */
+.roadmap-section {
+  background: linear-gradient(180deg, #0A0F2A, #1A1F3A);
+}
+
+.timeline {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeline-dot {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(0, 229, 232, 0.2);
+  border: 3px solid rgba(0, 229, 232, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #00e5e8;
+  z-index: 2;
+}
+
+.timeline-item.completed .timeline-dot {
+  background: linear-gradient(135deg, #00e5e8, #00c6c9);
+  border-color: #00e5e8;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(0, 229, 232, 0.5);
+}
+
+.timeline-item.in-progress .timeline-dot {
+  background: linear-gradient(135deg, #00ff88, #00dd77);
+  border-color: #00ff88;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.timeline-line {
+  width: 3px;
+  flex-grow: 1;
+  background: rgba(0, 229, 232, 0.2);
+  margin-top: 1rem;
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+.timeline-content {
+  padding-bottom: 2rem;
+}
+
+.timeline-date {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #00e5e8;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.timeline-card {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.timeline-card:hover {
+  border-color: rgba(0, 229, 232, 0.4);
+  background: rgba(0, 229, 232, 0.08);
+  transform: translateX(8px);
+}
+
+.timeline-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.timeline-card li {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.8rem;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.6;
+}
+
+.timeline-card li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: #00e5e8;
+  font-weight: 900;
+}
+
+.timeline-card li:last-child {
+  margin-bottom: 0;
+}
+
+/* FAQ Section */
+.faq-section {
+  background: linear-gradient(180deg, #1A1F3A, #0A0F2A);
+}
+
+.faq-list {
+  max-width: 900px;
+  margin: 0 auto 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.faq-item {
+  background: rgba(0, 229, 232, 0.05);
+  border: 2px solid rgba(0, 229, 232, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+  border-color: rgba(0, 229, 232, 0.4);
+}
+
+.faq-question {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.8rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.faq-question:hover {
+  background: rgba(0, 229, 232, 0.08);
+}
+
+.faq-text {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #00e5e8;
+  text-align: left;
+}
+
+.faq-icon {
+  font-size: 1.8rem;
+  color: #00e5e8;
+  transition: transform 0.3s ease;
+  font-weight: 300;
+}
+
+.faq-question[aria-expanded="true"] .faq-icon {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.faq-question[aria-expanded="true"] + .faq-answer {
+  max-height: 500px;
+}
+
+.faq-answer p {
+  padding: 0 2rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.faq-cta {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.faq-cta p {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .section {
+    padding: clamp(4rem, 10vw, 8rem) 0;
+  }
+  
+  .section-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+  }
+  
+  .subsection-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+  
+  .section {
+    padding: 4rem 0;
+  }
+  
+  .section-title {
+    margin-bottom: 2rem;
+  }
+  
+  .tokenomics-visual {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .about-features,
+  .burn-mechanisms,
+  .how-to-buy-steps {
+    grid-template-columns: 1fr;
+  }
+  
+  .nft-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .additional-links {
+    flex-direction: column;
+  }
+  
+  .link-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .timeline-item {
+    grid-template-columns: 60px 1fr;
+    gap: 1.5rem;
+  }
+  
+  .timeline-dot {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .feature-pill {
+    font-size: 0.95rem;
+    padding: 0.6rem 1.3rem;
+  }
+  
+  .hero-stats-bar {
+    padding: 2rem 1rem;
+  }
+}
