@@ -1,6 +1,7 @@
 // ============================================
-// $BINGO LIVE - PRODUCTION v10.0
-// All critical fixes + improvements included
+// $BINGO LIVE - PRODUCTION v11.0
+// Fixes: listener leak, initialLoadComplete timing, board render optimization
+// Features added: kick player, call history, game existence check, host winner confirmation
 // ============================================
 
 const LETTERS = ['B','I','N','G','O'];
@@ -71,6 +72,7 @@ const GAME_PATTERNS = {
   }
 };
 
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let STATE = 'LANDING';
 let isHost = false;
 let gameId = null;
@@ -81,6 +83,7 @@ let currentCardIndex = 0;
 let numCards = 1;
 let gameType = 'singleLine';
 let calledNumbers = new Set();
+let callHistory = [];          // FIX: ordered call log (newest first in display)
 let gameRef = null;
 let playersData = [];
 let winnersData = [];
@@ -89,7 +92,9 @@ let notifiedWins = new Set();
 let initialLoadComplete = false;
 let isConnected = true;
 let connectionRef = null;
+let pendingWinnerConfirm = null; // FIX: stores win data awaiting host confirmation
 
+// ─── DOM REFS ─────────────────────────────────────────────────────────────────
 const screens = {
   landing: document.getElementById('landing-screen'),
   hostSetup: document.getElementById('host-setup-screen'),
@@ -153,9 +158,18 @@ const elems = {
   btnNewGame: document.getElementById('btn-new-game'),
   btnGoHome: document.getElementById('btn-go-home'),
   toast: document.getElementById('toast'),
-  loading: document.getElementById('loading')
+  loading: document.getElementById('loading'),
+  hostCallHistory: document.getElementById('host-call-history'),
+  playerCallHistory: document.getElementById('player-call-history'),
+  winnerModal: document.getElementById('winner-confirm-modal'),
+  winnerModalHandle: document.getElementById('winner-modal-handle'),
+  winnerModalCard: document.getElementById('winner-modal-card'),
+  winnerModalPattern: document.getElementById('winner-modal-pattern'),
+  winnerModalAccept: document.getElementById('winner-modal-accept'),
+  winnerModalReject: document.getElementById('winner-modal-reject')
 };
 
+// ─── SCREEN / TOAST / LOADING ────────────────────────────────────────────────
 function showScreen(screenName) {
   Object.values(screens).forEach(s => s?.classList.remove('active'));
   screens[screenName]?.classList.add('active');
@@ -178,6 +192,7 @@ function showLoading(show = true) {
   }
 }
 
+// ─── VALIDATION ───────────────────────────────────────────────────────────────
 function validateHandle(handle) {
   if (!handle || handle.trim().length < 2) {
     return { valid: false, error: 'Handle must be at least 2 characters' };
@@ -191,11 +206,11 @@ function validateHandle(handle) {
   return { valid: true };
 }
 
-function validateGameId(gameId) {
-  if (!gameId || gameId.trim().length !== 8) {
+function validateGameId(id) {
+  if (!id || id.trim().length !== 8) {
     return { valid: false, error: 'Game ID must be exactly 8 characters' };
   }
-  if (!/^[A-Z0-9]+$/.test(gameId)) {
+  if (!/^[A-Z0-9]+$/.test(id)) {
     return { valid: false, error: 'Game ID can only contain letters and numbers' };
   }
   return { valid: true };
@@ -210,6 +225,11 @@ function normalizeHandle(handle) {
   return handle;
 }
 
+function isValidCalledFormat(str) {
+  return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str);
+}
+
+// ─── GENERATORS ───────────────────────────────────────────────────────────────
 function generateCardID() {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const letter = letters[Math.floor(Math.random() * letters.length)];
@@ -221,98 +241,65 @@ function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function isValidCalledFormat(str) {
-  return typeof str === 'string' && /^(?:B|I|N|G|O)-\d{1,2}$/.test(str);
-}
-
 function generateGameId() {
-  return Math.random().toString(36).substring(2, 10).toUpperCase();
+  // FIX: ensure exactly 8 chars by padding/truncating
+  const raw = Math.random().toString(36).substring(2).toUpperCase();
+  return raw.padEnd(8, '0').substring(0, 8);
 }
 
 function generateCard() {
   const card = {};
   const cardID = generateCardID();
-  
+
   LETTERS.forEach(letter => {
     const [min, max] = RANGES[letter];
     const nums = [];
     const available = [];
     for (let i = min; i <= max; i++) available.push(i);
-    
+
     while (nums.length < 5) {
       const idx = getRandomNumber(0, available.length - 1);
       nums.push(available.splice(idx, 1)[0]);
     }
-    
+
     card[letter] = nums.sort((a, b) => a - b);
   });
-  
+
   return { card, cardID };
 }
 
-function setupConnectionMonitoring() {
-  if (connectionRef) return;
-  
-  connectionRef = database.ref('.info/connected');
-  connectionRef.on('value', (snap) => {
-    isConnected = snap.val() === true;
-    
-    if (!isConnected) {
-      showToast('⚠️ Connection lost. Reconnecting...', 5000);
-    } else if (STATE !== 'LANDING' && STATE !== 'HOSTSETUP' && STATE !== 'PLAYERSETUP') {
-      showToast('✅ Connected', 2000);
-    }
-  });
-}
-
-function handleFirebaseError(error, context = '') {
-  console.error(`Firebase error (${context}):`, error);
-  
-  let userMessage = 'An error occurred. Please try again.';
-  
-  if (error.code === 'PERMISSION_DENIED') {
-    userMessage = 'Access denied. The game may not exist or has ended.';
-  } else if (error.code === 'NETWORK_ERROR' || error.message.includes('network')) {
-    userMessage = 'Network error. Check your connection and try again.';
-  } else if (error.code === 'UNAVAILABLE') {
-    userMessage = 'Service temporarily unavailable. Please try again.';
-  } else if (context === 'join') {
-    userMessage = 'Could not join game. Verify the Game ID and try again.';
-  } else if (context === 'create') {
-    userMessage = 'Could not create game. Please try again.';
-  }
-  
-  showToast(`❌ ${userMessage}`, 4000);
-  return userMessage;
-}
-
+// ─── BOARD RENDERING (OPTIMIZED) ──────────────────────────────────────────────
+// FIX: createBoard now builds DOM once; subsequent calls just toggle 'called' classes
+// instead of wiping and rebuilding all 75+ cells on every roll.
 function createBoard(boardElement) {
   if (!boardElement) return;
-  boardElement.innerHTML = '';
-  
+
+  // If board already exists, just refresh called states — no DOM rebuild
+  if (boardElement.children.length > 0) {
+    updateBoardCells(boardElement);
+    return;
+  }
+
+  // First render: build the full board DOM
   LETTERS.forEach(l => {
     const header = document.createElement('div');
     header.textContent = l;
     header.className = 'header';
     boardElement.appendChild(header);
   });
-  
+
   for (let row = 0; row < 8; row++) {
     LETTERS.forEach(letter => {
       const [min] = RANGES[letter];
-      
-      const leftNum = row < 8 ? min + row : null;
+
+      const leftNum = min + row;
       const leftDiv = document.createElement('div');
-      if (leftNum !== null) {
-        leftDiv.textContent = leftNum;
-        leftDiv.className = 'cell';
-        leftDiv.id = `${letter}-${leftNum}`;
-        if (calledNumbers.has(`${letter}-${leftNum}`)) leftDiv.classList.add('called');
-      } else {
-        leftDiv.className = 'empty';
-      }
+      leftDiv.textContent = leftNum;
+      leftDiv.className = 'cell';
+      leftDiv.id = `${letter}-${leftNum}`;
+      if (calledNumbers.has(`${letter}-${leftNum}`)) leftDiv.classList.add('called');
       boardElement.appendChild(leftDiv);
-      
+
       const rightNum = row < 7 ? min + row + 8 : null;
       const rightDiv = document.createElement('div');
       if (rightNum !== null) {
@@ -328,15 +315,31 @@ function createBoard(boardElement) {
   }
 }
 
+// FIX: lightweight update — only toggles CSS class, no DOM mutation
+function updateBoardCells(boardElement) {
+  if (!boardElement) return;
+  boardElement.querySelectorAll('.cell[id]').forEach(cell => {
+    cell.classList.toggle('called', calledNumbers.has(cell.id));
+  });
+}
+
+// Full board reset (used when starting fresh game/round with cleared calledNumbers)
+function resetBoard(boardElement) {
+  if (!boardElement) return;
+  boardElement.innerHTML = '';
+  createBoard(boardElement);
+}
+
+// ─── PATTERN DISPLAY ─────────────────────────────────────────────────────────
 function displayPattern(gridElement, nameElement) {
   if (!gridElement) return;
   gridElement.innerHTML = '';
-  
+
   const patternConfig = GAME_PATTERNS[gameType];
   if (!patternConfig) return;
-  
+
   const pattern = patternConfig.pattern || [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
-  
+
   pattern.forEach((row, rowIndex) => {
     row.forEach((val, colIndex) => {
       const cellDiv = document.createElement('div');
@@ -349,48 +352,77 @@ function displayPattern(gridElement, nameElement) {
       gridElement.appendChild(cellDiv);
     });
   });
-  
+
   if (nameElement) {
     nameElement.textContent = patternConfig.name || 'Unknown Pattern';
     nameElement.title = patternConfig.description || '';
   }
 }
 
+// ─── CALL HISTORY ─────────────────────────────────────────────────────────────
+// FIX: added call history tracking and display
+function addToCallHistory(number) {
+  if (!callHistory.includes(number)) {
+    callHistory.unshift(number); // newest first
+  }
+}
+
+function renderCallHistory() {
+  [elems.hostCallHistory, elems.playerCallHistory].forEach(container => {
+    if (!container) return;
+    const chipsEl = container.querySelector('.call-history-chips');
+    if (!chipsEl) return;
+
+    chipsEl.innerHTML = '';
+
+    callHistory.forEach((num, idx) => {
+      const letter = num.split('-')[0];
+      const chip = document.createElement('span');
+      chip.className = 'call-chip';
+      chip.dataset.letter = letter;
+      chip.textContent = num;
+      if (idx === 0) chip.classList.add('latest');
+      chipsEl.appendChild(chip);
+    });
+  });
+}
+
+// ─── PLAYER CARDS ─────────────────────────────────────────────────────────────
 function displayPlayerCards() {
   if (!elems.playerCardsContainer) return;
   elems.playerCardsContainer.innerHTML = '';
-  
+
   if (numCards === 1) {
     elems.playerCardsContainer.classList.add('single-card');
   } else {
     elems.playerCardsContainer.classList.remove('single-card');
   }
-  
+
   playerCards.forEach((cardData, index) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'player-card-wrapper';
     if (index === currentCardIndex) wrapper.classList.add('active');
-    
+
     const cardLabel = document.createElement('div');
     cardLabel.className = 'card-id-label';
     cardLabel.textContent = `Card ${cardData.cardID}`;
-    
+
     const cardEl = document.createElement('div');
     cardEl.className = 'player-card';
     cardEl.dataset.cardIndex = index;
-    
+
     LETTERS.forEach(L => {
       const h = document.createElement('div');
       h.className = 'header';
       h.textContent = L;
       cardEl.appendChild(h);
     });
-    
+
     for (let row = 0; row < 5; row++) {
       LETTERS.forEach((L, colIdx) => {
         const cellDiv = document.createElement('div');
         cellDiv.className = 'cell';
-        
+
         if (row === 2 && colIdx === 2) {
           cellDiv.textContent = 'FREE';
           cellDiv.classList.add('free', 'called');
@@ -399,21 +431,21 @@ function displayPlayerCards() {
           cellDiv.textContent = num;
           cellDiv.dataset.letter = L;
           cellDiv.dataset.number = num;
-          
+
           if (calledNumbers.has(`${L}-${num}`)) {
             cellDiv.classList.add('called');
           }
         }
-        
+
         cardEl.appendChild(cellDiv);
       });
     }
-    
+
     wrapper.appendChild(cardLabel);
     wrapper.appendChild(cardEl);
     elems.playerCardsContainer.appendChild(wrapper);
   });
-  
+
   updateCardNavigation();
 }
 
@@ -425,20 +457,17 @@ function updateCardNavigation() {
     if (elems.cardsNav) elems.cardsNav.style.display = 'flex';
     if (elems.cardPosition) elems.cardPosition.textContent = `Card ${currentCardIndex + 1} of ${numCards}`;
     if (elems.cardsIndicator) elems.cardsIndicator.textContent = `${currentCardIndex + 1}/${numCards}`;
-    
+
     if (elems.btnPrevCard) elems.btnPrevCard.disabled = (currentCardIndex === 0);
     if (elems.btnNextCard) elems.btnNextCard.disabled = (currentCardIndex === numCards - 1);
-    
+
     document.querySelectorAll('.player-card-wrapper').forEach((wrapper, idx) => {
-      if (idx === currentCardIndex) {
-        wrapper.classList.add('active');
-      } else {
-        wrapper.classList.remove('active');
-      }
+      wrapper.classList.toggle('active', idx === currentCardIndex);
     });
   }
 }
 
+// ─── WIN DETECTION ───────────────────────────────────────────────────────────
 function checkSingleLine(card, called) {
   for (let row = 0; row < 5; row++) {
     let rowComplete = true;
@@ -446,62 +475,50 @@ function checkSingleLine(card, called) {
       if (row === 2 && col === 2) continue;
       const L = LETTERS[col];
       const num = card[L][row];
-      if (!called.has(`${L}-${num}`)) {
-        rowComplete = false;
-        break;
-      }
+      if (!called.has(`${L}-${num}`)) { rowComplete = false; break; }
     }
     if (rowComplete) return true;
   }
-  
+
   for (let col = 0; col < 5; col++) {
     let colComplete = true;
     for (let row = 0; row < 5; row++) {
       if (row === 2 && col === 2) continue;
       const L = LETTERS[col];
       const num = card[L][row];
-      if (!called.has(`${L}-${num}`)) {
-        colComplete = false;
-        break;
-      }
+      if (!called.has(`${L}-${num}`)) { colComplete = false; break; }
     }
     if (colComplete) return true;
   }
-  
+
   return false;
 }
 
 function checkDoubleLine(card, called) {
   let linesComplete = 0;
-  
+
   for (let row = 0; row < 5; row++) {
     let rowComplete = true;
     for (let col = 0; col < 5; col++) {
       if (row === 2 && col === 2) continue;
       const L = LETTERS[col];
       const num = card[L][row];
-      if (!called.has(`${L}-${num}`)) {
-        rowComplete = false;
-        break;
-      }
+      if (!called.has(`${L}-${num}`)) { rowComplete = false; break; }
     }
     if (rowComplete) linesComplete++;
   }
-  
+
   for (let col = 0; col < 5; col++) {
     let colComplete = true;
     for (let row = 0; row < 5; row++) {
       if (row === 2 && col === 2) continue;
       const L = LETTERS[col];
       const num = card[L][row];
-      if (!called.has(`${L}-${num}`)) {
-        colComplete = false;
-        break;
-      }
+      if (!called.has(`${L}-${num}`)) { colComplete = false; break; }
     }
     if (colComplete) linesComplete++;
   }
-  
+
   return linesComplete >= 2;
 }
 
@@ -522,15 +539,15 @@ function checkWinPattern(card, called, pattern) {
 function checkAllCardsForWin() {
   const patternConfig = GAME_PATTERNS[gameType];
   if (!patternConfig) return [];
-  
+
   const newWins = [];
-  
+
   for (let i = 0; i < playerCards.length; i++) {
     if (cardWins[i]) continue;
-    
+
     const cardData = playerCards[i];
     let hasWon = false;
-    
+
     if (patternConfig.checkFunction === 'checkSingleLine') {
       hasWon = checkSingleLine(cardData.card, calledNumbers);
     } else if (patternConfig.checkFunction === 'checkDoubleLine') {
@@ -538,16 +555,17 @@ function checkAllCardsForWin() {
     } else if (patternConfig.pattern) {
       hasWon = checkWinPattern(cardData.card, calledNumbers, patternConfig.pattern);
     }
-    
+
     if (hasWon) {
       newWins.push({ cardIndex: i, cardID: cardData.cardID });
       cardWins[i] = true;
     }
   }
-  
+
   return newWins;
 }
 
+// ─── ROLL ─────────────────────────────────────────────────────────────────────
 function rollNumber() {
   const available = [];
   LETTERS.forEach(letter => {
@@ -557,62 +575,87 @@ function rollNumber() {
       if (!calledNumbers.has(num)) available.push({ letter, i });
     }
   });
-  
+
   if (available.length === 0) {
     showToast('All 75 numbers have been called!', 3000);
     return null;
   }
-  
+
   const chosen = available[getRandomNumber(0, available.length - 1)];
   const rolled = `${chosen.letter}-${chosen.i}`;
-  
+
   calledNumbers.add(rolled);
-  
+  addToCallHistory(rolled);
+
   if (gameRef) {
     gameRef.child('called').push(rolled).catch(err => {
       handleFirebaseError(err, 'roll');
     });
   }
-  
+
   return rolled;
 }
 
+// ─── STATS ───────────────────────────────────────────────────────────────────
 function updateStats() {
   if (elems.statCalled) elems.statCalled.textContent = calledNumbers.size;
   if (elems.statRemaining) elems.statRemaining.textContent = 75 - calledNumbers.size;
   if (elems.infoCalled) elems.infoCalled.textContent = `${calledNumbers.size}/75`;
-  
+
   if (elems.btnRoll && calledNumbers.size >= 75) {
     elems.btnRoll.disabled = true;
     elems.btnRoll.textContent = '✓ ALL CALLED';
   }
 }
 
+// ─── PLAYERS LIST (with kick button for host) ──────────────────────────────────
 function displayPlayerList(listElement) {
   if (!listElement) return;
   listElement.innerHTML = '';
-  
+
   if (isHost && hostHandle) {
     const hostDiv = document.createElement('div');
     hostDiv.className = 'player-item host-player';
     hostDiv.innerHTML = `<div>👑 ${hostHandle} (Host)</div><div class="cardid">HOST</div>`;
     listElement.appendChild(hostDiv);
   }
-  
+
   playersData.forEach(p => {
     const div = document.createElement('div');
     div.className = 'player-item';
     const isWinner = winnersData.some(w => w.handle === p.handle);
     if (isWinner) div.classList.add('winner');
-    
-    const cardInfo = p.cardIDs && p.cardIDs.length > 1 
-      ? `${p.cardIDs.length} cards` 
+
+    const cardInfo = p.cardIDs && p.cardIDs.length > 1
+      ? `${p.cardIDs.length} cards`
       : `#${p.cardIDs ? p.cardIDs[0] : p.cardID || 'N/A'}`;
-    
-    div.innerHTML = `<div>${isWinner ? '🏆 ' : ''}${p.handle}</div><div class="cardid">${cardInfo}</div>`;
+
+    // FIX: host view gets a kick button per player
+    const kickBtnHTML = isHost
+      ? `<button class="kick-btn" data-handle="${p.handle}">✕ Kick</button>`
+      : '';
+
+    div.innerHTML = `
+      <div>${isWinner ? '🏆 ' : ''}${p.handle}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="cardid">${cardInfo}</span>
+        ${kickBtnHTML}
+      </div>
+    `;
+
+    if (isHost) {
+      const kickBtn = div.querySelector('.kick-btn');
+      if (kickBtn) {
+        kickBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          kickPlayer(p.handle);
+        });
+      }
+    }
+
     listElement.appendChild(div);
   });
-  
+
   if (elems.statPlayers) elems.statPlayers.textContent = playersData.length + (isHost ? 1 : 0);
   if (elems.infoPlayers) elems.infoPlayers.textContent = playersData.length + (isHost ? 1 : 0);
 }
@@ -622,46 +665,130 @@ function updatePlayersList() {
   displayPlayerList(elems.playerPlayersList);
 }
 
+// ─── KICK PLAYER ──────────────────────────────────────────────────────────────
+// FIX: host can remove a player from the game
+function kickPlayer(handle) {
+  if (!isHost || !gameRef) return;
+  if (!confirm(`Kick ${handle} from the game?`)) return;
+
+  const handleKey = handle.startsWith('@') ? handle.substring(1) : handle;
+
+  gameRef.child('players').child(handleKey).remove()
+    .then(() => {
+      showToast(`🚫 ${handle} has been removed from the game.`, 3000);
+    })
+    .catch(err => handleFirebaseError(err, 'kick'));
+}
+
+// ─── WINNER CONFIRMATION MODAL (host only) ────────────────────────────────────
+// FIX: host now gets a modal to verify/reject a claimed win before it's recorded
+function showWinnerConfirmModal(wData, winKey) {
+  if (!elems.winnerModal) return;
+
+  pendingWinnerConfirm = { wData, winKey };
+
+  if (elems.winnerModalHandle) elems.winnerModalHandle.textContent = wData.handle;
+  if (elems.winnerModalCard) elems.winnerModalCard.textContent = wData.cardID;
+  if (elems.winnerModalPattern) elems.winnerModalPattern.textContent = GAME_PATTERNS[wData.gameType]?.name || wData.gameType;
+
+  elems.winnerModal.classList.add('show');
+}
+
+function closeWinnerModal() {
+  if (elems.winnerModal) elems.winnerModal.classList.remove('show');
+  pendingWinnerConfirm = null;
+}
+
+if (elems.winnerModalAccept) {
+  elems.winnerModalAccept.addEventListener('click', () => {
+    if (!pendingWinnerConfirm) return;
+    const { wData } = pendingWinnerConfirm;
+    showToast(`🏆 ${wData.handle} confirmed as winner!`, 4000);
+    closeWinnerModal();
+  });
+}
+
+if (elems.winnerModalReject) {
+  elems.winnerModalReject.addEventListener('click', () => {
+    if (!pendingWinnerConfirm) return;
+    const { wData, winKey } = pendingWinnerConfirm;
+
+    // Remove from Firebase
+    if (gameRef) {
+      gameRef.child('winners').child(winKey).remove().catch(err => handleFirebaseError(err, 'reject-win'));
+    }
+
+    // Remove from local state
+    winnersData = winnersData.filter(w => w.handle !== wData.handle || w.cardID !== wData.cardID);
+    if (elems.statWinners) elems.statWinners.textContent = winnersData.length;
+    updatePlayersList();
+
+    showToast(`❌ ${wData.handle}'s win has been rejected.`, 4000);
+    closeWinnerModal();
+  });
+}
+
+// ─── FIREBASE LISTENERS ───────────────────────────────────────────────────────
 function setupFirebaseListeners() {
   if (!gameRef) return;
-  
+
+  // FIX: initialLoadComplete is now set INSIDE the once('value') callback
+  // instead of a fragile 1-second setTimeout. This ensures it's only set
+  // after ALL existing called numbers have been loaded and processed.
   gameRef.child('called').once('value', snap => {
     calledNumbers.clear();
+    callHistory = [];
+
     const obj = snap.val();
     if (obj) {
-      Object.values(obj).forEach(v => {
-        if (isValidCalledFormat(v)) calledNumbers.add(v);
+      // Firebase push keys are ordered — sort them to preserve call order
+      const ordered = Object.entries(obj)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([, v]) => v);
+
+      ordered.forEach(v => {
+        if (isValidCalledFormat(v)) {
+          calledNumbers.add(v);
+          callHistory.push(v); // oldest first in array
+        }
       });
+
+      // Reverse so newest is first in display
+      callHistory.reverse();
     }
-    
+
     createBoard(elems.hostBoard);
     createBoard(elems.playerBoardView);
     if (!isHost && playerCards.length > 0) displayPlayerCards();
     updateStats();
-    
-    setTimeout(() => {
-      initialLoadComplete = true;
-    }, 1000);
+    renderCallHistory();
+
+    // FIX: set flag immediately after processing — no setTimeout
+    initialLoadComplete = true;
   }).catch(err => {
     handleFirebaseError(err, 'load');
     showLoading(false);
   });
-  
+
+  // Live number feed
   gameRef.child('called').on('child_added', snap => {
     const rolled = snap.val();
     if (!isValidCalledFormat(rolled) || !initialLoadComplete) return;
-    
+
     if (!calledNumbers.has(rolled)) {
       calledNumbers.add(rolled);
-      
+      addToCallHistory(rolled);
+
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = rolled;
       if (elems.playerLastCalled) elems.playerLastCalled.textContent = rolled;
-      
-      createBoard(elems.hostBoard);
-      createBoard(elems.playerBoardView);
+
+      // FIX: optimized board update — toggles class on one cell, no DOM rebuild
+      updateBoardCells(elems.hostBoard);
+      updateBoardCells(elems.playerBoardView);
       if (!isHost && playerCards.length > 0) displayPlayerCards();
       updateStats();
-      
+      renderCallHistory();
+
       if (!isHost) {
         const newWins = checkAllCardsForWin();
         newWins.forEach(winResult => {
@@ -681,23 +808,22 @@ function setupFirebaseListeners() {
       }
     }
   });
-  
+
+  // Pattern changes
   gameRef.child('gameType').on('value', snap => {
     const newType = snap.val();
     if (newType && GAME_PATTERNS[newType] && newType !== gameType) {
-      const oldType = gameType;
       gameType = newType;
-      
+
       displayPattern(elems.hostPatternGrid, elems.hostPatternName);
       displayPattern(elems.playerPatternGrid, elems.playerPatternName);
       if (elems.infoPattern) elems.infoPattern.textContent = GAME_PATTERNS[gameType]?.name || 'Unknown';
-      
       if (elems.hostPatternChange) elems.hostPatternChange.value = gameType;
-      
+
       if (!isHost && initialLoadComplete) {
         showToast(`🔄 Pattern changed to: ${GAME_PATTERNS[gameType].name}`, 4000);
         cardWins = [];
-        
+
         const newWins = checkAllCardsForWin();
         newWins.forEach(winResult => {
           showToast(`🎉 BINGO! Card ${winResult.cardID} wins with new pattern!`, 5000);
@@ -705,7 +831,8 @@ function setupFirebaseListeners() {
       }
     }
   });
-  
+
+  // Player roster
   gameRef.child('players').on('value', snap => {
     playersData = [];
     snap.forEach(childSnap => {
@@ -722,7 +849,9 @@ function setupFirebaseListeners() {
     });
     updatePlayersList();
   });
-  
+
+  // FIX: load existing winners first to populate notifiedWins,
+  // then child_added won't double-fire on existing entries.
   gameRef.child('winners').once('value', snap => {
     winnersData = [];
     snap.forEach(childSnap => {
@@ -736,22 +865,23 @@ function setupFirebaseListeners() {
     if (elems.statWinners) elems.statWinners.textContent = winnersData.length;
     updatePlayersList();
   });
-  
+
   gameRef.child('winners').on('child_added', snap => {
     const winKey = snap.key;
     if (notifiedWins.has(winKey)) return;
-    
+
     const wData = snap.val();
     if (wData) {
       winnersData.push(wData);
       winnersData.sort((a, b) => a.wonAt - b.wonAt);
       notifiedWins.add(winKey);
-      
+
       if (elems.statWinners) elems.statWinners.textContent = winnersData.length;
       updatePlayersList();
-      
+
+      // FIX: host gets confirmation modal instead of a blind toast
       if (isHost && initialLoadComplete) {
-        showToast(`🎉 ${wData.handle} wins with ${wData.gameType}!`, 4000);
+        showWinnerConfirmModal(wData, winKey);
       }
     }
   });
@@ -771,15 +901,54 @@ function cleanupFirebaseListeners() {
   notifiedWins.clear();
 }
 
+// ─── FIREBASE ERROR ───────────────────────────────────────────────────────────
+function handleFirebaseError(error, context = '') {
+  console.error(`Firebase error (${context}):`, error);
+
+  let userMessage = 'An error occurred. Please try again.';
+
+  if (error.code === 'PERMISSION_DENIED') {
+    userMessage = 'Access denied. The game may not exist or has ended.';
+  } else if (error.code === 'NETWORK_ERROR' || error.message?.includes('network')) {
+    userMessage = 'Network error. Check your connection and try again.';
+  } else if (error.code === 'UNAVAILABLE') {
+    userMessage = 'Service temporarily unavailable. Please try again.';
+  } else if (context === 'join') {
+    userMessage = 'Could not join game. Verify the Game ID and try again.';
+  } else if (context === 'create') {
+    userMessage = 'Could not create game. Please try again.';
+  }
+
+  showToast(`❌ ${userMessage}`, 4000);
+  return userMessage;
+}
+
+// ─── CONNECTION MONITORING ────────────────────────────────────────────────────
+function setupConnectionMonitoring() {
+  if (connectionRef) return;
+
+  connectionRef = database.ref('.info/connected');
+  connectionRef.on('value', (snap) => {
+    isConnected = snap.val() === true;
+
+    if (!isConnected) {
+      showToast('⚠️ Connection lost. Reconnecting...', 5000);
+    } else if (STATE !== 'LANDING' && STATE !== 'HOSTSETUP' && STATE !== 'PLAYERSETUP') {
+      showToast('✅ Connected', 2000);
+    }
+  });
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
 function setupTabNavigation() {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const tabName = btn.dataset.tab;
       const parent = btn.closest('.screen');
-      
+
       parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      
+
       btn.classList.add('active');
       const targetTab = parent.querySelector(`#${tabName}`);
       if (targetTab) targetTab.classList.add('active');
@@ -787,11 +956,12 @@ function setupTabNavigation() {
   });
 }
 
+// ─── URL PARAMS ───────────────────────────────────────────────────────────────
 function handleURLParams() {
   const params = new URLSearchParams(window.location.search);
   const gameParam = params.get('game');
   const hostParam = params.get('host');
-  
+
   if (gameParam) {
     if (elems.playerGameId) elems.playerGameId.value = gameParam.toUpperCase();
     showScreen('playerSetup');
@@ -801,12 +971,13 @@ function handleURLParams() {
   }
 }
 
+// ─── EXPORT WINNERS ───────────────────────────────────────────────────────────
 function exportWinnersForPrizes() {
   if (!winnersData || winnersData.length === 0) {
     console.log('No winners to export');
     return null;
   }
-  
+
   const exportData = {
     gameId: gameId,
     totalWinners: winnersData.length,
@@ -819,16 +990,17 @@ function exportWinnersForPrizes() {
       numbersCalled: w.numbersCalled
     }))
   };
-  
+
   console.log('🏆 Winners Export for Prizes:', exportData);
   console.table(exportData.winners);
   return exportData;
 }
 
+// ─── ONBOARDING TOUR ─────────────────────────────────────────────────────────
 function startOnboardingTour() {
   const hasSeenTour = localStorage.getItem('bingoTourCompleted');
   if (hasSeenTour) return;
-  
+
   const tourSteps = [
     { element: '#display-game-id', text: 'This is your Game ID. Share it with players!', tab: null },
     { element: '#btn-copy-id', text: 'Click here to copy the game link to share.', tab: null },
@@ -837,7 +1009,7 @@ function startOnboardingTour() {
     { element: '.game-tabs', text: 'Switch between tabs to see players, stats, and more.', tab: null },
     { element: '#btn-end-game', text: 'End the game when ready to see all winners.', tab: 'host-stats-tab' }
   ];
-  
+
   let currentStep = 0;
   const overlay = document.createElement('div');
   overlay.className = 'tour-overlay';
@@ -853,86 +1025,47 @@ function startOnboardingTour() {
     </div>
   `;
   document.body.appendChild(overlay);
-  
   document.body.style.overflow = 'hidden';
-  
+
   function positionTooltip(rect, tooltip) {
+    if (window.innerWidth <= 767) {
+      tooltip.style.cssText = `left:20px;right:20px;bottom:20px;top:auto;max-width:none;width:calc(100vw - 40px);`;
+      return;
+    }
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
     const tooltipRect = tooltip.getBoundingClientRect();
-    
-    if (window.innerWidth <= 767) {
-      tooltip.style.cssText = `
-        left: 20px;
-        right: 20px;
-        bottom: 20px;
-        top: auto;
-        max-width: none;
-        width: calc(100vw - 40px);
-      `;
-      return;
-    }
-    
     let top = rect.bottom + 20;
     let left = Math.max(20, rect.left);
-    
-    if (top + tooltipRect.height > viewportHeight - 20) {
-      top = rect.top - tooltipRect.height - 20;
-    }
-    
-    if (left + tooltipRect.width > viewportWidth - 20) {
-      left = viewportWidth - tooltipRect.width - 20;
-    }
-    
+    if (top + tooltipRect.height > viewportHeight - 20) top = rect.top - tooltipRect.height - 20;
+    if (left + tooltipRect.width > viewportWidth - 20) left = viewportWidth - tooltipRect.width - 20;
     left = Math.max(20, left);
-    
-    tooltip.style.cssText = `
-      top: ${top}px;
-      left: ${left}px;
-      right: auto;
-      bottom: auto;
-    `;
+    tooltip.style.cssText = `top:${top}px;left:${left}px;right:auto;bottom:auto;`;
   }
-  
+
   function calculateSpotlightPadding(rect) {
-    const minPadding = 8;
-    const maxPadding = 20;
-    
-    const widthPadding = Math.max(minPadding, Math.min(maxPadding, rect.width * 0.1));
-    const heightPadding = Math.max(minPadding, Math.min(maxPadding, rect.height * 0.1));
-    
-    return { x: widthPadding, y: heightPadding };
+    const min = 8, max = 20;
+    return {
+      x: Math.max(min, Math.min(max, rect.width * 0.1)),
+      y: Math.max(min, Math.min(max, rect.height * 0.1))
+    };
   }
-  
+
   function showStep(stepIndex) {
-    if (stepIndex >= tourSteps.length) {
-      endTour();
-      return;
-    }
-    
+    if (stepIndex >= tourSteps.length) { endTour(); return; }
     const step = tourSteps[stepIndex];
-    
+
     if (step.tab) {
       const tabBtn = document.querySelector(`[data-tab="${step.tab}"]`);
-      if (tabBtn && !tabBtn.classList.contains('active')) {
-        tabBtn.click();
-      }
+      if (tabBtn && !tabBtn.classList.contains('active')) tabBtn.click();
     }
-    
+
     setTimeout(() => {
       const element = document.querySelector(step.element);
-      if (!element) {
-        console.warn(`Tour element not found: ${step.element}`);
-        showStep(stepIndex + 1);
-        return;
-      }
-      
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center'
-      });
-      
+      if (!element) { showStep(stepIndex + 1); return; }
+
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
       setTimeout(() => {
         const rect = element.getBoundingClientRect();
         const spotlight = overlay.querySelector('.tour-spotlight');
@@ -940,35 +1073,20 @@ function startOnboardingTour() {
         const content = overlay.querySelector('.tour-content');
         const currentSpan = overlay.querySelector('.tour-current');
         const nextBtn = overlay.querySelector('.tour-next');
-        
+
         const padding = calculateSpotlightPadding(rect);
-        
-        spotlight.style.cssText = `
-          top: ${rect.top - padding.y}px;
-          left: ${rect.left - padding.x}px;
-          width: ${rect.width + (padding.x * 2)}px;
-          height: ${rect.height + (padding.y * 2)}px;
-        `;
-        
+        spotlight.style.cssText = `top:${rect.top - padding.y}px;left:${rect.left - padding.x}px;width:${rect.width + padding.x * 2}px;height:${rect.height + padding.y * 2}px;`;
         content.textContent = step.text;
         currentSpan.textContent = stepIndex + 1;
-        
-        if (stepIndex === tourSteps.length - 1) {
-          nextBtn.textContent = 'Finish';
-        } else {
-          nextBtn.textContent = 'Next';
-        }
-        
+        nextBtn.textContent = stepIndex === tourSteps.length - 1 ? 'Finish' : 'Next';
         positionTooltip(rect, tooltip);
-        
         overlay.classList.add('active');
-        
         spotlight.classList.add('pulse');
         setTimeout(() => spotlight.classList.remove('pulse'), 3000);
       }, 500);
     }, step.tab ? 300 : 0);
   }
-  
+
   function endTour() {
     overlay.remove();
     document.body.style.overflow = '';
@@ -976,11 +1094,10 @@ function startOnboardingTour() {
     showToast('Tour complete! Ready to host! 🎉', 3000);
     document.removeEventListener('keydown', handleKeyboard);
   }
-  
+
   function handleKeyboard(e) {
-    if (e.key === 'Escape') {
-      endTour();
-    } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
+    if (e.key === 'Escape') { endTour(); }
+    else if (e.key === 'Enter' || e.key === 'ArrowRight') {
       e.preventDefault();
       currentStep++;
       showStep(currentStep);
@@ -990,32 +1107,25 @@ function startOnboardingTour() {
       showStep(currentStep);
     }
   }
-  
+
   document.addEventListener('keydown', handleKeyboard);
-  
-  overlay.querySelector('.tour-next').addEventListener('click', () => {
-    currentStep++;
-    showStep(currentStep);
-  });
-  
+  overlay.querySelector('.tour-next').addEventListener('click', () => { currentStep++; showStep(currentStep); });
   overlay.querySelector('.tour-skip').addEventListener('click', endTour);
-  
   setTimeout(() => showStep(0), 1000);
 }
 
+// ─── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    
     if (e.code === 'Space' && isHost && STATE === 'HOSTGAME') {
       e.preventDefault();
-      if (elems.btnRoll && !elems.btnRoll.disabled) {
-        elems.btnRoll.click();
-      }
+      if (elems.btnRoll && !elems.btnRoll.disabled) elems.btnRoll.click();
     }
   });
 }
 
+// ─── HANDLE PERSISTENCE ───────────────────────────────────────────────────────
 function loadLastHandle() {
   const lastHandle = localStorage.getItem('lastHandle');
   if (lastHandle && elems.hostHandle) {
@@ -1027,6 +1137,7 @@ function saveLastHandle(handle) {
   localStorage.setItem('lastHandle', handle.replace('@', ''));
 }
 
+// ─── UNLOAD GUARD ─────────────────────────────────────────────────────────────
 window.addEventListener('beforeunload', (e) => {
   if (STATE === 'HOSTGAME' || STATE === 'PLAYERGAME') {
     e.preventDefault();
@@ -1034,6 +1145,8 @@ window.addEventListener('beforeunload', (e) => {
     return e.returnValue;
   }
 });
+
+// ─── EVENT LISTENERS ──────────────────────────────────────────────────────────
 
 if (elems.hostPattern) {
   elems.hostPattern.addEventListener('change', () => {
@@ -1071,69 +1184,65 @@ if (elems.btnPlayerMode) {
 }
 
 if (elems.btnBackFromHost) {
-  elems.btnBackFromHost.addEventListener('click', () => {
-    showScreen('landing');
-  });
+  elems.btnBackFromHost.addEventListener('click', () => showScreen('landing'));
 }
 
 if (elems.btnBackFromPlayer) {
-  elems.btnBackFromPlayer.addEventListener('click', () => {
-    showScreen('landing');
-  });
+  elems.btnBackFromPlayer.addEventListener('click', () => showScreen('landing'));
 }
 
+// ─── START HOST ───────────────────────────────────────────────────────────────
 if (elems.btnStartHost) {
   elems.btnStartHost.addEventListener('click', () => {
     const handleInput = elems.hostHandle.value.trim();
     const validation = validateHandle(handleInput);
-    
-    if (!validation.valid) {
-      return showToast(`⚠️ ${validation.error}`, 3000);
-    }
-    
+
+    if (!validation.valid) return showToast(`⚠️ ${validation.error}`, 3000);
+
     const handle = normalizeHandle(handleInput);
     const pattern = elems.hostPattern.value;
-    
+
     showLoading(true);
-    
+
     auth.signInAnonymously().then(() => {
       isHost = true;
       hostHandle = handle;
       gameType = pattern;
       gameId = generateGameId();
-      
+
       saveLastHandle(handle);
-      
+
       calledNumbers.clear();
+      callHistory = [];
       playersData = [];
       winnersData = [];
       cardWins = [];
       initialLoadComplete = false;
-      
+
       if (elems.displayGameId) elems.displayGameId.textContent = gameId;
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = '--';
-      
+
       gameRef = database.ref(`games/${gameId}`);
       gameRef.child('gameType').set(gameType);
       gameRef.child('host').set(hostHandle);
       gameRef.child('created').set(Date.now());
-      
+
       if (elems.hostPatternChange) elems.hostPatternChange.value = gameType;
-      
+
       setupFirebaseListeners();
-      createBoard(elems.hostBoard);
+      resetBoard(elems.hostBoard);
       displayPattern(elems.hostPatternGrid, elems.hostPatternName);
       updateStats();
       updatePlayersList();
-      
-      setTimeout(() => {
-        initialLoadComplete = true;
-      }, 1000);
-      
+      renderCallHistory();
+
+      // FIX: removed fragile setTimeout — initialLoadComplete is now set inside
+      // setupFirebaseListeners() once() callback
+
       showLoading(false);
       showScreen('hostGame');
       showToast(`🎮 Game ${gameId} started! Share the ID with players.`, 3500);
-      
+
       startOnboardingTour();
     }).catch(err => {
       showLoading(false);
@@ -1142,95 +1251,115 @@ if (elems.btnStartHost) {
   });
 }
 
+// ─── JOIN GAME ────────────────────────────────────────────────────────────────
 if (elems.btnJoinGame) {
   elems.btnJoinGame.addEventListener('click', () => {
     const gidInput = elems.playerGameId.value.trim().toUpperCase();
     const handleInput = elems.playerHandle.value.trim();
     const cardsCount = parseInt(elems.playerCardsSelect.value) || 1;
-    
+
     const gidValidation = validateGameId(gidInput);
-    if (!gidValidation.valid) {
-      return showToast(`⚠️ ${gidValidation.error}`, 3000);
-    }
-    
+    if (!gidValidation.valid) return showToast(`⚠️ ${gidValidation.error}`, 3000);
+
     const handleValidation = validateHandle(handleInput);
-    if (!handleValidation.valid) {
-      return showToast(`⚠️ ${handleValidation.error}`, 3000);
-    }
-    
+    if (!handleValidation.valid) return showToast(`⚠️ ${handleValidation.error}`, 3000);
+
     const gid = gidInput;
     const handle = normalizeHandle(handleInput);
-    
+
     showLoading(true);
-    
+
     auth.signInAnonymously()
       .then(() => {
-        gameId = gid;
-        playerHandle = handle;
-        numCards = cardsCount;
-        playerCards = [];
-        cardWins = [];
-        currentCardIndex = 0;
-        
-        for (let i = 0; i < numCards; i++) {
-          playerCards.push(generateCard());
-        }
-        
-        if (elems.playerNameDisplay) elems.playerNameDisplay.textContent = handle.replace('@', '');
-        if (elems.playerLastCalled) elems.playerLastCalled.textContent = '--';
-        
-        gameRef = database.ref(`games/${gameId}`);
-        
-        const handleKey = handle.substring(1);
-        const allCardIDs = playerCards.map(c => c.cardID);
-        
-        return gameRef.child('players').child(handleKey).set({
-          handle: handle,
-          cardID: playerCards[0].cardID,
-          cardIDs: allCardIDs,
-          numCards: numCards,
-          joinedAt: Date.now()
+        // FIX: verify game exists before writing player data
+        const checkRef = database.ref(`games/${gid}`);
+        return checkRef.once('value').then(snap => {
+          if (!snap.exists() || !snap.child('gameType').exists()) {
+            showLoading(false);
+            showToast('❌ Game not found. Check the Game ID and try again.', 4000);
+            return Promise.reject(new Error('GAME_NOT_FOUND'));
+          }
+
+          // Game exists — read its current type
+          const existingGameType = snap.child('gameType').val();
+
+          gameId = gid;
+          playerHandle = handle;
+          numCards = cardsCount;
+          playerCards = [];
+          cardWins = [];
+          currentCardIndex = 0;
+          gameType = existingGameType || 'singleLine';
+
+          for (let i = 0; i < numCards; i++) {
+            playerCards.push(generateCard());
+          }
+
+          if (elems.playerNameDisplay) elems.playerNameDisplay.textContent = handle.replace('@', '');
+          if (elems.playerLastCalled) elems.playerLastCalled.textContent = '--';
+
+          gameRef = database.ref(`games/${gameId}`);
+
+          const handleKey = handle.substring(1);
+          const allCardIDs = playerCards.map(c => c.cardID);
+
+          return gameRef.child('players').child(handleKey).set({
+            handle: handle,
+            cardID: playerCards[0].cardID,
+            cardIDs: allCardIDs,
+            numCards: numCards,
+            joinedAt: Date.now()
+          });
         });
       })
       .then(() => {
+        if (!gameRef) return; // was rejected earlier (GAME_NOT_FOUND)
+
         setupFirebaseListeners();
         displayPlayerCards();
-        createBoard(elems.playerBoardView);
+        resetBoard(elems.playerBoardView);
         displayPattern(elems.playerPatternGrid, elems.playerPatternName);
         updateStats();
-        
+        renderCallHistory();
+
         if (elems.infoGameId) elems.infoGameId.textContent = gameId;
         if (elems.infoPattern) elems.infoPattern.textContent = GAME_PATTERNS[gameType]?.name || 'Unknown';
-        
+
+        // FIX: removed fragile setTimeout — initialLoadComplete is now set inside
+        // setupFirebaseListeners() once() callback
+
         showLoading(false);
         showScreen('playerGame');
         showToast(`✅ Joined game ${gameId} as ${playerHandle}`, 3000);
       })
       .catch(err => {
+        if (err.message === 'GAME_NOT_FOUND') return; // already handled
         showLoading(false);
         handleFirebaseError(err, 'join');
       });
   });
 }
 
+// ─── ROLL BUTTON ──────────────────────────────────────────────────────────────
 if (elems.btnRoll) {
   elems.btnRoll.addEventListener('click', () => {
     if (!isHost || !gameRef) return showToast('You must be hosting a game', 3000);
     if (calledNumbers.size >= 75) return showToast('All numbers have been called!', 2000);
-    
+
     const rolled = rollNumber();
     if (rolled) {
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = rolled;
-      createBoard(elems.hostBoard);
+      updateBoardCells(elems.hostBoard);
       updateStats();
+      renderCallHistory();
     }
   });
 }
 
+// ─── COPY / SHARE ─────────────────────────────────────────────────────────────
 if (elems.btnCopyId) {
   elems.btnCopyId.addEventListener('click', () => {
     if (!gameId) return showToast('No Game ID to copy', 2000);
-    
     const url = `${window.location.origin}${window.location.pathname}?game=${gameId}`;
     navigator.clipboard.writeText(url)
       .then(() => showToast('✅ Game link copied to clipboard!', 2000))
@@ -1241,49 +1370,42 @@ if (elems.btnCopyId) {
 if (elems.btnHostShare || elems.btnPlayerShare) {
   const shareHandler = () => {
     if (!gameId) return showToast('No Game ID to share', 2000);
-    
     const url = `${window.location.origin}${window.location.pathname}?game=${gameId}`;
     const text = `Join my $BINGO game! Game ID: ${gameId}`;
-    
     if (navigator.share) {
-      navigator.share({ title: '$BINGO Live', text: text, url: url })
-        .catch(() => {});
+      navigator.share({ title: '$BINGO Live', text, url }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url)
         .then(() => showToast('✅ Game link copied!', 2000))
         .catch(() => showToast('❌ Error sharing', 2000));
     }
   };
-  
+
   if (elems.btnHostShare) elems.btnHostShare.addEventListener('click', shareHandler);
   if (elems.btnPlayerShare) elems.btnPlayerShare.addEventListener('click', shareHandler);
 }
 
+// ─── CARD NAVIGATION ─────────────────────────────────────────────────────────
 if (elems.btnPrevCard) {
   elems.btnPrevCard.addEventListener('click', () => {
-    if (currentCardIndex > 0) {
-      currentCardIndex--;
-      updateCardNavigation();
-    }
+    if (currentCardIndex > 0) { currentCardIndex--; updateCardNavigation(); }
   });
 }
 
 if (elems.btnNextCard) {
   elems.btnNextCard.addEventListener('click', () => {
-    if (currentCardIndex < numCards - 1) {
-      currentCardIndex++;
-      updateCardNavigation();
-    }
+    if (currentCardIndex < numCards - 1) { currentCardIndex++; updateCardNavigation(); }
   });
 }
 
+// ─── END GAME ─────────────────────────────────────────────────────────────────
 if (elems.btnEndGame) {
   elems.btnEndGame.addEventListener('click', () => {
     if (!confirm('End game and show results? This cannot be undone.')) return;
-    
+
     if (elems.endNumbers) elems.endNumbers.textContent = calledNumbers.size;
     if (elems.endWinners) elems.endWinners.textContent = winnersData.length;
-    
+
     if (elems.winnersDisplay) {
       elems.winnersDisplay.innerHTML = '';
       if (winnersData.length === 0) {
@@ -1297,103 +1419,108 @@ if (elems.btnEndGame) {
         });
       }
     }
-    
-    const prizeData = exportWinnersForPrizes();
-    
+
+    exportWinnersForPrizes();
     showScreen('gameEnd');
   });
 }
 
+// ─── LEAVE GAME ───────────────────────────────────────────────────────────────
 if (elems.btnLeaveGame) {
   elems.btnLeaveGame.addEventListener('click', () => {
     if (!confirm('Leave this game? You cannot rejoin with the same cards.')) return;
-    
+
     cleanupFirebaseListeners();
     if (gameRef && playerHandle) {
       const handleKey = playerHandle.substring(1);
       gameRef.child('players').child(handleKey).remove();
     }
-    
+
     showScreen('landing');
     showToast('Left the game', 2000);
   });
 }
 
+// ─── HOME BUTTONS ─────────────────────────────────────────────────────────────
 if (elems.btnHostHome || elems.btnPlayerHome) {
   const homeHandler = () => {
     if (!confirm('Leave to home? The game will continue without you.')) return;
     cleanupFirebaseListeners();
     showScreen('landing');
   };
-  
+
   if (elems.btnHostHome) elems.btnHostHome.addEventListener('click', homeHandler);
   if (elems.btnPlayerHome) elems.btnPlayerHome.addEventListener('click', homeHandler);
 }
 
+// ─── PLAY AGAIN ───────────────────────────────────────────────────────────────
+// FIX: cleanupFirebaseListeners() is now called BEFORE setupFirebaseListeners()
+// to prevent stacking duplicate listeners across rounds (the original leak).
 if (elems.btnPlayAgain) {
   elems.btnPlayAgain.addEventListener('click', () => {
     calledNumbers.clear();
+    callHistory = [];
     winnersData = [];
     cardWins = [];
     initialLoadComplete = false;
-    
+
     if (gameRef) {
       gameRef.child('called').remove();
       gameRef.child('winners').remove();
     }
-    
+
+    // FIX: clean up old listeners before re-subscribing
+    cleanupFirebaseListeners();
+
     if (isHost) {
       if (elems.hostLastCalled) elems.hostLastCalled.textContent = '--';
       if (elems.btnRoll) {
         elems.btnRoll.disabled = false;
         elems.btnRoll.textContent = '🎲 ROLL';
       }
-      createBoard(elems.hostBoard);
+      resetBoard(elems.hostBoard);
       updateStats();
-      setTimeout(() => {
-        initialLoadComplete = true;
-      }, 1000);
+      renderCallHistory();
+      setupFirebaseListeners();
       showScreen('hostGame');
       showToast('🔄 New round started! Same players, same pattern.', 3000);
     } else {
       if (elems.playerLastCalled) elems.playerLastCalled.textContent = '--';
       displayPlayerCards();
-      createBoard(elems.playerBoardView);
+      resetBoard(elems.playerBoardView);
       updateStats();
-      setTimeout(() => {
-        initialLoadComplete = true;
-      }, 1000);
+      renderCallHistory();
+      setupFirebaseListeners();
       showScreen('playerGame');
       showToast('🔄 New round started!', 3000);
     }
-    
-    setupFirebaseListeners();
   });
 }
 
+// ─── NEW GAME ─────────────────────────────────────────────────────────────────
 if (elems.btnNewGame) {
   elems.btnNewGame.addEventListener('click', () => {
     cleanupFirebaseListeners();
-    if (gameRef) {
-      gameRef.remove();
-    }
-    
+    if (gameRef) gameRef.remove();
+
     isHost = false;
     gameId = null;
     hostHandle = null;
     playerHandle = null;
     playerCards = [];
     cardWins = [];
+    callHistory = [];
     calledNumbers.clear();
     playersData = [];
     winnersData = [];
     gameRef = null;
-    
+
     showScreen('landing');
     showToast('Ready for a new game!', 2000);
   });
 }
 
+// ─── GO HOME ─────────────────────────────────────────────────────────────────
 if (elems.btnGoHome) {
   elems.btnGoHome.addEventListener('click', () => {
     cleanupFirebaseListeners();
@@ -1401,6 +1528,7 @@ if (elems.btnGoHome) {
   });
 }
 
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 setupTabNavigation();
 setupKeyboardShortcuts();
 handleURLParams();
@@ -1414,7 +1542,7 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
-console.log('%c$BINGO Live v10.0 - Production Ready 🚀', 'color: #00FF00; font-size: 20px; font-weight: bold;');
+console.log('%c$BINGO Live v11.0 - Production Ready 🚀', 'color: #00FF00; font-size: 20px; font-weight: bold;');
 console.log('Firebase Project:', firebaseConfig.projectId);
 console.log('Export winners: Call exportWinnersForPrizes() in console');
 console.log('Reset tour: Call window.resetTour() in console');
@@ -1423,4 +1551,4 @@ window.exportWinnersForPrizes = exportWinnersForPrizes;
 window.resetTour = () => {
   localStorage.removeItem('bingoTourCompleted');
   showToast('Tour reset! Start hosting to see it again.', 2000);
-};
+}; 
