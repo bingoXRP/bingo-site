@@ -1453,3 +1453,207 @@ button:disabled {
     border: 2px solid black;
   }
 }
+
+/* ============================================
+   v11.0 ADDITIONS — Call History, Kick, Winner Modal
+   ============================================ */
+
+/* ── Call History ─────────────────────────────── */
+
+.call-history {
+  margin-top: var(--spacing-lg);
+  background: var(--bg-darker);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.call-history-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dimmer);
+  margin-bottom: var(--spacing-sm);
+}
+
+.call-history-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-height: 100px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.call-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dimmer);
+  white-space: nowrap;
+  transition: none;
+}
+
+.call-chip.latest {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #000;
+  border-color: transparent;
+  animation: pulse 0.3s ease;
+}
+
+/* Letter-color coding */
+.call-chip[data-letter="B"] { border-color: #4f8ef7; color: #4f8ef7; background: rgba(79,142,247,0.08); }
+.call-chip[data-letter="I"] { border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.08); }
+.call-chip[data-letter="N"] { border-color: var(--primary); color: var(--primary); background: rgba(0,198,201,0.08); }
+.call-chip[data-letter="G"] { border-color: #f97316; color: #f97316; background: rgba(249,115,22,0.08); }
+.call-chip[data-letter="O"] { border-color: var(--error); color: var(--error); background: rgba(255,68,68,0.08); }
+
+.call-chip.latest[data-letter] {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #000;
+  border-color: transparent;
+}
+
+/* ── Kick Button ──────────────────────────────── */
+
+.kick-btn {
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  opacity: 0.65;
+  min-height: 28px;
+  white-space: nowrap;
+}
+
+.kick-btn:hover {
+  background: var(--error);
+  color: #fff;
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* ── Winner Confirmation Modal ────────────────── */
+
+.winner-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 14, 39, 0.93);
+  z-index: 10500;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+.winner-modal.show {
+  display: flex;
+  animation: fadeIn 0.25s ease;
+}
+
+.winner-modal-box {
+  background: var(--bg-card);
+  border: 2px solid var(--success);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0, 255, 0, 0.15);
+  animation: slideIn 0.3s ease;
+}
+
+.winner-modal-icon {
+  font-size: 3.5rem;
+  margin-bottom: var(--spacing-md);
+  animation: pulse 0.5s ease;
+}
+
+.winner-modal-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--success);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.winner-modal-detail {
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xl);
+}
+
+.winner-modal-detail strong {
+  color: var(--text);
+}
+
+.winner-modal-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.winner-confirm-btn {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 48px;
+}
+
+.winner-confirm-btn.accept {
+  background: var(--success);
+  color: #000;
+}
+
+.winner-confirm-btn.accept:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 255, 0, 0.4);
+}
+
+.winner-confirm-btn.reject {
+  background: transparent;
+  color: var(--error);
+  border: 2px solid var(--error);
+}
+
+.winner-confirm-btn.reject:hover {
+  background: var(--error);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px) {
+  .winner-modal-box {
+    padding: var(--spacing-lg);
+  }
+
+  .winner-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .kick-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .call-history-chips {
+    max-height: 80px;
+  }
+}
