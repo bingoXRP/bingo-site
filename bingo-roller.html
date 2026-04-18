@@ -8,7 +8,7 @@
     gtag('js', new Date());
     gtag('config', 'G-H99K0B4L10');
   </script>
-  
+ 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="$BINGO Live - Multiplayer bingo on XRPL. Host games, play with friends, win prizes!">
@@ -31,7 +31,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
 </head>
 <body>
-
+ 
 <div id="landing-screen" class="screen active">
   <div class="landing-hero">
     <img src="assets/images/mascot-hero.png" alt="Bingo Mascot" class="mascot-logo">
@@ -52,7 +52,7 @@
     <a href="/" class="back-link">← Back to Home</a>
   </div>
 </div>
-
+ 
 <div id="host-setup-screen" class="screen">
   <div class="setup-container">
     <button class="back-btn" id="btn-back-from-host">← Back</button>
@@ -83,7 +83,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div id="player-setup-screen" class="screen">
   <div class="setup-container">
     <button class="back-btn" id="btn-back-from-player">← Back</button>
@@ -110,7 +110,7 @@
     </div>
   </div>
 </div>
-
+ 
 <div id="host-game-screen" class="screen">
   <header class="game-header">
     <div class="header-brand">
@@ -129,13 +129,13 @@
       <button id="btn-roll" class="roll-btn">🎲 ROLL</button>
     </div>
   </header>
-
+ 
   <div class="game-tabs">
     <button class="tab-btn active" data-tab="host-game-tab">🎯 Game</button>
     <button class="tab-btn" data-tab="host-players-tab">👥 Players</button>
     <button class="tab-btn" data-tab="host-stats-tab">📊 Stats</button>
   </div>
-
+ 
   <div class="tab-content active" id="host-game-tab">
     <div class="board-wrapper">
       <div id="host-board" class="bingo-board"></div>
@@ -161,12 +161,18 @@
         </select>
       </div>
     </div>
+ 
+    <!-- NEW: Call History Log -->
+    <div id="host-call-history" class="call-history">
+      <div class="call-history-label">📋 Call History</div>
+      <div class="call-history-chips"></div>
+    </div>
   </div>
-
+ 
   <div class="tab-content" id="host-players-tab">
     <div id="host-players-list" class="players-list"></div>
   </div>
-
+ 
   <div class="tab-content" id="host-stats-tab">
     <div class="stats-grid">
       <div class="stat-card">
@@ -188,14 +194,14 @@
     </div>
     <button id="btn-end-game" class="danger-btn">End Game</button>
   </div>
-
+ 
   <footer class="game-footer">
     <button id="btn-host-home" class="footer-btn" title="Home">🏠</button>
     <span class="footer-info">Host Mode</span>
     <button id="btn-host-share" class="footer-btn" title="Share">📤</button>
   </footer>
 </div>
-
+ 
 <div id="player-game-screen" class="screen">
   <header class="game-header">
     <div class="header-brand">
@@ -212,14 +218,14 @@
       <span class="cards-indicator" id="cards-indicator">1/1</span>
     </div>
   </header>
-
+ 
   <div class="game-tabs">
     <button class="tab-btn active" data-tab="player-cards-tab">🎴 My Cards</button>
     <button class="tab-btn" data-tab="player-board-tab">🎯 Board</button>
     <button class="tab-btn" data-tab="player-players-tab">👥 Players</button>
     <button class="tab-btn" data-tab="player-info-tab">ℹ️ Info</button>
   </div>
-
+ 
   <div class="tab-content active" id="player-cards-tab">
     <div class="cards-nav" id="cards-nav" style="display:none;">
       <button id="btn-prev-card" class="nav-arrow">◀</button>
@@ -228,17 +234,22 @@
     </div>
     <div id="player-cards-container" class="player-cards-grid"></div>
   </div>
-
+ 
   <div class="tab-content" id="player-board-tab">
     <div class="board-wrapper">
       <div id="player-board-view" class="bingo-board"></div>
     </div>
+    <!-- NEW: Call History for players -->
+    <div id="player-call-history" class="call-history">
+      <div class="call-history-label">📋 Call History</div>
+      <div class="call-history-chips"></div>
+    </div>
   </div>
-
+ 
   <div class="tab-content" id="player-players-tab">
     <div id="player-players-list" class="players-list"></div>
   </div>
-
+ 
   <div class="tab-content" id="player-info-tab">
     <div class="info-section">
       <div class="info-item">
@@ -264,14 +275,14 @@
     </div>
     <button id="btn-leave-game" class="danger-btn">Leave Game</button>
   </div>
-
+ 
   <footer class="game-footer">
     <button id="btn-player-home" class="footer-btn" title="Home">🏠</button>
     <span class="footer-info">Player Mode</span>
     <button id="btn-player-share" class="footer-btn" title="Share">📤</button>
   </footer>
 </div>
-
+ 
 <div id="game-end-screen" class="screen">
   <div class="end-container">
     <h2>🎉 Game Over!</h2>
@@ -293,10 +304,27 @@
     </div>
   </div>
 </div>
-
+ 
+<!-- NEW: Winner Confirmation Modal (host only) -->
+<div id="winner-confirm-modal" class="winner-modal">
+  <div class="winner-modal-box">
+    <div class="winner-modal-icon">🎉</div>
+    <div class="winner-modal-title">BINGO Claimed!</div>
+    <div class="winner-modal-detail">
+      <strong id="winner-modal-handle">@player</strong> claims BINGO
+      on card <strong id="winner-modal-card">XX</strong>
+      (<span id="winner-modal-pattern">Pattern</span>)
+    </div>
+    <div class="winner-modal-actions">
+      <button id="winner-modal-reject" class="winner-confirm-btn reject">✕ Reject</button>
+      <button id="winner-modal-accept" class="winner-confirm-btn accept">✓ Confirm</button>
+    </div>
+  </div>
+</div>
+ 
 <div id="toast" class="toast"></div>
 <div id="loading" class="loading-overlay"><div class="spinner"></div></div>
-
+ 
 <script src="assets/js/firebase-config.js"></script>
 <script src="assets/js/bingo-game.js"></script>
 </body>
